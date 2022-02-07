@@ -32,8 +32,16 @@
 
 # 참고 사이트
 
+## 키보드 레이아웃
+
 * [Keyboard Layout Info](http://kbdlayout.info/) : 키보드의 규격과 레이아웃이 정리 되어 있다.
 
 * [Keyboard-Layout-Editor.com](http://www.keyboard-layout-editor.com/) : 키보드의 레이아웃을 구성해 볼 수 있고 사용되는 키의 갯수를 정리해 준다.
 
-* http://builder.swillkb.com/ : keyboard-layout-editor의 데이터를 이용해서 키보드 하판을 그려 준다.
+## 키보드 CAD
+
+- [Keyboard CAD Assistant](http://www.keyboardcad.com/) : 여기서는 바로 STL 도면을 얻을 수 있다.
+
+- [Plate Case Builder - swillkb](http://builder.swillkb.com/) : keyboard-layout-editor의 데이터를 이용해서 키보드 하판을 그려 준다.
+  
+  - [svg to stl]([Pro Tips - Docs - Plate & Case Builder](http://builder-docs.swillkb.com/pro-tips/#svg-to-stl-conversion) 사이트에서 받은 svg 파일을 도면 파일로 변경 하는 동영상 설명이 되어 있다.# Keyboard CAD Assistant
