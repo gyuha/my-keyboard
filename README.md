@@ -1,6 +1,11 @@
 # my-keyboard
 내가 원하는 키보드 만들기
 
+## 원하는 기능
+- 분할 키보드
+- 2개의 Function 키 사용 가능
+- 가운데 추가 키 배치 (가운데 키는 분할이 가능 하면 좋을 것 같다)
+
 ## 키보드 레이아웃
 
 ![layout](https://github.com/gyuha/my-keyboard/blob/main/keylayout/keyboard-layout.png?raw=true)
