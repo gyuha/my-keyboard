@@ -2153,88 +2153,24 @@
   
     <!-- Outer Border -->
     <rect x="257.5" y="217"
-          width="65.5" height="52"
+          width="335.5" height="52"
           rx="5" fill="#c8c3b8" class="outer border"/>
     
     <!-- Outer Fill -->
     <rect x="257.5" y="217"
-          width="65.5" height="52"
+          width="335.5" height="52"
           rx="5" fill="#c8c3b8"/>
     
 
     
       <!-- Inner Border -->
       <rect x="263.5" y="220"
-            width="53.5" height="40"
+            width="323.5" height="40"
             rx="5" fill="#f6f1e6" class="inner border"/>
       
       <!-- Inner Fill -->
       <rect x="263.5" y="220"
-            width="53.5" height="40"
-            rx="5" fill="#f6f1e6"/>
-      
-      
-
-     
-   
-  </g>
-
-  <g class='  keycap'
-  >
-
-  
-    <!-- Outer Border -->
-    <rect x="325" y="217"
-          width="119.5" height="52"
-          rx="5" fill="#c8c3b8" class="outer border"/>
-    
-    <!-- Outer Fill -->
-    <rect x="325" y="217"
-          width="119.5" height="52"
-          rx="5" fill="#c8c3b8"/>
-    
-
-    
-      <!-- Inner Border -->
-      <rect x="331" y="220"
-            width="107.5" height="40"
-            rx="5" fill="#f6f1e6" class="inner border"/>
-      
-      <!-- Inner Fill -->
-      <rect x="331" y="220"
-            width="107.5" height="40"
-            rx="5" fill="#f6f1e6"/>
-      
-      
-
-     
-   
-  </g>
-
-  <g class='  keycap'
-  >
-
-  
-    <!-- Outer Border -->
-    <rect x="446.5" y="217"
-          width="146.5" height="52"
-          rx="5" fill="#c8c3b8" class="outer border"/>
-    
-    <!-- Outer Fill -->
-    <rect x="446.5" y="217"
-          width="146.5" height="52"
-          rx="5" fill="#c8c3b8"/>
-    
-
-    
-      <!-- Inner Border -->
-      <rect x="452.5" y="220"
-            width="134.5" height="40"
-            rx="5" fill="#f6f1e6" class="inner border"/>
-      
-      <!-- Inner Fill -->
-      <rect x="452.5" y="220"
-            width="134.5" height="40"
+            width="323.5" height="40"
             rx="5" fill="#f6f1e6"/>
       
       
