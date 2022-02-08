@@ -17,18 +17,16 @@
 ## 데이터
 
 ```json
-["Esc\n\n\n`~","!\n1\n\nF1","@\n2\n\nF2","#\n3\n\nF3","$\n4\n\nF4","%\n5\n\nF5",{x:3},"^\n6\n\nF6","&\n7\n\nF7","*\n8\n\nF8","(\n9\n\nF9",")\n0\n\nF10","_\n-\n\nF11","+\n=\n\nF12",{w:2},"Backspace","Home"],
-[{w:1.5},"Tab","Q","W","E","R","T",{x:3},"Y","U","I","O","P","{\n[","}\n]",{w:1.5},"|\n\\","End"],
-[{w:1.75},"Function.1","A","S","D","F","G",{x:3},"H","J","K","L",":\n;","\"\n'",{w:2.25},"Enter","PgUp"],
-[{w:2.25},"Shift","Z","X","C","V","B",{x:2,c:"#ffe08d"},"B",{c:"#cccccc"},"N","M","<\n,",">\n.","?\n/",{w:1.75},"Shift",{a:7},"↑",{a:4},"PgDn"],
-[{w:1.25},"Ctrl",{w:1.25},"Win",{w:1.25},"Alt",{w:1.25},"Fn.2",{w:2.25},"Space",{x:2,c:"#ffe08d"},"한/영",{c:"#cccccc",w:2.75},"Space","Alt","Fn.1","Del",{a:7},"←","↓","→"]
+[{c:"#ea4221"},"ESC",{c:"#cccccc"},"`~","!\n1\n\nF1","@\n2\n\nF2","#\n3\n\nF3","$\n4\n\nF4","%\n5\n\nF5",{x:2},"^\n6\n\nF6","&\n7\n\nF7","*\n8\n\nF8","(\n9\n\nF9",")\n0\n\nF10","_\n-\n\nF11","+\n=\n\nF12",{c:"#c8c3b8",w:2},"Backspace",{c:"#63696a"},"Home"],
+["PrtSc",{c:"#c8c3b8",w:1.5},"Tab",{c:"#cccccc"},"Q","W","E","R","T",{x:2},"Y","U","I","O","P","{\n[","}\n]",{c:"#c8c3b8",w:1.5},"|\n\\",{c:"#63696a"},"End"],
+["F5",{c:"#c8c3b8",w:1.75},"Function.1",{c:"#cccccc"},"A","S","D","F","G",{x:2},"H","J","K","L",":\n;","\"\n'",{c:"#c8c3b8",w:2.25},"Enter",{c:"#63696a"},"PgUp"],
+["Insert",{c:"#c8c3b8",w:2.25},"Shift",{c:"#cccccc"},"Z","X","C","V","B",{x:1,c:"#ffe08d"},"B",{c:"#cccccc"},"N","M","<\n,",">\n.","?\n/",{c:"#c8c3b8",w:1.75},"Shift",{c:"#ea4221",a:7},"↑",{c:"#63696a",a:4},"PgDn"],
+["Del",{c:"#c8c3b8",w:1.25},"Ctrl",{w:1.25},"Win",{w:1.25},"Alt",{w:1.25},"Fn.2",{w:2.25},"Space",{x:1,c:"#ffe08d"},"한/영",{c:"#c8c3b8",w:2.75},"Space","Alt","Fn.1","Del",{c:"#ea4221",a:7},"←","↓","→"]
 ```
 
 ## 써머리
 
 ![요약](https://github.com/gyuha/my-keyboard/blob/main/keylayout/keylayout-summary.png?raw=true)
-
-
 
 # 참고 사이트
 
