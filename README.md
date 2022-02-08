@@ -42,4 +42,4 @@
 
 - [Plate Case Builder - swillkb](http://builder.swillkb.com/) : keyboard-layout-editor의 데이터를 이용해서 키보드 하판을 그려 준다.
   
-  - [svg to stl]([Pro Tips - Docs - Plate & Case Builder](http://builder-docs.swillkb.com/pro-tips/#svg-to-stl-conversion) 사이트에서 받은 svg 파일을 도면 파일로 변경 하는 동영상 설명이 되어 있다.# Keyboard CAD Assistant
+  - [svg to stl](http://builder-docs.swillkb.com/pro-tips/#svg-to-stl-conversion) : 사이트에서 받은 svg 파일을 도면 파일로 변경 하는 동영상 설명이 되어 있다.# Keyboard CAD Assistant
