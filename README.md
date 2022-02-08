@@ -10,9 +10,9 @@
 
 ## 키보드 레이아웃
 
-![layout](https://github.com/gyuha/my-keyboard/blob/main/keylayout/keyboard-layout.png?raw=true)
+![layout](https://github.com/gyuha/my-keyboard/blob/main/keylayout/v1/keyboard-layout.png?raw=true)
 
-참고 : http://www.keyboard-layout-editor.com/
+제작 : http://www.keyboard-layout-editor.com/
 
 ## 데이터
 
@@ -26,7 +26,7 @@
 
 ## 써머리
 
-![요약](https://github.com/gyuha/my-keyboard/blob/main/keylayout/keylayout-summary.png?raw=true)
+![요약](https://github.com/gyuha/my-keyboard/blob/main/keylayout/v1/keylayout-summary.png?raw=true)
 
 # 참고 사이트
 
