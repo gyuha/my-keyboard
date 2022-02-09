@@ -10,7 +10,7 @@
 
 ## 키보드 레이아웃
 
-![layout](https://github.com/gyuha/my-keyboard/blob/main/keylayout/v1/keyboard-layout.png?raw=true)
+![layout](https://github.com/gyuha/my-keyboard/blob/main/v1/keyboard-layout.png?raw=true)
 
 제작 : http://www.keyboard-layout-editor.com/
 
@@ -26,7 +26,7 @@
 
 ## 써머리
 
-![요약](https://github.com/gyuha/my-keyboard/blob/main/keylayout/v1/keylayout-summary.png?raw=true)
+![요약](https://github.com/gyuha/my-keyboard/blob/main/v1/keylayout-summary.png?raw=true)
 
 # 참고 사이트
 
