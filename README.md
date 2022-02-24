@@ -48,11 +48,11 @@
 
 # 써머리
 
-![요약](https://github.com/gyuha/my-keyboard/blob/main/v1/keylayout-summary.png?raw=true)
+![요약](https://github.com/gyuha/my-keyboard/blob/main/v2/keylayout-summary.png?raw=true)
 
 
 
-# 부품
+# 준비물
 
 | 부품명                                    | 수량  | 설명                        | 링크                                                                                                                   |
 | -------------------------------------- | --- | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -61,9 +61,10 @@
 | 3.5mm aux 케이블                          | 1   | 보드 연결 용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1223097)                                                             |
 | USB3.1 C 타입 FEMALE 26P <br/>변환보드 ANGLE | 2   | 보드 연결 용<br/>3.5 aux 대체용   | [연결](https://www.devicemart.co.kr/goods/view?no=13003211)                                                            |
 | 전선                                     | 1   | 랩핑와이어 추천(인두기로 녹여서 사용가능)   | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)                                                             |
-| 스위치                                    | 77  |                           |                                                                                                                      |
-| 키캡                                     |     | 되도록이면 XDA 또는 DSA를 선택 합니다. | [연결](https://ko.aliexpress.com/item/1005003510911114.html?gatewayAdapt=glo2kor&spm=a2g0o.9042311.0.0.bb0d4c4d3XOUd6) |
-| 납땜 재료                                  |     | 인두기, 납, 인두기 스탠드 등등        |                                                                                                                      |
+| 스위치                                    | 77  | 개인 취향으로 게이트론 백축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955)                                                 |
+| 키캡                                     | -   | 되도록이면 XDA 또는 DSA를 선택 합니다. | [연결](https://ko.aliexpress.com/item/1005003510911114.html?gatewayAdapt=glo2kor&spm=a2g0o.9042311.0.0.bb0d4c4d3XOUd6) |
+| Gateron Hot-swappable PCB Socket       | 77  | 스위치 핫 스왓 용                | [연결](https://ko.aliexpress.com/item/1005002637150446.html)                                                           |
+| 납땜 재료                                  | -   | 인두기, 납, 인두기 스탠드 등등        |                                                                                                                      |
 | 미끄럼 방지 패드 or 범퍼                        |     |                           | [연결](https://smartstore.naver.com/mg9000/products/3289975643)                                                        |
 
 
@@ -71,6 +72,8 @@
 # 참고 사이트
 
 ## 참고 github
+
+* [GitHub - mastery6/wingB_Korean-Split-keyboard](https://github.com/mastery6/wingB_Korean-Split-keyboard) : 참고를 가장 많이한 저장소 입니다. 감사합니다.
 
 ## 키보드 레이아웃
 
@@ -85,3 +88,35 @@
 - [Plate Case Builder - swillkb](http://builder.swillkb.com/) : keyboard-layout-editor의 데이터를 이용해서 키보드 하판을 그려 줍니다.
   
   - [svg to stl](http://builder-docs.swillkb.com/pro-tips/#svg-to-stl-conversion) : 사이트에서 받은 svg 파일을 도면 파일로 변경 하는 동영상 설명이 되어 있습니다.# Keyboard CAD Assistant
+
+## 온라인 강좌
+
+* [스압) 맨땅에서 키보드 만드는 제작기 - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view?id=mechanicalkeyboard&no=830197)
+
+* 풀와이어링 키보드 제작 가이드
+  
+  * [풀와이어링 키보드 제작 가이드 4. 다이오드 및 행 연결 - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view?id=mechanicalkeyboard&no=395243)
+  
+  * [풀와이어링 키보드 제작 가이드 6. 각 행과 열을 컨트롤러 핀에 연결하기 - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view?id=mechanicalkeyboard&no=395287)
+  
+  * [Teensy 2.0에 qmk 올리기1](https://gall.dcinside.com/mechanicalkeyboard/395303)
+  
+  * [Teensy 2.0에 qmk 올리기2](https://gall.dcinside.com/mechanicalkeyboard/395319)
+
+* QMK 노브,, OLED 생초보자 가이드
+  
+  * [QMK, 노브, OLED 생초보자 가이드 -4. QMK 파일설명- !스압 - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=622220)
+  
+  * [QMK, 노브, OLED 생초보자 가이드 -5. QMK 새프로젝트- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624502)
+  
+  * [QMK, 노브, OLED 생초보자 가이드 -6. QMK rules.mk- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624556)
+  
+  * [QMK, 노브, OLED 생초보자 가이드 -7. QMK c와 h- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624636)
+  
+  * [QMK, 노브, OLED 생초보자 가이드 -8. QMK config.h- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624668)
+  
+  * [QMK, 노브, OLED 생초보자 가이드 -9. QMK keymap.c- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=625890)
+  
+  * [QMK, 노브, OLED 생초보자 가이드 -10. QMK 컴파일- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=625963)
+  
+  
