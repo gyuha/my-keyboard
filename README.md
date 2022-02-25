@@ -42,15 +42,9 @@
 [{x:0.25,c:"#ffe08d"},"한/영",{c:"#c8c3b8",w:2.75},"Space","Alt","Fn.1","Del",{c:"#ea4221",a:7},"←","↓","→"]
 ```
 
-
-
-
-
 # 써머리
 
 ![요약](https://github.com/gyuha/my-keyboard/blob/main/v2/keylayout-summary.png?raw=true)
-
-
 
 # 준비물
 
@@ -68,19 +62,21 @@
 | 납땜 재료                                  | -   | 인두기, 납, 인두기 스탠드 등등        |                                                                                                                      |
 | 미끄럼 방지 패드 or 범퍼                        |     |                           | [연결](https://smartstore.naver.com/mg9000/products/3289975643)                                                        |
 
-
-
 # 참고 사이트
 
 ## 참고 github
 
 * [GitHub - mastery6/wingB_Korean-Split-keyboard](https://github.com/mastery6/wingB_Korean-Split-keyboard) : 참고를 가장 많이한 저장소 입니다. 감사합니다.
 
+
+
 ## 키보드 레이아웃
 
 * [Keyboard Layout Info](http://kbdlayout.info/) : 키보드의 규격과 레이아웃이 정리 되어 있습니다.
 
 * [Keyboard-Layout-Editor.com](http://www.keyboard-layout-editor.com/) : 키보드의 레이아웃을 구성해 볼 수 있고 사용되는 키의 갯수를 정리해 줍니다.
+
+
 
 ## 키보드 CAD
 
@@ -90,36 +86,50 @@
   
   - [svg to stl](http://builder-docs.swillkb.com/pro-tips/#svg-to-stl-conversion) : 사이트에서 받은 svg 파일을 도면 파일로 변경 하는 동영상 설명이 되어 있습니다.# Keyboard CAD Assistant
 
+
+
+## QMK
+
+* [QMK Logo QMK Firmware](https://qmk.fm/)
+
+* [QMK  키코드](https://docs.qmk.fm/#/keycodes)
+
+* [QMK Toolbox download](https://github.com/qmk/qmk_toolbox/releases)
+
+* [세상에서 제일 쉬운 QMK 사용법 - YouTube](https://www.youtube.com/c/TeleV2/search?query=qmk)
+
+* [Keyboard Firmware Builder](https://kbfirmware.com/)
+
+
+
 ## 온라인 강좌
 
 * [기계식키보드 마이너 갤러리 도움말 - Google Sheets](https://docs.google.com/spreadsheets/d/1DJDHeYMjaFfE15rE-lezlNs-_lD4InzRbwcVyTJKrkc/edit#gid=986385303)
 
 * [스압) 맨땅에서 키보드 만드는 제작기 - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view?id=mechanicalkeyboard&no=830197)
 
-* 풀와이어링 키보드 제작 가이드
+* 풀와이어링 키보드 제작 가이드 - 기계식키보드 갤러리
   
-  * [풀와이어링 키보드 제작 가이드 4. 다이오드 및 행 연결 - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view?id=mechanicalkeyboard&no=395243)
+  * [4. 다이오드 및 행 연결](https://gall.dcinside.com/mgallery/board/view?id=mechanicalkeyboard&no=395243)
   
-  * [풀와이어링 키보드 제작 가이드 6. 각 행과 열을 컨트롤러 핀에 연결하기 - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view?id=mechanicalkeyboard&no=395287)
-  
-  * [Teensy 2.0에 qmk 올리기1](https://gall.dcinside.com/mechanicalkeyboard/395303)
-  
-  * [Teensy 2.0에 qmk 올리기2](https://gall.dcinside.com/mechanicalkeyboard/395319)
+  * [6. 각 행과 열을 컨트롤러 핀에 연결하기](https://gall.dcinside.com/mgallery/board/view?id=mechanicalkeyboard&no=395287)
 
-* QMK 노브,, OLED 생초보자 가이드
+* Teensy 2.0에 qmk 올리기 : [1부](https://gall.dcinside.com/mechanicalkeyboard/395303) [2부](https://gall.dcinside.com/mechanicalkeyboard/395319)
+
+* QMK 노브,, OLED 생초보자 가이드: 기계식키보드 갤러리
   
-  * [QMK, 노브, OLED 생초보자 가이드 -4. QMK 파일설명- !스압 - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=622220)
+  * [4. QMK 파일설명](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=622220)
   
-  * [QMK, 노브, OLED 생초보자 가이드 -5. QMK 새프로젝트- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624502)
+  * [5. QMK 새프로젝트](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624502)
   
-  * [QMK, 노브, OLED 생초보자 가이드 -6. QMK rules.mk- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624556)
+  * [6. QMK rules.mk](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624556)
   
-  * [QMK, 노브, OLED 생초보자 가이드 -7. QMK c와 h- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624636)
+  * [7. QMK c와 h](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624636)
   
-  * [QMK, 노브, OLED 생초보자 가이드 -8. QMK config.h- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624668)
+  * [8. QMK config.h](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=624668)
   
-  * [QMK, 노브, OLED 생초보자 가이드 -9. QMK keymap.c- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=625890)
+  * [9. QMK keymap.c](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=625890)
   
-  * [QMK, 노브, OLED 생초보자 가이드 -10. QMK 컴파일- - 기계식키보드 갤러리](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=625963)
-  
-  
+  * [10. QMK 컴파일](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=625963)
+
+* 아두이노로 키보드 만들기 : [1부](http://www.kbdmania.net/xe/best_article/8635141) [2부](http://www.kbdmania.net/xe/best_article/8639304) [3부]([Best Article : KBDMania - 아두이노로 키보드 만들기 3부](http://www.kbdmania.net/xe/best_article/8640469))
