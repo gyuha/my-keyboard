@@ -52,7 +52,7 @@
 | -------------------------------------- | --- | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | 아두이노 프로 마이크로<br/>Arduino ATmega32U4    | 2   | PC연결 용                    | [연결](https://ko.aliexpress.com/item/1348800135.html?gatewayAdapt=glo2kor&spm=a2g0o.9042311.0.0.7f234c4dRKXC3b)       |
 | 스테레오 커넥터 / 3.5mm / FEMALE              | 2   | 보드 연결 용                   | [연결](https://www.devicemart.co.kr/goods/view?no=2679)                                                                |
-| 3.5mm aux 케이블                          | 1   | 보드 연결 용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1223097)                                                             |
+| 3.5mm aux 케이블                          | 1   | 보드 연결 용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1223095)                                                             |
 | USB3.1 C 타입 FEMALE 26P <br/>변환보드 ANGLE | 2   | 보드 연결 용<br/>3.5 aux 대체용   | [연결](https://www.devicemart.co.kr/goods/view?no=13003211)                                                            |
 | 체리 스테빌 라이저                             | 1   |                           | [연결](https://smartstore.naver.com/whatkey/products/5153072093)                                                       |
 | 전선                                     | 1   | 랩핑와이어 추천(인두기로 녹여서 사용가능)   | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)                                                             |
@@ -61,6 +61,9 @@
 | Gateron Hot-swappable PCB Socket       | 77  | 스위치 핫 스왓 용                | [연결](https://ko.aliexpress.com/item/1005002637150446.html)                                                           |
 | 납땜 재료                                  | -   | 인두기, 납, 인두기 스탠드 등등        |                                                                                                                      |
 | 미끄럼 방지 패드 or 범퍼                        |     |                           | [연결](https://smartstore.naver.com/mg9000/products/3289975643)                                                        |
+| 다이오드(1N4148)                           | 77  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=25)                                                                  |
+| 접시머리 십자볼트 (니켈) 머신스크류 M3*10             | 32  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=34782)                                                               |
+| 인서트(Spredsert) M3X5                    | 32  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=1067969)                                                             |
 
 # 참고 사이트
 
@@ -68,15 +71,11 @@
 
 * [GitHub - mastery6/wingB_Korean-Split-keyboard](https://github.com/mastery6/wingB_Korean-Split-keyboard) : 참고를 가장 많이한 저장소 입니다. 감사합니다.
 
-
-
 ## 키보드 레이아웃
 
 * [Keyboard Layout Info](http://kbdlayout.info/) : 키보드의 규격과 레이아웃이 정리 되어 있습니다.
 
 * [Keyboard-Layout-Editor.com](http://www.keyboard-layout-editor.com/) : 키보드의 레이아웃을 구성해 볼 수 있고 사용되는 키의 갯수를 정리해 줍니다.
-
-
 
 ## 키보드 CAD
 
@@ -85,8 +84,6 @@
 - [Plate Case Builder - swillkb](http://builder.swillkb.com/) : keyboard-layout-editor의 데이터를 이용해서 키보드 하판을 그려 줍니다.
   
   - [svg to stl](http://builder-docs.swillkb.com/pro-tips/#svg-to-stl-conversion) : 사이트에서 받은 svg 파일을 도면 파일로 변경 하는 동영상 설명이 되어 있습니다.# Keyboard CAD Assistant
-
-
 
 ## QMK
 
@@ -99,8 +96,6 @@
 * [세상에서 제일 쉬운 QMK 사용법 - YouTube](https://www.youtube.com/c/TeleV2/search?query=qmk)
 
 * [Keyboard Firmware Builder](https://kbfirmware.com/)
-
-
 
 ## 온라인 강좌
 
