@@ -81,11 +81,6 @@ qmk compile -kb gkey -km default
 컴파일 한 output 파일은 `$HOME/qmk_firmware/.build` 폴더에 복사 됩니다.
 
 
-## 사이트 링크
-* [QMK Firmware](https://docs.qmk.fm/#/)
-* [QMK Keycodes](https://docs.qmk.fm/#/keycodes)
-* [QMK tools](https://github.com/qmk/qmk_toolbox/releases)
-
 
 # 참고 사이트
 
