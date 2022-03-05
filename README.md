@@ -12,7 +12,7 @@
 
 # 키보드 전체 레이아웃
 
-![layout](https://github.com/gyuha/my-keyboard/blob/main/v2/keyboard-layout.png?raw=true)
+![layout](https://github.com/gyuha/my-keyboard/blob/main/keyboard-layout.png?raw=true)
 
 제작 : http://www.keyboard-layout-editor.com/
 
@@ -44,7 +44,7 @@
 
 # 써머리
 
-![요약](https://github.com/gyuha/my-keyboard/blob/main/v2/keylayout-summary.png?raw=true)
+![요약](https://github.com/gyuha/my-keyboard/blob/main/keylayout-summary.png?raw=true)
 
 # 준비물
 
@@ -63,7 +63,7 @@
 | 미끄럼 방지 패드 or 범퍼                        |     |                           | [연결](https://smartstore.naver.com/mg9000/products/3289975643)                                                        |
 | 다이오드(1N4148)                           | 77  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=25)                                                                  |
 | 접시머리 십자볼트 (니켈) 머신스크류 M3*10             | 32  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=34782)                                                               |
-| 인서트(Spredsert) M3X5                    | 32  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=1067969)                                                             |
+
 
 # QMK
 ## 소스 연결 하기
