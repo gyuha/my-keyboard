@@ -17,8 +17,8 @@
 // #define ENCODERS_PAD_B { F5 }
 
 // wiring of each half
-#define MATRIX_ROW_PINS { F6, F7, B1, B3, B2, B6}
-#define MATRIX_COL_PINS { D1, D4, C6, D7, E6, B4, B5, F4, F5}
+#define MATRIX_ROW_PINS { F7, B1, B3, B2, B6}
+#define MATRIX_COL_PINS { D4, C6, D7, E6, B4, B5, F4, F5, F6}
 
 #define DIODE_DIRECTION COL2ROW
 #define SOFT_SERIAL_PIN D0
