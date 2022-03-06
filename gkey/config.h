@@ -6,20 +6,19 @@
 #define PRODUCT_ID      0x6666
 #define DEVICE_VER      0x0001
 #define PRODUCT         gkey
-#define MANUFACTURER    Mastery
+#define MANUFACTURER    Home
 
 /* key matrix size */
 // Rows are doubled-up
-#define MATRIX_ROWS 16
-#define MATRIX_COLS 5
+#define MATRIX_ROWS 10
+#define MATRIX_COLS 9
 
 // #define ENCODERS_PAD_A { F4 }
 // #define ENCODERS_PAD_B { F5 }
 
 // wiring of each half
-
-#define MATRIX_COL_PINS { D4, C6, D7, E6, B4, B5}
 #define MATRIX_ROW_PINS { F6, F7, B1, B3, B2, B6}
+#define MATRIX_COL_PINS { D1, D4, C6, D7, E6, B4, B5, F4, F5}
 
 #define DIODE_DIRECTION COL2ROW
 #define SOFT_SERIAL_PIN D0

@@ -24,7 +24,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      _______ ,_______    ,_______ ,KC_LEFT ,KC_DOWN,KC_RGHT,_______      ,KC_LBRC ,KC_RBRC,KC_4   ,KC_5    ,KC_6      ,_______ ,_______ ,_______ ,_______,
      _______ ,_______    ,_______ ,KC_HOME ,KC_PGUP,KC_PGDN,_______      ,KC_LPRN ,KC_RPRN,KC_1   ,KC_2    ,KC_3      ,_______ ,_______ ,_______ ,_______,
      _______ ,_______    ,_______ ,_______ ,_______,_______,_______      ,_______ ,_______,KC_0   ,_______ ,_______   ,_______ ,_______ ,_______ ,_______
-
   )
 };
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
