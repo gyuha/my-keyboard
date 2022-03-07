@@ -3,7 +3,7 @@
 #include "config_common.h"
 
 #define VENDOR_ID       0xFEED
-#define PRODUCT_ID      0x6666
+#define PRODUCT_ID      0x4445
 #define DEVICE_VER      0x0001
 #define PRODUCT         gkey
 #define MANUFACTURER    Home
