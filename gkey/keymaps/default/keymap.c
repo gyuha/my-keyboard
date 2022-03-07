@@ -1,12 +1,10 @@
 #include QMK_KEYBOARD_H
 #include "gkey.h"
 
-#define _QWERTY 0
-#define _LOWER 1
-#define _RAISE 2
-
-#define RAISE MO(_RAISE)
-#define LOWER MO(_LOWER)
+enum key_layouts {
+   _QWERTY,
+   _LOWER
+};
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    [_QWERTY] = LAYOUT(
