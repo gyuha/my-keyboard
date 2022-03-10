@@ -12,11 +12,17 @@
 
 # 키보드 전체 레이아웃
 
-![layout](https://github.com/gyuha/my-keyboard/blob/main/keyboard-layout.png?raw=true)
+![layout](https://github.com/gyuha/my-keyboard/blob/main/image/keyboard-layout.png?raw=true)
 
 제작 : http://www.keyboard-layout-editor.com/
 
 ## 
+
+#### 랜더링
+
+![keyboard](https://github.com/gyuha/my-keyboard/blob/main/image/keyboard.png?raw=true)
+
+
 
 # 데이터
 
@@ -64,9 +70,10 @@
 | 다이오드(1N4148)                           | 77  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=25)                                                                  |
 | 접시머리 십자볼트 (니켈) 머신스크류 M3*10             | 32  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=34782)                                                               |
 
-
 # QMK
+
 ## 소스 연결 하기
+
 qmk를 설치하고 나면 qmk_firmware라는 폴더가 생기고, 그 안에 있는 `keyboards` 폴더에 소스 파일을 넣어 주고 컴파일을 해야 합니다.
 저 같은 경우에는 폴더를 symbolic link를 걸어서 넣어 줬습니다.
 
@@ -75,15 +82,14 @@ ln -snf $HOME/qmk_firmware/keyboards/gkey `pwd`/gkey
 ```
 
 ## 컴파일 하기
+
 ```bash
 qmk compile -kb gkey -km default
 ```
+
 컴파일 한 output 파일은 `$HOME/qmk_firmware/.build` 폴더에 복사 됩니다.
 
-
-
 # 참고 사이트
-
 
 ## 참고 github
 
