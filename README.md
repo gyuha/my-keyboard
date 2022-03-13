@@ -22,8 +22,6 @@
 
 ![keyboard](https://github.com/gyuha/my-keyboard/blob/main/image/keyboard.png?raw=true)
 
-
-
 # 데이터
 
 키보드 [www.keyboard-layout-editor.com](http://www.keyboard-layout-editor.com) 에서 아래 데이터를 `</> Raw Data` 탭을 선택해서 넣어 주면 키보드의 구성을 편집 할 수 있습니다.
@@ -88,6 +86,18 @@ qmk compile -kb gkey -km default
 ```
 
 컴파일 한 output 파일은 `$HOME/qmk_firmware/.build` 폴더에 복사 됩니다.
+
+`gkey_default.hex` 파일을 아두이노에 넣어 주시면 됩니다.
+
+
+
+아두이도 프로 마이크로의 펌웨어를 업데이트 하기 전에는 보드의 `리셋(13)`과 `그라운드(GND)`를 같이 눌러주고 펌웨어를 올리시면 됩니다.
+
+또는 키보드에서 FN1과 ESC를 같이 눌러 주셔도 리셋이 됩니다.
+
+
+
+
 
 # 참고 사이트
 
