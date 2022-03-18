@@ -18,7 +18,7 @@
 
 ## 
 
-#### 랜더링
+#### 제작 화면
 
 ![keyboard](https://github.com/gyuha/my-keyboard/blob/main/image/keyboard.png?raw=true)
 
@@ -56,7 +56,7 @@
 | -------------------------------------- | --- | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | 아두이노 프로 마이크로<br/>Arduino ATmega32U4    | 2   | PC연결 용                    | [연결](https://ko.aliexpress.com/item/1348800135.html?gatewayAdapt=glo2kor&spm=a2g0o.9042311.0.0.7f234c4dRKXC3b)       |
 | 스테레오 커넥터 / 3.5mm / FEMALE              | 2   | 보드 연결 용                   | [연결](https://www.devicemart.co.kr/goods/view?no=2679)                                                                |
-| 3.5mm aux 케이블                          | 1   | 보드 연결 용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1223095)                                                             |
+| 3.5mm aux 케이블                          | 1   | 보드 연결 용, 다이소에서 구매         |                                                                                                                      |
 | USB3.1 C 타입 FEMALE 26P <br/>변환보드 ANGLE | 2   | 보드 연결 용<br/>3.5 aux 대체용   | [연결](https://www.devicemart.co.kr/goods/view?no=13003211)                                                            |
 | 체리 스테빌 라이저                             | 2   |                           | [연결](https://smartstore.naver.com/whatkey/products/5153072093)                                                       |
 | 전선                                     | 1   | 랩핑와이어 추천(인두기로 녹여서 사용가능)   | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)                                                             |
@@ -87,15 +87,9 @@ qmk compile -kb gkey -km default
 
 컴파일 한 output 파일은 `$HOME/qmk_firmware/.build` 폴더에 복사 됩니다.
 
-`gkey_default.hex` 파일을 아두이노에 넣어 주시면 됩니다.
-
-
+`gkey_default.hex` 파일을 QMK Toolbox를 이용해서  아두이노에 넣어 주시면 됩니다.
 
 아두이도 프로 마이크로의 펌웨어를 업데이트 하기 전에는 보드의 `리셋(13)`과 `그라운드(GND)`를 같이 눌러주고 펌웨어를 올리시면 됩니다.
-
-또는 키보드에서 FN1과 ESC를 같이 눌러 주셔도 리셋이 됩니다.
-
-
 
 
 
