@@ -1,4 +1,4 @@
-# 
+
 
 내가 원하는 키보드 만들기
 
@@ -50,6 +50,10 @@
 
 ![요약](https://github.com/gyuha/my-keyboard/blob/main/keylayout-summary.png?raw=true)
 
+
+
+
+
 # 준비물
 
 | 부품명                                    | 수량  | 설명                        | 링크                                                                                                                   |
@@ -67,6 +71,60 @@
 | 미끄럼 방지 패드 or 범퍼                        |     |                           | [연결](https://smartstore.naver.com/mg9000/products/3289975643)                                                        |
 | 다이오드(1N4148)                           | 77  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=25)                                                                  |
 | 접시머리 십자볼트 (니켈) 머신스크류 M3*10             | 32  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=34782)                                                               |
+
+# 
+
+# 조립하기
+
+## 모델링 출력하기
+
+ modeling 폴더의 모델을  3D 프린터기로 출력해 주시면 됩니다.
+
+제가 가지고 있는 프린터기가 작아서 총 8등분이 되어 있습니다.
+
+혹시, 4등분이 필요 하신 분이 생기면 다시 도면을 개선해 볼 생각이 있긴 하지만, 지금은 유지 ^^
+
+
+
+## 키 조립하기
+
+출력을 마쳤으면,  키 스위치와 스테빌라이저를 꼽아 줍니다. 그리고 반대편에는 핫스왓용 스위치를 꼽아 줍니다.
+
+핫스왓 스위치를 꼽고 나서 글루건을 한방 씩 쏴주는 것을 권장합니다.
+
+나중에 띠기 좀 귀찮기는 하지만, 사용중에 키 스위치에서 핫스왓 스위치가 분리되는 것을 방지 할 수 있습니다.
+
+
+
+## 납땜
+
+행열에 맞춰서 연결을 해 줍니다.
+
+다이오드의 방향은  COL행에 연결해 주시면, 까만 선이 있는 부분이 프로마이크로를 향하게 연결해 주시면 됩니다.
+
+
+
+### 프로마이크로 핀
+
+![PIN](https://github.com/gyuha/my-keyboard/raw/main/kbfirmware/pin.png?raw=true)
+
+
+
+### 좌측
+
+![left](https://github.com/gyuha/my-keyboard/raw/main/kbfirmware/left.png?raw=true)
+
+
+
+### 우측
+
+![우측](https://github.com/gyuha/my-keyboard/raw/main/kbfirmware/right.png?raw=true)
+
+
+
+핀 배선은 [kbfirmware.com](https://kbfirmware.com/) 에서 만들었습니다.
+
+
 
 # QMK
 
@@ -90,6 +148,10 @@ qmk compile -kb gkey -km default
 `gkey_default.hex` 파일을 QMK Toolbox를 이용해서  아두이노에 넣어 주시면 됩니다.
 
 아두이도 프로 마이크로의 펌웨어를 업데이트 하기 전에는 보드의 `리셋(13)`과 `그라운드(GND)`를 같이 눌러주고 펌웨어를 올리시면 됩니다.
+
+
+
+여기까지 했으면 조립해서 사용하시면 됩니다.
 
 
 
