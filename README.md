@@ -20,7 +20,7 @@
 
 #### 제작 화면
 
-![keyboard](https://github.com/gyuha/my-keyboard/blob/main/image/keyboard.png?raw=true)
+![keyboard](https://github.com/gyuha/my-keyboard/blob/main/image/keyboard.jpg?raw=true)
 
 # 데이터
 
