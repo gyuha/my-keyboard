@@ -24,7 +24,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       RESET  ,  KC_KP_1, KC_KP_2, KC_KP_3, KC_KP_4, KC_KP_5, KC_KP_6,  KC_KP_6, KC_KP_7, KC_KP_8, KC_KP_9,  KC_KP_0,  KC_PMNS, KC_PEQL, _______, KC_MUTE,
       _______,  KC_HOME, KC_UP,   KC_END,  KC_PGUP, _______,           KC_KP_7, KC_KP_8, KC_KP_9, _______,  _______,  _______, _______, _______, KC_SLEP,
       _______,  KC_LEFT, KC_DOWN, KC_RGHT, KC_PGDN, _______,           KC_KP_4, KC_KP_5, KC_KP_6, _______,  _______,  _______, KC_PENT,          KC_MPRV,
-      _______,  KC_INS,  KC_DEL,  KC_PSCR, _______, _______,           KC_KP_0, KC_KP_1, KC_KP_2, KC_KP_3,  KC_INS,   KC_DEL,  _______, _______, KC_MNXT,
+      _______,  KC_INS,  KC_DEL,  KC_PSCR, _______, _______,           KC_KP_0, KC_KP_1, KC_KP_2, KC_KP_3,  KC_PDOT,  KC_DEL,  _______, _______, KC_MNXT,
       _______,  _______, _______, _______, _______,                    KC_NUM , _______,          _______,  _______,  _______, _______, _______, _______)
 };
 
