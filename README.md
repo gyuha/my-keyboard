@@ -109,7 +109,7 @@
 
 
 # 스트레오 컨넥트 연결 핀
-![핀](https://github.com/gyuha/my-keyboard/raw/main/kbfirmware/stero connect ping.png?raw=true)
+![핀](https://github.com/gyuha/my-keyboard/blob/main/image/stero%20connect%20ping.png?raw=true)
 
 
 
