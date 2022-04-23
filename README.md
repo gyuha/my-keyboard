@@ -65,6 +65,9 @@
 | 미끄럼 방지 패드 or 범퍼                        |     |                           | [연결](https://smartstore.naver.com/mg9000/products/3289975643)                                                        |
 | 다이오드(1N4148)                           | 77  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=25)                                                                  |
 | 접시머리 십자볼트 (니켈) 머신스크류 M3*10             | 32  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=34782)                                                               |
+| 스위치                                    | 2   | 펌웨어 업데이트용 리세 스위치          | [연결](https://www.devicemart.co.kr/goods/view?no=34555)                                                               |
+
+
 
 # 
 
@@ -106,13 +109,9 @@
 
 핀 배선은 [kbfirmware.com](https://kbfirmware.com/) 에서 만들었습니다.
 
-
-
 # 스트레오 컨넥트 연결 핀
+
 ![핀](https://github.com/gyuha/my-keyboard/blob/main/image/stero%20connect%20ping.png?raw=true)
-
-
-
 
 # QMK
 
@@ -202,8 +201,6 @@ qmk compile -kb gkey -km default
   * [10. QMK 컴파일](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=625963)
 
 * 아두이노로 키보드 만들기 : [1부](http://www.kbdmania.net/xe/best_article/8635141) [2부](http://www.kbdmania.net/xe/best_article/8639304) [3부]([Best Article : KBDMania - 아두이노로 키보드 만들기 3부](http://www.kbdmania.net/xe/best_article/8640469))
-
-
 
 # 참고 자료
 
