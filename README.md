@@ -1,5 +1,3 @@
-
-
 내가 원하는 키보드 만들기
 
 # 원하는 기능
@@ -50,16 +48,12 @@
 
 ![요약](https://github.com/gyuha/my-keyboard/blob/main/keylayout-summary.png?raw=true)
 
-
-
-
-
 # 준비물
 
 | 부품명                                    | 수량  | 설명                        | 링크                                                                                                                   |
 | -------------------------------------- | --- | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | 아두이노 프로 마이크로<br/>Arduino ATmega32U4    | 2   | PC연결 용                    | [연결](https://ko.aliexpress.com/item/1348800135.html?gatewayAdapt=glo2kor&spm=a2g0o.9042311.0.0.7f234c4dRKXC3b)       |
-| 스테레오 커넥터 / 3.5mm / FEMALE              | 2   | 보드 연결 용                   | [연결](https://www.devicemart.co.kr/goods/view?no=2679)                                                                |
+| 스테레오 커넥터 / 3.5mm / FEMALE              | 2   | 보드 연결 용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1067728)                                                             |
 | 3.5mm aux 케이블                          | 1   | 보드 연결 용, 다이소에서 구매         |                                                                                                                      |
 | USB3.1 C 타입 FEMALE 26P <br/>변환보드 ANGLE | 2   | 보드 연결 용<br/>3.5 aux 대체용   | [연결](https://www.devicemart.co.kr/goods/view?no=13003211)                                                            |
 | 체리 스테빌 라이저                             | 2   |                           | [연결](https://smartstore.naver.com/whatkey/products/5153072093)                                                       |
@@ -84,8 +78,6 @@
 
 혹시, 4등분이 필요 하신 분이 생기면 다시 도면을 개선해 볼 생각이 있긴 하지만, 지금은 유지 ^^
 
-
-
 ## 키 조립하기
 
 출력을 마쳤으면,  키 스위치와 스테빌라이저를 꼽아 줍니다. 그리고 반대편에는 핫스왓용 스위치를 꼽아 줍니다.
@@ -94,35 +86,31 @@
 
 나중에 띠기 좀 귀찮기는 하지만, 사용중에 키 스위치에서 핫스왓 스위치가 분리되는 것을 방지 할 수 있습니다.
 
-
-
 ## 납땜
 
 행열에 맞춰서 연결을 해 줍니다.
 
 다이오드의 방향은  COL행에 연결해 주시면, 까만 선이 있는 부분이 프로마이크로를 향하게 연결해 주시면 됩니다.
 
-
-
 ### 프로마이크로 핀
 
 ![PIN](https://github.com/gyuha/my-keyboard/raw/main/kbfirmware/pin.png?raw=true)
-
-
 
 ### 좌측
 
 ![left](https://github.com/gyuha/my-keyboard/raw/main/kbfirmware/left.png?raw=true)
 
-
-
 ### 우측
 
 ![우측](https://github.com/gyuha/my-keyboard/raw/main/kbfirmware/right.png?raw=true)
 
-
-
 핀 배선은 [kbfirmware.com](https://kbfirmware.com/) 에서 만들었습니다.
+
+
+
+# 스트레오 컨넥트 연결 핀
+![핀](https://github.com/gyuha/my-keyboard/raw/main/kbfirmware/stero connect ping.png?raw=true)
+
 
 
 
@@ -149,11 +137,7 @@ qmk compile -kb gkey -km default
 
 아두이도 프로 마이크로의 펌웨어를 업데이트 하기 전에는 보드의 `리셋(13)`과 `그라운드(GND)`를 같이 눌러주고 펌웨어를 올리시면 됩니다.
 
-
-
 여기까지 했으면 조립해서 사용하시면 됩니다.
-
-
 
 # 참고 사이트
 
@@ -218,3 +202,11 @@ qmk compile -kb gkey -km default
   * [10. QMK 컴파일](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=625963)
 
 * 아두이노로 키보드 만들기 : [1부](http://www.kbdmania.net/xe/best_article/8635141) [2부](http://www.kbdmania.net/xe/best_article/8639304) [3부]([Best Article : KBDMania - 아두이노로 키보드 만들기 3부](http://www.kbdmania.net/xe/best_article/8640469))
+
+
+
+# 참고 자료
+
+## Arduino ATmega32U4  연결 핀
+
+![pro micro pin](https://user-images.githubusercontent.com/91782246/135756721-60a5d858-9b95-4c4b-9dd7-ec2c003c7c5b.jpeg)
