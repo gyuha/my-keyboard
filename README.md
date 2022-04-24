@@ -62,12 +62,10 @@
 | 키캡                                     | -   | 되도록이면 XDA 또는 DSA를 선택 합니다. | [연결](https://ko.aliexpress.com/item/1005003510911114.html?gatewayAdapt=glo2kor&spm=a2g0o.9042311.0.0.bb0d4c4d3XOUd6) |
 | Gateron Hot-swappable PCB Socket       | 77  | 스위치 핫 스왓 용                | [연결](https://ko.aliexpress.com/item/1005002637150446.html)                                                           |
 | 납땜 재료                                  | -   | 인두기, 납, 인두기 스탠드 등등        |                                                                                                                      |
-| 미끄럼 방지 패드 or 범퍼                        |     |                           | [연결](https://smartstore.naver.com/mg9000/products/3289975643)                                                        |
+| 미끄럼 방지 패드 or 범퍼                        |     |                           | [연결](https://www.coupang.com/vp/products/6265639245)                                                                 |
 | 다이오드(1N4148)                           | 77  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=25)                                                                  |
 | 접시머리 십자볼트 (니켈) 머신스크류 M3*10             | 32  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=34782)                                                               |
 | 스위치                                    | 2   | 펌웨어 업데이트용 리세 스위치          | [연결](https://www.devicemart.co.kr/goods/view?no=34555)                                                               |
-
-
 
 # 
 
