@@ -1,0 +1,5 @@
+[{c:"#ea4221",a:5},"~\n\n\n\n\n\n`",{c:"#cccccc",a:7},"F1","F2","F3","F4","F5","F6",{x:1},"F6","F7","F8","F9","F10","F11","F12",{c:"#c8c3b8",w:2},"",{c:"#63696a",a:5},"Power\n\n\n\n\n\nDown"],
+[{c:"#c8c3b8",a:4,w:1.5},"CAPS",{c:"#cccccc",a:7},"HOME","↑","END","PgUp","",{x:2,a:5},"Keypad\n\n\n\n\n\n7","Keypad\n\n\n\n\n\n8","Keypad\n\n\n\n\n\n9",{a:7},"","","","",{c:"#c8c3b8",w:1.5},"",{c:"#63696a"},"Sleep"],
+[{c:"#c8c3b8",w:1.75},"",{c:"#cccccc"},"←","↓","→","PgDn","",{x:2,a:5},"Keypad\n\n\n\n\n\n4","Keypad\n\n\n\n\n\n5","Keypad\n\n\n\n\n\n6",{a:7},"","","",{c:"#c8c3b8",a:5,w:2.25},"Keypad\n\n\n\n\n\nEnter",{c:"#63696a"},"MEDIA\n\n\n\n\n\nPREV"],
+[{c:"#c8c3b8",a:7,w:2.25},"",{c:"#cccccc"},"Insert","Delete",{a:5},"Print\n\n\n\n\n\nScreen",{a:7},"","",{x:1,a:5},"Keypad\n\n\n\n\n\n0","Keypad\n\n\n\n\n\n1","Keypad\n\n\n\n\n\n2","Keypad\n\n\n\n\n\n3","Keypad\n\n\n\n\n\n.",{a:7},"Delete",{c:"#c8c3b8",w:1.75},"",{c:"#ea4221"},"",{c:"#63696a",a:5},"MEDIA\n\n\n\n\n\nNEXT"],
+[{c:"#c8c3b8",a:7,w:1.25},"",{w:1.25},"",{w:1.25},"",{c:"#cb3d6e",w:1.25},"FN.2",{c:"#c8c3b8",w:2.25},"",{x:1,a:5},"Num\n\n\n\n\n\nLock",{a:7,w:2.75},"","","","",{c:"#ea4221"},"","",""]

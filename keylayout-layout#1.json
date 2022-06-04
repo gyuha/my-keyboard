@@ -1,0 +1,5 @@
+[{c:"#ea4221",a:5},"~\n\n\n\n\n\n`",{c:"#cccccc",a:7},"F1","F2","F3","F4","F5","F6",{x:1},"F6","F7","F8","F9","F10","F11","F12",{c:"#c8c3b8",w:2},"",{c:"#63696a"},"MUTE"],
+[{c:"#c8c3b8",a:4,w:1.5},"CAPS",{c:"#cccccc",a:7},"HOME","↑","END","PgUp","",{x:2,a:5},"~\n\n\n\n\n\n`",{a:7},"","","","PgUp","","",{c:"#c8c3b8",w:1.5},"",{c:"#63696a"},"PLAY"],
+[{c:"#cb3d6e",a:4,w:1.75},"Function.1",{c:"#cccccc",a:7},"←","↓","→","PgDn","",{x:2},"←","↑","↓","→","","",{c:"#c8c3b8",w:2.25},"",{c:"#63696a",a:5},"VOL\n\n\n\n\n\nUP"],
+[{c:"#c8c3b8",a:7,w:2.25},"",{c:"#cccccc"},"Insert","Delete",{a:5},"Print\n\n\n\n\n\nScreen",{a:7},"","",{x:1},"PgDn","","","","Insert","Delete",{c:"#c8c3b8",w:1.75},"",{c:"#ea4221",a:5},"VOL\n\n\n\n\n\nUP",{c:"#63696a"},"VOL\n\n\n\n\n\nDOWN"],
+[{c:"#c8c3b8",a:7,w:1.25},"",{w:1.25},"",{w:1.25},"",{w:1.25},"",{w:2.25},"",{x:1},"CAPS",{w:2.75},"",{c:"#cb3d6e"},"FN.1",{c:"#c8c3b8"},"App",{a:5},"Right\n\n\n\n\n\nCtrl",{c:"#ea4221"},"MEDIA\n\n\n\n\n\nPREV","VOL\n\n\n\n\n\nDOWN","MEDIA\n\n\n\n\n\nNEXT"]
