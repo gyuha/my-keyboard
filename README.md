@@ -200,6 +200,9 @@ qmk compile -kb gkey -km default
 
 * 아두이노로 키보드 만들기 : [1부](http://www.kbdmania.net/xe/best_article/8635141) [2부](http://www.kbdmania.net/xe/best_article/8639304) [3부]([Best Article : KBDMania - 아두이노로 키보드 만들기 3부](http://www.kbdmania.net/xe/best_article/8640469))
 
+* [3D프린터만으로 풀와이어링 기계식키보드 직접 만들기](https://www.youtube.com/watch?v=bxcL0NbGioA)
+  * https://www.thingiverse.com/thing:4929989
+
 # 참고 자료
 
 ## Arduino ATmega32U4  연결 핀
