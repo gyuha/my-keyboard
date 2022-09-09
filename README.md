@@ -180,7 +180,9 @@ qmk compile -kb gkey -km default
   
   * [6. 각 행과 열을 컨트롤러 핀에 연결하기](https://gall.dcinside.com/mgallery/board/view?id=mechanicalkeyboard&no=395287)
 
-* Teensy 2.0에 qmk 올리기 : [1부](https://gall.dcinside.com/mechanicalkeyboard/395303) [2부](https://gall.dcinside.com/mechanicalkeyboard/395319)
+* Teensy 2.0에 qmk 올리기 : 
+  * [1부](https://gall.dcinside.com/mechanicalkeyboard/395303)
+  * [2부](https://gall.dcinside.com/mechanicalkeyboard/395319)
 
 * QMK 노브,, OLED 생초보자 가이드: 기계식키보드 갤러리
   
@@ -198,7 +200,10 @@ qmk compile -kb gkey -km default
   
   * [10. QMK 컴파일](https://gall.dcinside.com/mgallery/board/view/?id=mechanicalkeyboard&no=625963)
 
-* 아두이노로 키보드 만들기 : [1부](http://www.kbdmania.net/xe/best_article/8635141) [2부](http://www.kbdmania.net/xe/best_article/8639304) [3부]([Best Article : KBDMania - 아두이노로 키보드 만들기 3부](http://www.kbdmania.net/xe/best_article/8640469))
+* 아두이노로 키보드 만들기 
+  * [1부](http://www.kbdmania.net/xe/best_article/8635141)
+  * [2부](http://www.kbdmania.net/xe/best_article/8639304)
+  * [3부](http://www.kbdmania.net/xe/best_article/8640469)
 
 * [3D프린터만으로 풀와이어링 기계식키보드 직접 만들기](https://www.youtube.com/watch?v=bxcL0NbGioA)
   * https://www.thingiverse.com/thing:4929989
