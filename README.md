@@ -138,6 +138,9 @@ qmk compile -kb gkey -km default
 
 # 참고 사이트
 
+## 다양한 DIY 키보드 링크
+* **[Mechanical Keyboard and where to find them](https://github.com/help-14/mechanical-keyboard)**
+
 ## 참고 github
 
 * [GitHub - mastery6/wingB_Korean-Split-keyboard](https://github.com/mastery6/wingB_Korean-Split-keyboard) : 참고를 가장 많이한 저장소 입니다. 감사합니다.
