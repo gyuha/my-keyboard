@@ -208,6 +208,8 @@ qmk compile -kb gkey -km default
 * [3D프린터만으로 풀와이어링 기계식키보드 직접 만들기](https://www.youtube.com/watch?v=bxcL0NbGioA)
   * https://www.thingiverse.com/thing:4929989
 
+* [EasyEDA](https://easyeda.com/) : 웹 PCB 설계
+* [JLCPcb](https://jlcpcb.com/) : JLCPCB: PCB Prototype & PCB Fabrication Manufacturer - PCB 출력
 # 참고 자료
 
 ## Arduino ATmega32U4  연결 핀
