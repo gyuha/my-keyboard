@@ -215,6 +215,7 @@ qmk compile -kb gkey -km default
 ### 기타
 * [자작 키보드 디스코드 채널](https://discord.com/invite/8sUwcKzFa5)
 * [마우저(부품 사양, 가격 확인)](https://www.mouser.kr/)
+* [CNC 비용 줄이기 TIP](https://www.hubs.com/knowledge-base/reducing-cnc-machining-costs-design-tips/)
 
 <br/>
 
