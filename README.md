@@ -163,6 +163,7 @@ qmk compile -kb gkey -km default
   * [PCB 기판 제작(6)](https://ola-page.tistory.com/27) 거버파일 추출하기. PCB 주문하기.
 * [ai03's Keyboard PCB Design Guide](https://wiki.ai03.com/books/pcb-design/page/pcb-guide-part-1---preparations#bkmrk-ai03%27s-keyboard-pcb-) : PCB 키보드 기판 제작에서 유명한 사이트, 그대로 만드는건 추천하지 않음
 * [Noah Kiser](https://www.youtube.com/channel/UC45VUrCGJStbkWobT0FMTVA) : PCB 키보드 제작 유투브
+* olothy 40 플랭크배열 키보드 :  [#1 기판 설계](https://kbddiary.tistory.com/64), [#2 하우징](https://kbddiary.tistory.com/65), [#3 출력물](https://kbddiary.tistory.com/67), [#4 RP2040](https://kbddiary.tistory.com/68)
 
 ### EasyEDA
 * [EasyEDA Tutorial](https://docs.easyeda.com/en/PCB/Board-Outline/index.html) : 공식 튜토리얼
