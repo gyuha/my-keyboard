@@ -46,7 +46,7 @@
 
 # 써머리
 
-![요약](images/keylayout-summary.png?raw=true)
+![요약](image/keylayout-summary.png?raw=true)
 
 # 준비물
 
