@@ -50,19 +50,19 @@
 
 # 준비물
 
-| | 부품명                                    | 수량  | 설명                        | 링크                                                                                                                   |
-|---| -------------------------------------- | --- | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| | 부품명 | 수량 | 설명 | 링크 |
+|:--:| -- | :--: | -- | -- |
 | ![rp2040](image/parts/RP2040-Zero-details-3.jpg) | RP2040-Zero RP2040 | 2 | 보드용 | [연결](https://ko.aliexpress.com/item/1005003823256706.html) |
 | ![PJ-322 3.5Pie](image/parts/PJ-322%203.5Pie.jpg) | 스테레오 커넥터 / 3.5mm / FEMALE | 2 | 보드 연결 용 | [연결](https://www.devicemart.co.kr/goods/view?no=1067728)                                                             |
-| ![aux](image/parts/aux.jpg)| 3.5mm aux 케이블 | 1 | 보드 연결 용 | [연결](https://ko.aliexpress.com/item/1005006150639643.html) |
+| ![aux](image/parts/aux-cable.jpg)| 3.5mm aux 케이블 | 1 | 보드 연결 용 | [연결](https://ko.aliexpress.com/item/1005006150639643.html) |
 | ![체리스테빌](image/parts/stabil.jpg) | 체리 스테빌 라이저 | 2 || [연결](https://smartstore.naver.com/whatkey/products/5153072093)                                                       |
 | ![wire](image/parts/wire.jpg) | 전선 | 1 | 랩핑와이어 추천(인두기로 녹여서 사용가능) | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)                                                             |
 | ![switch](image/parts/key-switch.jpg) | 스위치 | 77  | 개인 취향으로 게이트론 백축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955)                                                 |
 | ![keycap](image/parts/keycap.jpg) | 키캡 | -   | 되도록이면 XDA 또는 DSA를 선택 합니다. | [연결](https://ko.aliexpress.com/w/wholesale-key-xda.html) |
-| ![bump](image/parts/bump.jpg) | 미끄럼 방지 패드 or 범퍼 |  | | [연결](https://www.coupang.com/vp/products/6265639245) |
+| ![bump](image/parts/bump.jpg) | 미끄럼 방지 패드 or 범퍼 | 1 | 바닥 미끄럼 방지 | [연결](https://www.coupang.com/vp/products/6265639245) |
 | ![diode](image/parts/diode.jpg) | 다이오드(1N4148) | 77  | | [연결](https://www.devicemart.co.kr/goods/view?no=25)|
-| | 조립볼트/6*15 | 32  |  | [연결](https://www.devicemart.co.kr/goods/view?no=34782) |
-| | 스위치 | 2 | 펌웨어 업데이트용 리세 스위치 | [연결](https://www.devicemart.co.kr/goods/view?no=34555) |
+| ![bolt](image/parts/bolt.jpg) | 조립볼트/6*15 | 32  |  | [연결](https://smartstore.naver.com/riwootool/products/5216506630) |
+| ![switch](image/parts/switch.jpg) | 스위치 | 2 | 펌웨어 업데이트용 리셋 스위치 | [연결](https://www.devicemart.co.kr/goods/view?no=34555) |
 | | 납땜 재료 | -   | 인두기, 납, 인두기 스탠드 등등 | |
 
 
