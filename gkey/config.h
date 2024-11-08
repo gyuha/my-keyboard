@@ -1,16 +1,16 @@
 #pragma once
 
-#include "config_common.h"
+//#include "config_common.h"
 
 #define VENDOR_ID       0xFEED
 #define PRODUCT_ID      0x4445
 #define DEVICE_VER      0x0001
-#define PRODUCT         gkey
-#define MANUFACTURER    Home
+#define PRODUCT         "Split-keyboard"
+#define MANUFACTURER    "MyHome"
 
 /* key matrix size */
 // Rows are doubled-up
-#define MATRIX_ROWS 10 
+#define MATRIX_ROWS 10
 #define MATRIX_COLS 9
 
 // #define ENCODERS_PAD_A { F4 }
