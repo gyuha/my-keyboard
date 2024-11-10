@@ -10,7 +10,7 @@
 
 # 키보드 전체 레이아웃
 
-![layout](image/keyboard-layout.png?raw=true)
+![layout](./image/keyboard-layout.png?raw=true)
 
 제작 : http://www.keyboard-layout-editor.com/
 
@@ -18,7 +18,7 @@
 
 #### 제작 화면
 
-![keyboard](https://github.com/gyuha/my-keyboard/blob/main/image/keyboard.jpg?raw=true)
+![keyboard](./image/keyboard.jpg?raw=true)
 
 # 데이터
 
