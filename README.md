@@ -1,12 +1,20 @@
-내가 원하는 키보드 만들기
+# 내가 원하는 키보드 만들기
 
-# 원하는 기능
+> 새로운 버전 제작 중. 내용이 업데이트 중입니다.
+
+## 원하는 기능
 
 - 분할 키보드
 - 2개의 Function 키 사용 가능
 - 가운데 추가 키 배치
 
-##
+### 주요 포인트
+1. 한글 타이핑을 할 경우 'ㅠ' 키를 자주 사용하게 되는데, 기존의 분할 키보드들은 가운데에 키가 없어서 불편했습니다.
+그래서, 양쪽 키보드 B키를 추가 배치 했습니다.
+2. 그리고, '한/영'가 윈도우에서는 스페이스바 옆 ALT 키로 매핑이 되어 있는데, 개발하면서 한영키를 자주 전환을 하게 되는데, 이 때 주로 엄지 손가락으로 ALT키를 눌러서 손가락이 불편했습니다. 그렇다고 한영키를 누르기 위해서 손을 키보드 아래로 내려가 하는 것도 불편해서 한/영키를 오른쪽 키보드 B키 밑으로 배치를 했습니다.
+3. 잘 사용하지 않는 Caps Lock 키를 펑션키로 매핑을 했습니다. 이렇게 하면, 펑션키를 누르기 위해서 손을 키보드 아래로 내릴 필요가 없어서 편리합니다.
+
+
 
 # 키보드 전체 레이아웃
 
@@ -14,8 +22,8 @@
 
 제작 : http://www.keyboard-layout-editor.com/
 
-##
 
+---
 #### 제작 화면
 
 ![keyboard](./image/keyboard.jpg?raw=true)
@@ -52,19 +60,20 @@
 
 
 |                                                   | 부품명                           | 수량 | 설명                                         | 링크                                                                   |
-| :-------------------------------------------------: | ---------------------------------- | :----: | ---------------------------------------------- | ------------------------------------------------------------------------ |
-| ![rp2040](image/parts/RP2040-Zero-details-3.jpg) | RP2040-Zero RP2040               |  2  | 보드용                                       | [연결](https://ko.aliexpress.com/item/1005003823256706.html)           |
-| ![PJ-322 3.5Pie](image/parts/PJ-322%203.5Pie.jpg) | 스테레오 커넥터 / 3.5mm / FEMALE |  2  | 보드 연결 용                                 | [연결](https://www.devicemart.co.kr/goods/view?no=1067728)             |
-|         ![aux](image/parts/aux-cable.jpg)         | 3.5mm aux 케이블                 |  1  | 보드 연결 용                                 | [연결](https://ko.aliexpress.com/item/1005006150639643.html)           |
-|      ![코스타스테빌](image/parts/stabil.jpg)      | 코스타 스테빌 라이저             |  2  |                                              | [연결](https://ko.aliexpress.com/item/1005004349496355.html)           |
-|           ![wire](image/parts/wire.jpg)           | 전선                             |  1  | 랩핑와이어 추천(인두기로 녹여서 사용가능)    | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)             |
+| :-----------------------------------------------: | -------------------------------- | :--: | -------------------------------------------- | ---------------------------------------------------------------------- |
+| ![rp2040](image/parts/RP2040-Zero-details-3.jpg)  | RP2040-Zero RP2040               |  2   | 보드용                                       | [연결](https://ko.aliexpress.com/item/1005003823256706.html)           |
+| ![PJ-322 3.5Pie](image/parts/PJ-322%203.5Pie.jpg) | 스테레오 커넥터 / 3.5mm / FEMALE |  2   | 보드 연결 용                                 | [연결](https://www.devicemart.co.kr/goods/view?no=1067728)             |
+|         ![aux](image/parts/aux-cable.jpg)         | 3.5mm aux 케이블                 |  1   | 보드 연결 용                                 | [연결](https://ko.aliexpress.com/item/1005006150639643.html)           |
+|      ![코스타스테빌](image/parts/stabil.jpg)      | 코스타 스테빌 라이저             |  2   | 긴 키 안정 (5개가 필요 해서 2세트 구매)  | [연결](https://ko.aliexpress.com/w/wholesale-costar-stabilizer.html)   |
+|           ![wire](image/parts/wire.jpg)           | 전선                             |  1   | 랩핑와이어 추천(인두기로 녹여서 사용가능)    | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)             |
 |       ![switch](image/parts/key-switch.jpg)       | 스위치                           |  77  | 개인 취향으로 게이트론 백축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955) |
-|         ![keycap](image/parts/keycap.jpg)         | 키캡                             |  -  | 되도록이면 XDA 또는 DSA를 선택 합니다.       | [연결](https://ko.aliexpress.com/w/wholesale-key-xda.html)             |
-|           ![bump](image/parts/bump.jpg)           | 미끄럼 방지 패드 or 범퍼         |  1  | 바닥 미끄럼 방지                             | [연결](https://www.coupang.com/vp/products/6265639245)                 |
-|          ![diode](image/parts/diode.jpg)          | 다이오드(1N4148)                 |  77  |                                              | [연결](https://www.devicemart.co.kr/goods/view?no=25)                  |
-|           ![bolt](image/parts/bolt.jpg)           | 조립볼트/6*15                    |  32  |                                              | [연결](https://smartstore.naver.com/riwootool/products/5216506630)     |
-|         ![switch](image/parts/switch.jpg)         | 스위치                           |  2  | 펌웨어 업데이트용 리셋 스위치                | [연결](https://www.devicemart.co.kr/goods/view?no=34555)               |
-|                                                   | 납땜 재료                        |  -  | 인두기, 납, 인두기 스탠드 등등               |                                                                        |
+|         ![keycap](image/parts/keycap.jpg)         | 키캡                             |  -   | 되도록이면 XDA 또는 DSA를 선택 합니다.       | [연결](https://ko.aliexpress.com/w/wholesale-xda-keycap.html)             |
+|           ![bump](image/parts/bump.jpg)           | 미끄럼 방지 패드 or 범퍼         |  1   | 바닥 미끄럼 방지                             | [연결](https://www.coupang.com/vp/products/6265639245)                 |
+|          ![MMSD4148](image/parts/MMSD4148.png)          | 다이오드(1N4148/MMSD4148)                 |  77  |                                              | [연결](https://www.devicemart.co.kr/goods/view?no=6382)  |
+|  ![인서트(Spredsert)](image/parts/spredsert.png)  | 인서트(spredsert) | 8 | 케이스 조립용 | [연결](https://www.devicemart.co.kr/goods/view?no=1067969) |
+| ![나사](image/parts/M3x5.png) | 접시머리 십자볼트 M3*5 | 16 | 케이스 조립용 | [연결](http://devicemart.co.kr/goods/view?no=34781) |
+|         ![switch](image/parts/switch.jpg)         | 스위치                           |  2   | 펌웨어 업데이트용 리셋 스위치                | [연결](https://www.devicemart.co.kr/goods/view?no=34555)               |
+|                                                   | 납땜 재료                        |  -   | 인두기, 납, 인두기 스탠드 등등               |                                                                        |
 
 ### 프로마이크로 핀
 
