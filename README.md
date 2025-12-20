@@ -71,7 +71,7 @@
 |           ![bump](image/parts/bump.jpg)           | 미끄럼 방지 패드 or 범퍼         |  1   | 바닥 미끄럼 방지                             | [연결](https://www.coupang.com/vp/products/6265639245)                 |
 |          ![MMSD4148](image/parts/MMSD4148.png)          | 다이오드(1N4148/MMSD4148)                 |  77  |                                              | [연결](https://www.devicemart.co.kr/goods/view?no=6382)  |
 |  ![인서트(Spredsert)](image/parts/spredsert.png)  | 인서트(spredsert) | 8 | 케이스 조립용 | [연결](https://www.devicemart.co.kr/goods/view?no=1067969) |
-| ![나사](image/parts/M3x5.png) | 접시머리 십자볼트 M3*5 | 16 | 케이스 조립용 | [연결](http://devicemart.co.kr/goods/view?no=34781) |
+| ![나사](image/parts/M3x5.png) | 접시머리 십자볼트 M3*10 | 8 | 케이스 조립용 | [연결](https://www.devicemart.co.kr/goods/view?no=34782) |
 |         ![switch](image/parts/switch.jpg)         | 스위치                           |  2   | 펌웨어 업데이트용 리셋 스위치                | [연결](https://www.devicemart.co.kr/goods/view?no=34555)               |
 |                                                   | 납땜 재료                        |  -   | 인두기, 납, 인두기 스탠드 등등               |                                                                        |
 
