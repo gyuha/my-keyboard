@@ -217,3 +217,4 @@ qmk compile -kb gkey -km default
 # 참고 자료
 
 * [RP2040 datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf)
+* [Marbastlib](https://github.com/ebastler/marbastlib) : MX 및 Choc 스타일 키패드의 풋프린트와 커스텀 키보드 디자인에 사용되는 다양한 부품들을 모아놓은 라이브러리입니다.
