@@ -40,7 +40,7 @@ FRONT_INT_H = 12.0  # 앞쪽 내부 여유 높이 (mm); 뒤쪽은 depth에 6도 
 #   인서트: Spredsert M3x5 (devicemart no=1067969) — 바디 보스 상단에 압입, 파일럿 Ø4.0
 #   나사  : 접시머리 십자 머신스크류 M3x10 (devicemart no=34782) — 상판 관통 후 인서트 체결
 BOSS_OD            = 7.0   # 인서트 보스 외경
-BOSS_WALL_OVERLAP  = 2.0   # 보스가 벽과 겹치는 양(mm). 클수록 보스가 코너 바깥쪽으로 이동해 스위치 컷아웃을 피함. d=WALL_T+BOSS_OD/2-overlap=4.5 (실측 유효창 4.2~4.9)
+BOSS_WALL_OVERLAP  = 2.2   # 보스가 벽과 겹치는 양(mm). 클수록 보스가 코너(라운드 중심)쪽으로 이동. d=WALL_T+BOSS_OD/2-overlap=4.3 (실측 유효창 4.2~4.9, 라운드반경 ~3.45)
 INSERT_HOLE_D      = 4.0   # Spredsert M3 압입 파일럿 홀 지름
 INSERT_HOLE_DEPTH  = 7.0   # 인서트 홀 깊이 (인서트 5mm + 나사끝 여유)
 SCREW_CLEAR_D      = 3.4   # 상판 M3 나사 관통 클리어런스 지름
@@ -447,6 +447,19 @@ def unplace_plate(shape, y_front):
 # ─────────────────────────────────────────────────────────────────────────────
 # 조립 · 검증 · STL · FCStd
 # ─────────────────────────────────────────────────────────────────────────────
+def prestretch_plate_y(plate, y_front):
+    """6° 틸트 시 Y가 cos6°만큼 단축돼 바디 수직벽보다 안쪽으로 들어가는 것을 보상.
+    틸트 전 평판을 y_front 기준 Y로 1/cos6° 늘리면 틸트 후 투영이 footprint와 일치 → 벽과 밀착.
+    (스위치 컷아웃은 판에 수직 유지, 스위치 안착 불변)"""
+    k = 1.0 / math.cos(math.radians(TILT_DEG))
+    p = plate.copy()
+    p.translate(App.Vector(0, -y_front, 0))
+    m = App.Matrix(); m.A22 = k              # Y축만 스케일
+    p = p.transformGeometry(m)
+    p.translate(App.Vector(0, y_front, 0))
+    return p
+
+
 def place_plate_on_rim(plate, y_front):
     """평평한 상판을 6° 틸트시켜 바디 rim(z_top) 위에 안착."""
     zf = Z_FLOOR + FRONT_INT_H
@@ -485,6 +498,7 @@ def build_half(side):
     y_front = outer_face.BoundBox.YMin
     bb0 = outer_face.BoundBox
     plate_flat = plate_solid(path)[0]                     # 스위치 컷아웃만
+    plate_flat = prestretch_plate_y(plate_flat, y_front)  # 틸트 Y단축 보상 → 벽과 밀착
     body, info = body_solid(path)
     plate_asm = place_plate_on_rim(plate_flat, y_front)   # rim 위 틸트 배치
     plate_asm = cut_plate_screws(plate_asm, bb0, y_front)  # 나사홀 + 카운터싱크
