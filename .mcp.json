@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "freecad": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "freecad-mcp"
+      ],
+      "env": {}
+    }
+  }
+}
