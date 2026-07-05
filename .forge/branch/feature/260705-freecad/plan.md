@@ -1,26 +1,40 @@
-<!-- forge-slug: keyboard-plate-rear-mount-lower -->
-<!-- task: 1 -->
+<!-- forge-slug: rp2040-zero-split-firmware -->
+<!-- task: 2 -->
 <!-- tdd: off -->
-# keyboard-plate 뒷쪽 부품 받침 낮추기 + 노출 홀 위치 연동 조정
+# RP2040-Zero 분할 키보드 QMK 펌웨어 포팅 (VIA 포함)
 
 ## Goal / Non-goals
-- Goal: Fusion 360 `keyboard-plate v9`의 좌우 Body 뒷쪽에서 부품(RP2040·TRRS)을 케이스 바닥에 밀착시키도록 부품 받침을 낮추고, 그에 맞춰 뒷변 받침과 USB-C·TRRS 노출 홀을 조정한다. 기존 B-rep body를 직접 편집한다(소스 스크립트 부재).
+- Goal: 기존 `gkey/` QMK 키보드(ATmega32u4/Pro Micro 대상)를 RP2040-Zero 2개(좌우 각 1개)로 포팅한다. 최근 재배선된 6행 매트릭스(좌 6행×7열, 우 6행×9열)에 맞춰 매트릭스 핀·LAYOUT 매크로를 재정의하고, `keylayout-left.json`/`keylayout-right.json`의 새 레이아웃(ESC+F행, 양쪽 B키, 한/영 재배치, Caps→Fn 진입키)을 반영한 base 레이어를 새로 작성하며, 기존 FN1(방향키·미디어·기능키)·FN2(넘패드) 레이어 기능은 새 매트릭스 위치에 그대로 재배치한다. VIA 지원을 추가한다.
 - Non-goals:
-  - 상판(LeftPlate/RightPlate) 수정 안 함
-  - 인서트 보스(코너 원통 ⑥), 좌우 코너 기둥(⑤) 건드리지 않음
-  - 스위치 컷아웃·케이스 외형·틸트 등 나머지 형상 불변
-  - 파라메트릭 생성 스크립트 복원/재생성 안 함 (ADR-0001)
+  - PCB 재설계(`pcb/*.epro`)
+  - 파라메트릭 케이스 작업(다른 브랜치의 범위)
+  - 리셋 스위치 물리 배선 유지 — RP2040-Zero 온보드 BOOTSEL 버튼으로 대체(기존 파츠리스트의 리셋 스위치는 이번 작업 범위 밖)
+  - 2선 full-duplex 시리얼 전환 — 1선 half-duplex 유지 (ADR-0002)
+  - RGB LED(GP16 온보드 WS2812)·인코더 등 사용하지 않는 기능 추가
+  - GP26-29 예비 핀 활용(향후 확장용으로 비워둠)
 
 ## Source of truth
-- Glossary terms: keyboard-plate, Body, 부품 받침, 뒷변 받침, 부품 노출 홀 — `.forge/CONTEXT.md`
-- Related ADRs: `.forge/adr/0001-brep-direct-edit-no-source.md` (소스 부재 → B-rep 직접 편집)
-- 기준: 모든 높이는 케이스 내부 바닥면(FLOOR 상면 z=3mm) 위 돌출 높이. 단위 cm(Fusion API), print()로 출력.
-- Definition of Done: 좌우 Body 모두에서 아래 목표 z가 측정으로 확인되고, `fusion/left-body.stl`·`fusion/right-body.stl`이 갱신됨.
-  - 부품 받침(RP2040 패드 ① + TRRS 받침 ② + 앞 정렬 리브 ③) 상면 z=4mm (바닥 위 1mm 돌출)
-  - 뒷변 받침 ④: 떠있는 하우징(z=6~10) 제거 후 바닥 위 3mm 돌기(z=3~6)로 재정의
-  - USB-C·TRRS 노출 홀 중심 z=8 → 7mm (보드 1mm 하강에 연동, 1mm 내림)
+- Glossary terms: half(반쪽) — `.forge/CONTEXT.md`("각 반쪽은 독립된... 자체 RP2040 컨트롤러를 가지며, TRRS 시리얼로 연결된다")
+- Related ADRs: `.forge/adr/0002-split-serial-half-duplex.md`(1선 half-duplex 선택 이유)
+- 참고 자료(비-소스오브트루스, 레이아웃 범례용): `keylayout-left.json`/`keylayout-right.json`(새 6행 물리 키 배치·범례), `image/wiring-left.png`/`wiring-right.png`(새 6행 논리 행/열 연결)
+- 확정된 GPIO 핀 배치:
+  - Row pins(좌·우 공통, 6개): GP0 GP1 GP2 GP3 GP4 GP5
+  - Left col pins(7개): GP6 GP7 GP8 GP9 GP10 GP11 GP12
+  - Right col pins(9개): GP6 GP7 GP8 GP9 GP10 GP11 GP12 GP13 GP14
+  - Serial(TRRS, half-duplex, 좌·우 공통): GP15
+  - Diode direction: COL2ROW(기존 `gkey/config.h` 값 유지 가정 — 재배선 시 실제와 다르면 바로잡을 것)
+- Definition of Done:
+  - `gkey/rules.mk`: `MCU = RP2040`, `BOARD = GENERIC_RP_RP2040`, 적절한 `BOOTLOADER` 정의, `VIA_ENABLE = yes` 반영
+  - `gkey/config.h`: 위 GPIO 핀 배치로 `MATRIX_ROW_PINS`/`MATRIX_COL_PINS`(좌·우 각각)·`SOFT_SERIAL_PIN GP15` 갱신
+  - `gkey/gkey.h`의 `LAYOUT` 매크로가 좌 6행×7열/우 6행×9열 새 물리 키 배치를 반영
+  - `gkey/keymaps/default/keymap.c`: `_QWERTY` 베이스 레이어가 `keylayout-left.json`/`keylayout-right.json` 범례(ESC+F행, 양쪽 B키, 한/영 재배치, Caps→Fn)를 따르고, 기존 `_FN1`/`_FN2` 레이어 기능이 새 위치에 보존됨
+  - `qmk compile -kb gkey -km default` 성공, `.uf2` 산출물 생성 확인
+  - `gkey/keymaps/via/` 또는 VIA Design 탭용 `via.json` 키보드 정의 작성, 매트릭스/레이어 수가 실제 키맵과 일치
+  - (수동, 하드웨어 필요) 사용자가 실제 RP2040-Zero 2대에 플래싱 후 좌우 모든 키·레이어 전환 동작을 확인
 
 ## Work slices
-- [ ] S1. LeftBody 수정: 부품 받침 ①②③ 상면 z=4로 낮춤, 뒷변 받침 ④를 바닥 위 3mm 돌기(z=3~6)로 재구성, USB-C·TRRS 홀 중심 z=7로 이동 — 완료 기준: LeftBody 측정에서 받침 상면 z≈4, ④ z범위≈3~6, 두 홀 중심 z≈7, body 유효(단일 solid)
-- [ ] S2. RightBody에 미러 대칭으로 동일 적용 (depends: S1) — 완료 기준: RightBody 측정에서 S1과 동일한 목표 z 확인, body 유효
-- [ ] S3. body STL 재출력 (depends: S2) — 완료 기준: `fusion/left-body.stl`, `fusion/right-body.stl` 파일 mtime 갱신 및 정상 export
+- [ ] S1. `gkey/rules.mk`·`gkey/config.h`를 RP2040용으로 갱신 — MCU/BOARD/BOOTLOADER 설정, 확정된 GPIO 핀 배치로 매트릭스·시리얼 핀 정의, `VIA_ENABLE = yes` 추가 — 완료 기준: `qmk compile -kb gkey -km default`가 에러 없이 성공하고 `.uf2` 생성(이 시점 keymap.c는 임시로 매트릭스 크기만 맞춘 상태여도 무방)
+- [ ] S2. `gkey/gkey.h`의 `LAYOUT` 매크로를 좌 6행×7열/우 6행×9열 새 매트릭스로 재정의 (depends: S1) — 완료 기준: 매크로 인자 개수가 새 물리 키 개수와 일치하고 컴파일 성공
+- [ ] S3. `gkey/keymaps/default/keymap.c` 재작성 — `_QWERTY`는 `keylayout-left.json`/`keylayout-right.json` 범례를 따르고, `_FN1`·`_FN2`는 기존 기능을 새 위치에 재배치 (depends: S2) — 완료 기준: 3개 레이어 모두 새 `LAYOUT` 매크로 인자 개수와 일치, 컴파일 성공
+- [ ] S4. VIA 지원 추가 — `via.json` 키보드 정의 작성(VIA 스펙 https://www.caniusevia.com/docs/specification 준수) (depends: S3) — 완료 기준: `via.json`의 매트릭스 크기·레이어 수가 실제 키맵과 일치, VIA 앱 Design 탭 로드 시 파싱 에러 없음
+- [ ] S5. 최종 컴파일 확인 및 하드웨어 플래싱 안내 (depends: S4) — 완료 기준: `qmk compile` 최종 성공; 사용자가 실제 보드 2대에 플래싱 후 키 입력·레이어 전환을 확인(수동 UAT)

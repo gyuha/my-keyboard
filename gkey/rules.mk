@@ -3,9 +3,9 @@
 #   change to "no" to disable the options, or define them in the Makefile in
 #   the appropriate keymap folder that will get included automatically
 #
-MCU = atmega32u4
-
-BOOTLOADER = atmel-dfu
+MCU = RP2040
+BOARD = GENERIC_RP_RP2040
+BOOTLOADER = rp2040
 
 BOOTMAGIC_ENABLE = yes      # Virtual DIP switch configuration(+1000)
 MOUSEKEY_ENABLE = yes       # Mouse keys(+4700)
@@ -20,7 +20,9 @@ UNICODE_ENABLE = no         # Unicode
 BLUETOOTH_ENABLE = no       # Enable Bluetooth with the Adafruit EZ-Key HID
 RGBLIGHT_ENABLE = no        # Enable WS2812 RGB underlight. 
 SPLIT_KEYBOARD = yes
+SERIAL_DRIVER = vendor
 ENCODER_ENABLE = no
+VIA_ENABLE = yes
 
 # Do not enable SLEEP_LED_ENABLE. it uses the same timer as BACKLIGHT_ENABLE
 SLEEP_LED_ENABLE = no    # Breathing sleep LED during USB suspend
