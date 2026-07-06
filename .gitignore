@@ -1,2 +1,3 @@
 *.FCStd1
 freecad-mcp/
+freecad/__pycache__
