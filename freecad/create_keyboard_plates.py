@@ -1,3 +1,4 @@
+import math
 import os
 
 import FreeCAD as App
@@ -11,6 +12,10 @@ OUTER_MARGIN = 8.0
 CORNER_RADIUS = 5.0
 BODY_WALL_THICKNESS = 3.0
 BODY_HEIGHT = 18.0
+REST_SIDE_MARGIN = 6.0
+REST_REAR_MARGIN = 6.0
+REST_SLANT_WIDTH = 10.0
+REST_SLANT_ANGLE_DEG = 70.0
 M3_CLEARANCE_DIAMETER = 3.2
 M3_COUNTERSINK_DIAMETER = 6.0
 M3_COUNTERSINK_DEPTH = 1.5
@@ -131,6 +136,37 @@ def countersunk_m3_hole(x, y):
                                 M3_COUNTERSINK_DEPTH,
                                 App.Vector(x, y, PLATE_THICKNESS - M3_COUNTERSINK_DEPTH))
     return clearance.fuse(countersink)
+
+
+def build_tilt_rest(layout):
+    """Wedge rest under the body: flush with the front face, inset by the margins elsewhere.
+
+    Resting on the desk, the rear face tucks inward (under the body) at
+    REST_SLANT_ANGLE_DEG from the desk and is REST_SLANT_WIDTH wide, its top corner
+    sitting REST_REAR_MARGIN in front of the body rear face. The bottom tapers to
+    zero at the front edge."""
+    x_min = layout["x_min"] + REST_SIDE_MARGIN
+    x_max = layout["x_max"] - REST_SIDE_MARGIN
+    y_front = layout["y_min"]
+    y_rear = layout["y_max"] - REST_REAR_MARGIN
+    slant = math.radians(REST_SLANT_ANGLE_DEG)
+    depth = y_rear - y_front
+    # Typing tilt that lets the rear-face top corner meet the body bottom plane.
+    tilt = math.asin(REST_SLANT_WIDTH * math.sin(slant) / depth)
+    bottom_length = depth * math.cos(tilt) - REST_SLANT_WIDTH * math.cos(slant)
+    rear_bottom_y = y_front + bottom_length * math.cos(tilt)
+    rear_bottom_z = -BODY_HEIGHT - bottom_length * math.sin(tilt)
+    thickness = bottom_length * math.sin(tilt) + 1.0
+    slab = rounded_prism(x_min, y_front, x_max, y_rear, CORNER_RADIUS,
+                         thickness, -BODY_HEIGHT - thickness)
+    profile = [
+        App.Vector(x_min - 1.0, y_front, -BODY_HEIGHT),
+        App.Vector(x_min - 1.0, y_rear, -BODY_HEIGHT),
+        App.Vector(x_min - 1.0, rear_bottom_y, rear_bottom_z),
+    ]
+    section = Part.Face(Part.makePolygon(profile + [profile[0]]))
+    wedge = slab.common(section.extrude(App.Vector(x_max - x_min + 2.0, 0, 0)))
+    return wedge, math.degrees(tilt)
 
 
 def add_feature(document, name, label, shape, color, visible=True):
@@ -258,7 +294,9 @@ def build_body(document, side, layout, color, include_controller=False, usb_cent
         controller_object.addProperty("App::PropertyLength", "SeatDepth", "RP2040-Zero").SeatDepth = RP2040_SEAT_DEPTH
         controller_object.addProperty("App::PropertyString", "Orientation", "RP2040-Zero").Orientation = orientation
 
-    final_body = case_shell.multiFuse(bosses).cut(Part.makeCompound(body_cuts)).removeSplitter()
+    rest_wedge, rest_tilt = build_tilt_rest(layout)
+    final_body = case_shell.multiFuse(bosses + [rest_wedge]).cut(
+        Part.makeCompound(body_cuts)).removeSplitter()
 
     pocket_object = add_feature(document, side + "_M3_Insert_Pockets",
                                 side + " SPREDSERT M3x5 insert pockets",
@@ -274,6 +312,11 @@ def build_body(document, side, layout, color, include_controller=False, usb_cent
     body_object.addProperty("App::PropertyLength", "BodyHeight", "Body Parameters").BodyHeight = BODY_HEIGHT
     body_object.addProperty("App::PropertyLength", "BottomThickness", "Body Parameters").BottomThickness = BODY_WALL_THICKNESS
     body_object.addProperty("App::PropertyLength", "InsertBossDiameter", "Body Parameters").InsertBossDiameter = INSERT_BOSS_DIAMETER
+    body_object.addProperty("App::PropertyLength", "RestSlantWidth", "Tilt Rest").RestSlantWidth = REST_SLANT_WIDTH
+    body_object.addProperty("App::PropertyAngle", "RestSlantAngle", "Tilt Rest").RestSlantAngle = REST_SLANT_ANGLE_DEG
+    body_object.addProperty("App::PropertyLength", "RestSideMargin", "Tilt Rest").RestSideMargin = REST_SIDE_MARGIN
+    body_object.addProperty("App::PropertyLength", "RestRearMargin", "Tilt Rest").RestRearMargin = REST_REAR_MARGIN
+    body_object.addProperty("App::PropertyAngle", "RestTiltAngle", "Tilt Rest").RestTiltAngle = rest_tilt
     body_object.addProperty("App::PropertyString", "AssemblyNotes", "Documentation").AssemblyNotes = (
         "Open-top body: install four SPREDSERT M3x5 inserts from the top, then fasten the 4 mm plate "
         "with the matching M3x10 countersunk screws. A 2 mm relief below each insert prevents screw bottoming.")
@@ -293,7 +336,8 @@ for name, value in (("PlateThickness", PLATE_THICKNESS), ("Margin", OUTER_MARGIN
                     ("RP2040SeatDepth", RP2040_SEAT_DEPTH), ("USBOpeningWidth", USB_C_OPENING_WIDTH),
                     ("USBOpeningHeight", USB_C_OPENING_HEIGHT), ("USBBezelWidth", USB_C_BEZEL_WIDTH),
                     ("USBBezelHeight", USB_C_BEZEL_HEIGHT), ("USBBezelDepth", USB_C_BEZEL_DEPTH),
-                    ("USBEdgeOffset", USB_C_EDGE_OFFSET)):
+                    ("USBEdgeOffset", USB_C_EDGE_OFFSET), ("RestSideMargin", REST_SIDE_MARGIN),
+                    ("RestRearMargin", REST_REAR_MARGIN), ("RestSlantWidth", REST_SLANT_WIDTH)):
     parameters.addProperty("App::PropertyLength", name, "Dimensions")
     setattr(parameters, name, value)
 
@@ -330,3 +374,7 @@ document.saveAs(os.path.join(BASE_DIR, "keyboard_switch_plates.FCStd"))
 print("Created keyboard_switch_plates.FCStd")
 print("Left plate: %.2f x %.2f x %.2f mm" % (left_shape.BoundBox.XLength, left_shape.BoundBox.YLength, left_shape.BoundBox.ZLength))
 print("Right plate: %.2f x %.2f x %.2f mm" % (right_shape.BoundBox.XLength, right_shape.BoundBox.YLength, right_shape.BoundBox.ZLength))
+print("Left body: %.2f x %.2f x %.2f mm" % (left_body_shape.BoundBox.XLength, left_body_shape.BoundBox.YLength, left_body_shape.BoundBox.ZLength))
+print("Right body: %.2f x %.2f x %.2f mm" % (right_body_shape.BoundBox.XLength, right_body_shape.BoundBox.YLength, right_body_shape.BoundBox.ZLength))
+print("Rest tilt: left %.2f deg, right %.2f deg" % (
+    float(left_body_object.RestTiltAngle), float(right_body_object.RestTiltAngle)))
