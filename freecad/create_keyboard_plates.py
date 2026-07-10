@@ -18,6 +18,19 @@ SPREDSERT_M3_LOCATING_DIAMETER = 4.0
 SPREDSERT_M3_LENGTH = 5.0
 M3_SCREW_TIP_RELIEF = 2.0
 INSERT_BOSS_DIAMETER = 8.0
+RP2040_ZERO_LENGTH = 25.0
+RP2040_ZERO_WIDTH = 18.0
+RP2040_ZERO_PCB_THICKNESS = 1.6
+RP2040_SEAT_CLEARANCE = 0.6
+RP2040_SEAT_DEPTH = 1.0
+USB_C_OPENING_WIDTH = 10.0
+USB_C_OPENING_HEIGHT = 6.0
+USB_C_OPENING_RADIUS = 1.5
+USB_C_BEZEL_WIDTH = 14.0
+USB_C_BEZEL_HEIGHT = 10.0
+USB_C_BEZEL_RADIUS = 5.0
+USB_C_BEZEL_DEPTH = 1.0
+USB_C_EDGE_OFFSET = 37.0
 SCREW_CORNER_OFFSET = 4.3
 DISPLAY_GAP = 25.0
 TOLERANCE = 0.001
@@ -90,6 +103,26 @@ def rounded_plate(x_min, y_min, x_max, y_max):
     return rounded_prism(x_min, y_min, x_max, y_max, CORNER_RADIUS, PLATE_THICKNESS, 0)
 
 
+def rounded_slot_xz(x_min, y_min, z_min, width, height, radius, depth):
+    """Create a rounded rectangle in the XZ plane, extruded along positive Y."""
+    parts = []
+    if width - 2 * radius > TOLERANCE:
+        parts.append(Part.makeBox(width - 2 * radius, depth, height,
+                                  App.Vector(x_min + radius, y_min, z_min)))
+    if height - 2 * radius > TOLERANCE:
+        parts.append(Part.makeBox(width, depth, height - 2 * radius,
+                                  App.Vector(x_min, y_min, z_min + radius)))
+    centers = {
+        (x_min + radius, z_min + radius),
+        (x_min + width - radius, z_min + radius),
+        (x_min + radius, z_min + height - radius),
+        (x_min + width - radius, z_min + height - radius),
+    }
+    parts.extend(Part.makeCylinder(radius, depth, App.Vector(x, y_min, z), App.Vector(0, 1, 0))
+                 for x, z in centers)
+    return parts[0].multiFuse(parts[1:]).removeSplitter()
+
+
 def countersunk_m3_hole(x, y):
     clearance = Part.makeCylinder(M3_CLEARANCE_DIAMETER / 2, PLATE_THICKNESS,
                                   App.Vector(x, y, 0))
@@ -159,7 +192,8 @@ def build_plate(document, side, dxf_filename, color):
     }
 
 
-def build_body(document, side, layout, color):
+def build_body(document, side, layout, color, include_controller=False, usb_center_x=None,
+               usb_at_rear=True):
     x_min = layout["x_min"]
     y_min = layout["y_min"]
     x_max = layout["x_max"]
@@ -179,7 +213,52 @@ def build_body(document, side, layout, color):
                                         SPREDSERT_M3_LENGTH + M3_SCREW_TIP_RELIEF,
                                         App.Vector(x, y, -(SPREDSERT_M3_LENGTH + M3_SCREW_TIP_RELIEF)))
                       for x, y in layout["screw_locations"]]
-    final_body = case_shell.multiFuse(bosses).cut(Part.makeCompound(insert_pockets)).removeSplitter()
+    body_cuts = list(insert_pockets)
+
+    if include_controller:
+        if usb_center_x is None:
+            usb_center_x = (x_min + x_max) / 2
+        seat_width = RP2040_ZERO_WIDTH + 2 * RP2040_SEAT_CLEARANCE
+        seat_length = RP2040_ZERO_LENGTH + 2 * RP2040_SEAT_CLEARANCE
+        seat_x = usb_center_x - seat_width / 2
+        if usb_at_rear:
+            seat_y = y_min + BODY_WALL_THICKNESS
+            usb_y = y_min - 0.1
+            board_y = seat_y
+            orientation = "USB-C faces the rear edge"
+        else:
+            seat_y = y_max - BODY_WALL_THICKNESS - seat_length
+            usb_y = y_max - BODY_WALL_THICKNESS - 0.1
+            board_y = seat_y + seat_length - RP2040_ZERO_LENGTH
+            orientation = "USB-C faces the front edge"
+        seat_z = -cavity_height - RP2040_SEAT_DEPTH
+        controller_seat = Part.makeBox(seat_width, seat_length, RP2040_SEAT_DEPTH,
+                                       App.Vector(seat_x, seat_y, seat_z))
+        # USB-C sits at the back edge of the controller and is reached through the rear wall.
+        usb_opening = rounded_slot_xz(usb_center_x - USB_C_OPENING_WIDTH / 2, usb_y,
+                                      -BODY_HEIGHT + 2.0, USB_C_OPENING_WIDTH,
+                                      USB_C_OPENING_HEIGHT, USB_C_OPENING_RADIUS,
+                                      BODY_WALL_THICKNESS + 0.2)
+        bezel_y = usb_y if usb_at_rear else y_max - USB_C_BEZEL_DEPTH
+        usb_bezel = rounded_slot_xz(usb_center_x - USB_C_BEZEL_WIDTH / 2, bezel_y,
+                                    -BODY_HEIGHT,
+                                    USB_C_BEZEL_WIDTH, USB_C_BEZEL_HEIGHT,
+                                    USB_C_BEZEL_RADIUS, USB_C_BEZEL_DEPTH + 0.1)
+        body_cuts.extend((controller_seat, usb_opening, usb_bezel))
+        board_reference = Part.makeBox(RP2040_ZERO_WIDTH, RP2040_ZERO_LENGTH,
+                                       RP2040_ZERO_PCB_THICKNESS,
+                                       App.Vector(usb_center_x - RP2040_ZERO_WIDTH / 2,
+                                                  board_y,
+                                                  seat_z))
+        controller_object = add_feature(document, side + "_RP2040_Zero_Reference",
+                                        side + " RP2040-Zero board reference",
+                                        board_reference, (0.15, 0.60, 0.30), True)
+        controller_object.addProperty("App::PropertyLength", "BoardLength", "RP2040-Zero").BoardLength = RP2040_ZERO_LENGTH
+        controller_object.addProperty("App::PropertyLength", "BoardWidth", "RP2040-Zero").BoardWidth = RP2040_ZERO_WIDTH
+        controller_object.addProperty("App::PropertyLength", "SeatDepth", "RP2040-Zero").SeatDepth = RP2040_SEAT_DEPTH
+        controller_object.addProperty("App::PropertyString", "Orientation", "RP2040-Zero").Orientation = orientation
+
+    final_body = case_shell.multiFuse(bosses).cut(Part.makeCompound(body_cuts)).removeSplitter()
 
     pocket_object = add_feature(document, side + "_M3_Insert_Pockets",
                                 side + " SPREDSERT M3x5 insert pockets",
@@ -210,14 +289,22 @@ for name, value in (("PlateThickness", PLATE_THICKNESS), ("Margin", OUTER_MARGIN
                     ("M3CountersinkDiameter", M3_COUNTERSINK_DIAMETER),
                     ("M3CountersinkDepth", M3_COUNTERSINK_DEPTH),
                     ("SPREDSERTLocatingDiameter", SPREDSERT_M3_LOCATING_DIAMETER),
-                    ("SPREDSERTLength", SPREDSERT_M3_LENGTH), ("M3ScrewTipRelief", M3_SCREW_TIP_RELIEF)):
+                    ("SPREDSERTLength", SPREDSERT_M3_LENGTH), ("M3ScrewTipRelief", M3_SCREW_TIP_RELIEF),
+                    ("RP2040SeatDepth", RP2040_SEAT_DEPTH), ("USBOpeningWidth", USB_C_OPENING_WIDTH),
+                    ("USBOpeningHeight", USB_C_OPENING_HEIGHT), ("USBBezelWidth", USB_C_BEZEL_WIDTH),
+                    ("USBBezelHeight", USB_C_BEZEL_HEIGHT), ("USBBezelDepth", USB_C_BEZEL_DEPTH),
+                    ("USBEdgeOffset", USB_C_EDGE_OFFSET)):
     parameters.addProperty("App::PropertyLength", name, "Dimensions")
     setattr(parameters, name, value)
 
 left_object, left_shape, left_layout = build_plate(document, "Left", "left-switch.dxf", (0.86, 0.70, 0.20))
 right_object, right_shape, right_layout = build_plate(document, "Right", "right-switch.dxf", (0.25, 0.65, 0.85))
-left_body_object, left_body_shape = build_body(document, "Left", left_layout, (0.60, 0.35, 0.12))
-right_body_object, right_body_shape = build_body(document, "Right", right_layout, (0.12, 0.38, 0.60))
+left_body_object, left_body_shape = build_body(
+    document, "Left", left_layout, (0.60, 0.35, 0.12), True,
+    left_layout["x_max"] - USB_C_EDGE_OFFSET, False)
+right_body_object, right_body_shape = build_body(
+    document, "Right", right_layout, (0.12, 0.38, 0.60), True,
+    right_layout["x_min"] + USB_C_EDGE_OFFSET, False)
 
 # Both DXFs use a local origin. Move every right-side document object so the
 # two halves are visibly separate in FreeCAD while retaining their local STL geometry.
