@@ -49,6 +49,12 @@ TRS_JACK_STOP_THICKNESS = 3.0
 TRS_JACK_STOP_HEIGHT = 2.0
 TRS_JACK_STOP_CLEARANCE = 0.2
 SCREW_CORNER_OFFSET = 4.3
+PALM_REST_DEPTH = 80.0
+PALM_REST_REAR_HEIGHT = 25.0
+PALM_REST_FRONT_HEIGHT = 12.0
+PALM_REST_FLAT_DEPTH = 35.0
+PALM_REST_GAP = 5.0
+PALM_REST_FILLET_RADIUS = 3.0
 DISPLAY_GAP = 25.0
 TOLERANCE = 0.001
 
@@ -179,6 +185,44 @@ def build_tilt_rest(layout):
     section = Part.Face(Part.makePolygon(profile + [profile[0]]))
     wedge = slab.common(section.extrude(App.Vector(x_max - x_min + 2.0, 0, 0)))
     return wedge, math.degrees(tilt)
+
+
+def build_palm_rest(document, side, layout, color):
+    """Free-standing wedge palm rest in front of the body (user side, past y_min).
+
+    Flat bottom resting on the desk plane (z = -BODY_HEIGHT). A short flat shelf on
+    the keyboard side slopes down toward the user; all top edges are rounded."""
+    x_min = layout["x_min"]
+    x_max = layout["x_max"]
+    y_rear = layout["y_min"] - PALM_REST_GAP
+    y_front = y_rear - PALM_REST_DEPTH
+    z_base = -BODY_HEIGHT
+    slab = rounded_prism(x_min, y_front, x_max, y_rear, CORNER_RADIUS,
+                         PALM_REST_REAR_HEIGHT, z_base)
+    profile = [
+        App.Vector(x_min - 1.0, y_rear + 1.0, z_base),
+        App.Vector(x_min - 1.0, y_rear + 1.0, z_base + PALM_REST_REAR_HEIGHT),
+        App.Vector(x_min - 1.0, y_rear - PALM_REST_FLAT_DEPTH, z_base + PALM_REST_REAR_HEIGHT),
+        App.Vector(x_min - 1.0, y_front - 1.0, z_base + PALM_REST_FRONT_HEIGHT),
+        App.Vector(x_min - 1.0, y_front - 1.0, z_base),
+    ]
+    section = Part.Face(Part.makePolygon(profile + [profile[0]]))
+    wedge = slab.common(section.extrude(App.Vector(x_max - x_min + 2.0, 0, 0)))
+    top_edges = [edge for edge in wedge.Edges
+                 if min(vertex.Point.z for vertex in edge.Vertexes) >
+                 z_base + PALM_REST_FRONT_HEIGHT / 2]
+    wedge = wedge.makeFillet(PALM_REST_FILLET_RADIUS, top_edges).removeSplitter()
+    rest_object = add_feature(document, side + "_Palm_Rest", side + " palm rest wedge",
+                              wedge, color, True)
+    rest_object.addProperty("App::PropertyLength", "Depth", "Palm Rest").Depth = PALM_REST_DEPTH
+    rest_object.addProperty("App::PropertyLength", "RearHeight", "Palm Rest").RearHeight = PALM_REST_REAR_HEIGHT
+    rest_object.addProperty("App::PropertyLength", "FrontHeight", "Palm Rest").FrontHeight = PALM_REST_FRONT_HEIGHT
+    rest_object.addProperty("App::PropertyLength", "FlatDepth", "Palm Rest").FlatDepth = PALM_REST_FLAT_DEPTH
+    rest_object.addProperty("App::PropertyLength", "BodyGap", "Palm Rest").BodyGap = PALM_REST_GAP
+    rest_object.addProperty("App::PropertyString", "PrintNote", "Palm Rest").PrintNote = (
+        "Free-standing piece: place in front of the body with roughly a %.0f mm gap. "
+        "Print flat side down; no supports needed." % PALM_REST_GAP)
+    return rest_object, wedge
 
 
 def add_feature(document, name, label, shape, color, visible=True):
@@ -392,7 +436,10 @@ for name, value in (("PlateThickness", PLATE_THICKNESS), ("Margin", OUTER_MARGIN
                     ("RestRearMargin", REST_REAR_MARGIN), ("RestSlantWidth", REST_SLANT_WIDTH),
                     ("TRSJackEdgeOffset", TRS_JACK_EDGE_OFFSET),
                     ("TRSJackHoleDiameter", TRS_JACK_HOLE_DIAMETER),
-                    ("TRSJackAxisHeight", TRS_JACK_AXIS_HEIGHT)):
+                    ("TRSJackAxisHeight", TRS_JACK_AXIS_HEIGHT),
+                    ("PalmRestDepth", PALM_REST_DEPTH),
+                    ("PalmRestRearHeight", PALM_REST_REAR_HEIGHT),
+                    ("PalmRestFrontHeight", PALM_REST_FRONT_HEIGHT)):
     parameters.addProperty("App::PropertyLength", name, "Dimensions")
     setattr(parameters, name, value)
 
@@ -406,6 +453,8 @@ right_body_object, right_body_shape = build_body(
     document, "Right", right_layout, (0.12, 0.38, 0.60), True,
     right_layout["x_min"] + USB_C_EDGE_OFFSET, False,
     right_layout["x_min"] + TRS_JACK_EDGE_OFFSET)
+left_palm_object, left_palm_shape = build_palm_rest(document, "Left", left_layout, (0.13, 0.13, 0.13))
+right_palm_object, right_palm_shape = build_palm_rest(document, "Right", right_layout, (0.13, 0.13, 0.13))
 
 # Both DXFs use a local origin. Move every right-side document object so the
 # two halves are visibly separate in FreeCAD while retaining their local STL geometry.
@@ -426,6 +475,10 @@ Mesh.export([left_body_object], os.path.join(BASE_DIR, "left_keyboard_body.stl")
 right_body_object.Placement.Base = App.Vector(0, 0, 0)
 Mesh.export([right_body_object], os.path.join(BASE_DIR, "right_keyboard_body.stl"))
 right_body_object.Placement.Base = App.Vector(right_display_offset, 0, 0)
+Mesh.export([left_palm_object], os.path.join(BASE_DIR, "left_palm_rest.stl"))
+right_palm_object.Placement.Base = App.Vector(0, 0, 0)
+Mesh.export([right_palm_object], os.path.join(BASE_DIR, "right_palm_rest.stl"))
+right_palm_object.Placement.Base = App.Vector(right_display_offset, 0, 0)
 document.recompute()
 document.saveAs(os.path.join(BASE_DIR, "keyboard_switch_plates.FCStd"))
 print("Created keyboard_switch_plates.FCStd")
@@ -439,3 +492,7 @@ print("PJ-322 jack hole: dia %.2f mm, center z %.2f, left x=%.2f, right x=%.2f (
     TRS_JACK_HOLE_DIAMETER, -BODY_HEIGHT + TRS_JACK_AXIS_HEIGHT,
     left_layout["x_max"] - TRS_JACK_EDGE_OFFSET,
     right_layout["x_min"] + TRS_JACK_EDGE_OFFSET))
+print("Left palm rest: %.2f x %.2f x %.2f mm" % (
+    left_palm_shape.BoundBox.XLength, left_palm_shape.BoundBox.YLength, left_palm_shape.BoundBox.ZLength))
+print("Right palm rest: %.2f x %.2f x %.2f mm" % (
+    right_palm_shape.BoundBox.XLength, right_palm_shape.BoundBox.YLength, right_palm_shape.BoundBox.ZLength))
