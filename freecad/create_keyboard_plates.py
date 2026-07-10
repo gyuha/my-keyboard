@@ -36,6 +36,14 @@ USB_C_BEZEL_HEIGHT = 10.0
 USB_C_BEZEL_RADIUS = 5.0
 USB_C_BEZEL_DEPTH = 1.0
 USB_C_EDGE_OFFSET = 37.0
+TRS_JACK_EDGE_OFFSET = 17.5
+TRS_JACK_HOLE_DIAMETER = 6.5
+TRS_JACK_AXIS_HEIGHT = 6.5
+TRS_JACK_BODY_LENGTH = 15.0
+TRS_JACK_BODY_WIDTH = 9.0
+TRS_JACK_BODY_HEIGHT = 7.0
+TRS_JACK_NOSE_DIAMETER = 5.0
+TRS_JACK_NOSE_LENGTH = 2.0
 SCREW_CORNER_OFFSET = 4.3
 DISPLAY_GAP = 25.0
 TOLERANCE = 0.001
@@ -229,7 +237,7 @@ def build_plate(document, side, dxf_filename, color):
 
 
 def build_body(document, side, layout, color, include_controller=False, usb_center_x=None,
-               usb_at_rear=True):
+               usb_at_rear=True, jack_center_x=None):
     x_min = layout["x_min"]
     y_min = layout["y_min"]
     x_max = layout["x_max"]
@@ -294,6 +302,34 @@ def build_body(document, side, layout, color, include_controller=False, usb_cent
         controller_object.addProperty("App::PropertyLength", "SeatDepth", "RP2040-Zero").SeatDepth = RP2040_SEAT_DEPTH
         controller_object.addProperty("App::PropertyString", "Orientation", "RP2040-Zero").Orientation = orientation
 
+    if jack_center_x is not None:
+        # PJ-322 plug axis: jack body resting on the cavity floor, entry through the rear wall.
+        jack_z = -BODY_HEIGHT + TRS_JACK_AXIS_HEIGHT
+        jack_hole = Part.makeCylinder(TRS_JACK_HOLE_DIAMETER / 2, BODY_WALL_THICKNESS + 0.2,
+                                      App.Vector(jack_center_x, y_max - BODY_WALL_THICKNESS - 0.1, jack_z),
+                                      App.Vector(0, 1, 0))
+        body_cuts.append(jack_hole)
+        jack_body = Part.makeBox(TRS_JACK_BODY_WIDTH,
+                                 TRS_JACK_BODY_LENGTH - TRS_JACK_NOSE_LENGTH,
+                                 TRS_JACK_BODY_HEIGHT,
+                                 App.Vector(jack_center_x - TRS_JACK_BODY_WIDTH / 2,
+                                            y_max - BODY_WALL_THICKNESS - (TRS_JACK_BODY_LENGTH - TRS_JACK_NOSE_LENGTH),
+                                            jack_z - TRS_JACK_BODY_HEIGHT / 2))
+        jack_nose = Part.makeCylinder(TRS_JACK_NOSE_DIAMETER / 2, TRS_JACK_NOSE_LENGTH,
+                                      App.Vector(jack_center_x, y_max - BODY_WALL_THICKNESS, jack_z),
+                                      App.Vector(0, 1, 0))
+        jack_object = add_feature(document, side + "_PJ322_Jack_Reference",
+                                  side + " PJ-322 3.5 mm TRS jack reference",
+                                  jack_body.fuse(jack_nose), (0.75, 0.65, 0.15), True)
+        jack_object.addProperty("App::PropertyString", "Part", "PJ-322").Part = (
+            "PJ-322 3.5 mm stereo jack, 5-pin DIP (Devicemart 1067728)")
+        jack_object.addProperty("App::PropertyLength", "HoleDiameter", "PJ-322").HoleDiameter = TRS_JACK_HOLE_DIAMETER
+        jack_object.addProperty("App::PropertyLength", "EdgeOffset", "PJ-322").EdgeOffset = TRS_JACK_EDGE_OFFSET
+        jack_object.addProperty("App::PropertyLength", "AxisHeight", "PJ-322").AxisHeight = TRS_JACK_AXIS_HEIGHT
+        jack_object.addProperty("App::PropertyString", "MountingNote", "PJ-322").MountingNote = (
+            "Rest the jack on the cavity floor with the DIP pins facing up, nose tucked into the "
+            "rear-wall hole; solder the link wires, then fix the body with adhesive.")
+
     rest_wedge, rest_tilt = build_tilt_rest(layout)
     final_body = case_shell.multiFuse(bosses + [rest_wedge]).cut(
         Part.makeCompound(body_cuts)).removeSplitter()
@@ -337,7 +373,10 @@ for name, value in (("PlateThickness", PLATE_THICKNESS), ("Margin", OUTER_MARGIN
                     ("USBOpeningHeight", USB_C_OPENING_HEIGHT), ("USBBezelWidth", USB_C_BEZEL_WIDTH),
                     ("USBBezelHeight", USB_C_BEZEL_HEIGHT), ("USBBezelDepth", USB_C_BEZEL_DEPTH),
                     ("USBEdgeOffset", USB_C_EDGE_OFFSET), ("RestSideMargin", REST_SIDE_MARGIN),
-                    ("RestRearMargin", REST_REAR_MARGIN), ("RestSlantWidth", REST_SLANT_WIDTH)):
+                    ("RestRearMargin", REST_REAR_MARGIN), ("RestSlantWidth", REST_SLANT_WIDTH),
+                    ("TRSJackEdgeOffset", TRS_JACK_EDGE_OFFSET),
+                    ("TRSJackHoleDiameter", TRS_JACK_HOLE_DIAMETER),
+                    ("TRSJackAxisHeight", TRS_JACK_AXIS_HEIGHT)):
     parameters.addProperty("App::PropertyLength", name, "Dimensions")
     setattr(parameters, name, value)
 
@@ -345,10 +384,12 @@ left_object, left_shape, left_layout = build_plate(document, "Left", "left-switc
 right_object, right_shape, right_layout = build_plate(document, "Right", "right-switch.dxf", (0.25, 0.65, 0.85))
 left_body_object, left_body_shape = build_body(
     document, "Left", left_layout, (0.60, 0.35, 0.12), True,
-    left_layout["x_max"] - USB_C_EDGE_OFFSET, False)
+    left_layout["x_max"] - USB_C_EDGE_OFFSET, False,
+    left_layout["x_max"] - TRS_JACK_EDGE_OFFSET)
 right_body_object, right_body_shape = build_body(
     document, "Right", right_layout, (0.12, 0.38, 0.60), True,
-    right_layout["x_min"] + USB_C_EDGE_OFFSET, False)
+    right_layout["x_min"] + USB_C_EDGE_OFFSET, False,
+    right_layout["x_min"] + TRS_JACK_EDGE_OFFSET)
 
 # Both DXFs use a local origin. Move every right-side document object so the
 # two halves are visibly separate in FreeCAD while retaining their local STL geometry.
@@ -378,3 +419,7 @@ print("Left body: %.2f x %.2f x %.2f mm" % (left_body_shape.BoundBox.XLength, le
 print("Right body: %.2f x %.2f x %.2f mm" % (right_body_shape.BoundBox.XLength, right_body_shape.BoundBox.YLength, right_body_shape.BoundBox.ZLength))
 print("Rest tilt: left %.2f deg, right %.2f deg" % (
     float(left_body_object.RestTiltAngle), float(right_body_object.RestTiltAngle)))
+print("PJ-322 jack hole: dia %.2f mm, center z %.2f, left x=%.2f, right x=%.2f (local coords)" % (
+    TRS_JACK_HOLE_DIAMETER, -BODY_HEIGHT + TRS_JACK_AXIS_HEIGHT,
+    left_layout["x_max"] - TRS_JACK_EDGE_OFFSET,
+    right_layout["x_min"] + TRS_JACK_EDGE_OFFSET))
