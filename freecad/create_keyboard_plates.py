@@ -7,7 +7,7 @@ import Mesh
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PLATE_THICKNESS = 4.0
-OUTER_MARGIN = 7.0
+OUTER_MARGIN = 8.0
 CORNER_RADIUS = 5.0
 M3_CLEARANCE_DIAMETER = 3.2
 M3_COUNTERSINK_DIAMETER = 6.0
@@ -139,7 +139,7 @@ def build_plate(document, side, dxf_filename, color):
     plate_object = add_feature(document, side + "_Switch_Plate", side + " finished 4 mm switch plate",
                                final_shape, color, True)
     plate_object.addProperty("App::PropertyString", "DesignNotes", "Documentation").DesignNotes = (
-        "Central switch array only; original DXF perimeter excluded. 7 mm margin, R5 corners, "
+        "Central switch array only; original DXF perimeter excluded. %.1f mm margin, R5 corners, " % OUTER_MARGIN +
         "four M3x10 countersunk mounting holes (3.2 mm clearance, 6.0 mm top countersink).")
     return plate_object, final_shape
 
