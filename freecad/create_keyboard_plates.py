@@ -44,6 +44,10 @@ TRS_JACK_BODY_WIDTH = 9.0
 TRS_JACK_BODY_HEIGHT = 7.0
 TRS_JACK_NOSE_DIAMETER = 5.0
 TRS_JACK_NOSE_LENGTH = 2.0
+TRS_JACK_STOP_WIDTH = 12.0
+TRS_JACK_STOP_THICKNESS = 3.0
+TRS_JACK_STOP_HEIGHT = 2.0
+TRS_JACK_STOP_CLEARANCE = 0.2
 SCREW_CORNER_OFFSET = 4.3
 DISPLAY_GAP = 25.0
 TOLERANCE = 0.001
@@ -258,6 +262,7 @@ def build_body(document, side, layout, color, include_controller=False, usb_cent
                                         App.Vector(x, y, -(SPREDSERT_M3_LENGTH + M3_SCREW_TIP_RELIEF)))
                       for x, y in layout["screw_locations"]]
     body_cuts = list(insert_pockets)
+    body_fuses = []
 
     if include_controller:
         if usb_center_x is None:
@@ -309,12 +314,19 @@ def build_body(document, side, layout, color, include_controller=False, usb_cent
                                       App.Vector(jack_center_x, y_max - BODY_WALL_THICKNESS - 0.1, jack_z),
                                       App.Vector(0, 1, 0))
         body_cuts.append(jack_hole)
+        jack_inner_y = y_max - BODY_WALL_THICKNESS - (TRS_JACK_BODY_LENGTH - TRS_JACK_NOSE_LENGTH)
         jack_body = Part.makeBox(TRS_JACK_BODY_WIDTH,
                                  TRS_JACK_BODY_LENGTH - TRS_JACK_NOSE_LENGTH,
                                  TRS_JACK_BODY_HEIGHT,
                                  App.Vector(jack_center_x - TRS_JACK_BODY_WIDTH / 2,
-                                            y_max - BODY_WALL_THICKNESS - (TRS_JACK_BODY_LENGTH - TRS_JACK_NOSE_LENGTH),
+                                            jack_inner_y,
                                             jack_z - TRS_JACK_BODY_HEIGHT / 2))
+        # Floor backstop behind the jack body: takes the plug-insertion push toward the cavity.
+        jack_stop = Part.makeBox(TRS_JACK_STOP_WIDTH, TRS_JACK_STOP_THICKNESS, TRS_JACK_STOP_HEIGHT,
+                                 App.Vector(jack_center_x - TRS_JACK_STOP_WIDTH / 2,
+                                            jack_inner_y - TRS_JACK_STOP_CLEARANCE - TRS_JACK_STOP_THICKNESS,
+                                            -cavity_height))
+        body_fuses.append(jack_stop)
         jack_nose = Part.makeCylinder(TRS_JACK_NOSE_DIAMETER / 2, TRS_JACK_NOSE_LENGTH,
                                       App.Vector(jack_center_x, y_max - BODY_WALL_THICKNESS, jack_z),
                                       App.Vector(0, 1, 0))
@@ -326,12 +338,16 @@ def build_body(document, side, layout, color, include_controller=False, usb_cent
         jack_object.addProperty("App::PropertyLength", "HoleDiameter", "PJ-322").HoleDiameter = TRS_JACK_HOLE_DIAMETER
         jack_object.addProperty("App::PropertyLength", "EdgeOffset", "PJ-322").EdgeOffset = TRS_JACK_EDGE_OFFSET
         jack_object.addProperty("App::PropertyLength", "AxisHeight", "PJ-322").AxisHeight = TRS_JACK_AXIS_HEIGHT
+        jack_object.addProperty("App::PropertyLength", "StopThickness", "PJ-322").StopThickness = TRS_JACK_STOP_THICKNESS
+        jack_object.addProperty("App::PropertyLength", "StopHeight", "PJ-322").StopHeight = TRS_JACK_STOP_HEIGHT
+        jack_object.addProperty("App::PropertyLength", "StopClearance", "PJ-322").StopClearance = TRS_JACK_STOP_CLEARANCE
         jack_object.addProperty("App::PropertyString", "MountingNote", "PJ-322").MountingNote = (
             "Rest the jack on the cavity floor with the DIP pins facing up, nose tucked into the "
-            "rear-wall hole; solder the link wires, then fix the body with adhesive.")
+            "rear-wall hole; the floor backstop behind the body takes the plug-insertion push. "
+            "Solder the link wires, then tack the body with adhesive.")
 
     rest_wedge, rest_tilt = build_tilt_rest(layout)
-    final_body = case_shell.multiFuse(bosses + [rest_wedge]).cut(
+    final_body = case_shell.multiFuse(bosses + body_fuses + [rest_wedge]).cut(
         Part.makeCompound(body_cuts)).removeSplitter()
 
     pocket_object = add_feature(document, side + "_M3_Insert_Pockets",
