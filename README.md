@@ -76,7 +76,37 @@
 |         ![switch](image/parts/switch.jpg)         | 스위치                           |  2   | 펌웨어 업데이트용 리셋 스위치                | [연결](https://www.devicemart.co.kr/goods/view?no=34555)               |
 |                                                   | 납땜 재료                        |  -   | 인두기, 납, 인두기 스탠드 등등               |                                                                        |
 
-### 프로마이크로 핀
+### RP2040-Zero 핀 배치
+
+행(ROW) 핀은 좌우 공통이고, 열(COL) 핀은 우측이 2열(GP13, GP14) 더 많습니다.
+TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
+
+| RP2040-Zero 핀 | 좌측 보드 | 우측 보드 |
+| :------------: | :-------: | :-------: |
+|      GP0       |   ROW 0   |   ROW 0   |
+|      GP1       |   ROW 1   |   ROW 1   |
+|      GP2       |   ROW 2   |   ROW 2   |
+|      GP3       |   ROW 3   |   ROW 3   |
+|      GP4       |   ROW 4   |   ROW 4   |
+|      GP5       |   ROW 5   |   ROW 5   |
+|      GP6       |   COL 0   |   COL 0   |
+|      GP7       |   COL 1   |   COL 1   |
+|      GP8       |   COL 2   |   COL 2   |
+|      GP9       |   COL 3   |   COL 3   |
+|      GP10      |   COL 4   |   COL 4   |
+|      GP11      |   COL 5   |   COL 5   |
+|      GP12      |   COL 6   |   COL 6   |
+|      GP13      |     —     |   COL 7   |
+|      GP14      |     —     |   COL 8   |
+|      GP15      | TRRS 시리얼 | TRRS 시리얼 |
+|       5V       | TRRS VCC  | TRRS VCC  |
+|      GND       | TRRS GND  | TRRS GND  |
+
+- 다이오드 방향: `COL2ROW`
+- USB는 우측 보드에 연결합니다(`MASTER_RIGHT`). 좌측은 TRRS로만 연결됩니다.
+- 펌웨어 정의: `gkey/config.h`의 `MATRIX_ROW_PINS` / `MATRIX_COL_PINS` / `SERIAL_USART_TX_PIN`
+
+### 프로마이크로 핀 (구버전)
 
 ![PIN](https://github.com/gyuha/my-keyboard/raw/main/kbfirmware/pin.png?raw=true)
 
