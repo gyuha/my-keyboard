@@ -126,6 +126,27 @@ TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
 
 # QMK
 
+## QMK 설치
+
+macOS 기준입니다. Homebrew로 QMK CLI를 설치하고 `qmk setup`으로 초기화합니다.
+
+```bash
+brew install qmk
+qmk setup
+```
+
+`qmk setup`을 하면 홈 폴더에 `qmk_firmware` 폴더가 생깁니다.
+
+### ARM 툴체인 (RP2040 필수)
+
+RP2040은 ARM 툴체인으로 빌드합니다. 그런데 Homebrew의 `arm-none-eabi-gcc`(16.1.0 기준)는 newlib이 빠져 있어서 `fatal error: stdint.h: No such file or directory`로 컴파일이 실패합니다. ARM 공식 툴체인을 설치해야 합니다.
+
+```bash
+brew install --cask gcc-arm-embedded
+```
+
+설치 경로는 `/Applications/ArmGNUToolchain/<버전>/arm-none-eabi/bin` 입니다(예: `15.2.rel1`). 컴파일할 때 이 경로를 PATH 앞에 두면 됩니다(아래 참고). brew의 `arm-none-eabi-gcc`는 지우지 않아도 PATH 우선순위로 우회됩니다.
+
 ## 소스 연결 하기
 
 qmk를 설치하고 나면 qmk_firmware라는 폴더가 생기고, 그 안에 있는 `keyboards` 폴더에 소스 파일을 넣어 주고 컴파일을 해야 합니다.
@@ -137,17 +158,28 @@ ln -snf $HOME/qmk_firmware/keyboards/gkey `pwd`/gkey
 
 ## 컴파일 하기
 
+RP2040은 `.uf2` 파일로 빌드됩니다. ARM 공식 툴체인을 PATH 앞에 두고 컴파일합니다.
+
 ```bash
-qmk compile -kb gkey -km default
+cd $HOME/qmk_firmware
+PATH="/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/bin:$PATH" qmk compile -kb gkey -km default
 ```
 
-컴파일 한 output 파일은 `$HOME/qmk_firmware/.build` 폴더에 복사 됩니다.
+컴파일 결과 `gkey_default.uf2`가 `$HOME/qmk_firmware/.build` 폴더에 생성됩니다.
 
-`gkey_default.hex` 파일을 QMK Toolbox를 이용해서  아두이노에 넣어 주시면 됩니다.
+## 플래시 (RP2040-Zero)
 
-아두이도 프로 마이크로의 펌웨어를 업데이트 하기 전에는 보드의 `리셋(13)`과 `그라운드(GND)`를 같이 눌러주고 펌웨어를 올리시면 됩니다.
+1. RP2040-Zero의 `BOOTSEL` 버튼을 누른 채 USB를 연결하면 `RPI-RP2` 이름의 저장장치로 마운트됩니다.
+2. `gkey_default.uf2` 파일을 `RPI-RP2`에 드래그하면 자동으로 재부팅되며 펌웨어가 적용됩니다.
+3. 좌·우 두 보드를 각각 BOOTSEL로 연결해 같은 `.uf2`를 플래시합니다. (사용 시 USB는 우측 보드에 연결 — `MASTER_RIGHT`)
 
 여기까지 했으면 조립해서 사용하시면 됩니다.
+
+### 플래시 (구버전 / 프로마이크로)
+
+> ATmega32u4(프로마이크로) 기반 구버전용 방법입니다. 현행 RP2040 보드에는 해당하지 않습니다.
+
+구버전에서는 `gkey_default.hex` 파일을 QMK Toolbox로 프로마이크로에 올립니다. 펌웨어 업데이트 전에는 보드의 `리셋`과 `그라운드(GND)`를 같이 눌러 부트로더로 진입시킵니다.
 
 # 참고 사이트
 
