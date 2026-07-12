@@ -445,10 +445,12 @@ for name, value in (("PlateThickness", PLATE_THICKNESS), ("Margin", OUTER_MARGIN
 
 left_object, left_shape, left_layout = build_plate(document, "Left", "left-switch.dxf", (0.86, 0.70, 0.20))
 right_object, right_shape, right_layout = build_plate(document, "Right", "right-switch.dxf", (0.25, 0.65, 0.85))
+# Left half is the TRRS slave (MASTER_RIGHT firmware): no controller seat or
+# USB opening; the RP2040-Zero is placed freely and flashing needs the case
+# open anyway (BOOTSEL button access).
 left_body_object, left_body_shape = build_body(
-    document, "Left", left_layout, (0.60, 0.35, 0.12), True,
-    left_layout["x_max"] - USB_C_EDGE_OFFSET, False,
-    left_layout["x_max"] - TRS_JACK_EDGE_OFFSET)
+    document, "Left", left_layout, (0.60, 0.35, 0.12),
+    jack_center_x=left_layout["x_max"] - TRS_JACK_EDGE_OFFSET)
 right_body_object, right_body_shape = build_body(
     document, "Right", right_layout, (0.12, 0.38, 0.60), True,
     right_layout["x_min"] + USB_C_EDGE_OFFSET, False,

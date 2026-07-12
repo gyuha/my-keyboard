@@ -1,6 +1,6 @@
 # keyboard-plate (분할 키보드 케이스)
 
-Fusion 360에서 파라메트릭하게 생성하는 3D 프린팅용 분할 키보드 케이스. 이전에는 FreeCAD(`freecad/make_keyboard.py`)로 만들었으나 현재 작업은 Fusion 360으로 이관됐다.
+3D 프린팅용 분할 키보드 케이스. 현재 활성 모델은 FreeCAD 파라메트릭 스크립트(`freecad/create_keyboard_plates.py`)가 생성한다. Fusion 360 모델(keyboard-plate v9)은 이전 세대 작업물이다.
 
 ## Language
 
@@ -17,7 +17,7 @@ _Avoid_: 케이스, 하판
 _Avoid_: 커버, 뚜껑
 
 **부품 받침 (Part mount)**:
-Body 바닥에서 솟아 RP2040 보드·TRRS 소켓 등 부품이 안착하는 돌출 패드와 그 앞 정렬 리브. [[뒷변 받침]]과 구분된다.
+Body 바닥에서 RP2040 보드·TRRS 소켓 등 부품이 안착·정렬되는 자리. 형태는 모델 세대에 따라 다르다 — Fusion 모델에서는 돌출 패드+정렬 리브, 현행 FreeCAD 모델에서는 바닥을 파낸 리세스 시트. [[뒷변 받침]]과 구분된다.
 _Avoid_: 포스트, 스탠드오프
 
 **뒷변 받침 (Rear-edge mount)**:
