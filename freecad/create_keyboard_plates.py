@@ -49,6 +49,9 @@ TRS_JACK_STOP_THICKNESS = 3.0
 TRS_JACK_STOP_HEIGHT = 2.0
 TRS_JACK_STOP_CLEARANCE = 0.2
 SCREW_CORNER_OFFSET = 4.3
+STAB_CLIP_PLATE_THICKNESS = 1.4
+STAB_CLIP_LEDGE_WIDTH = 1.2
+STAB_CUTOUT_MAX_WIDTH = 5.0
 PALM_REST_DEPTH = 80.0
 PALM_REST_REAR_HEIGHT = 25.0
 PALM_REST_FRONT_HEIGHT = 12.0
@@ -255,7 +258,23 @@ def build_plate(document, side, dxf_filename, color):
         (x_max - SCREW_CORNER_OFFSET, y_max - SCREW_CORNER_OFFSET),
     ]
     screw_voids = [countersunk_m3_hole(x, y) for x, y in screw_locations]
-    final_shape = outline.cut(Part.makeCompound(key_voids + screw_voids)).removeSplitter()
+    # Plate-mount stabilizer clips need a 1.4 mm plate; relieve the underside on the
+    # top/bottom edges of each narrow stabilizer cutout so the clip can latch.
+    stab_pocket_depth = PLATE_THICKNESS - STAB_CLIP_PLATE_THICKNESS
+    stab_pockets = []
+    for wire in key_wires:
+        wire_bounds = wire.BoundBox
+        if min(wire_bounds.XLength, wire_bounds.YLength) > STAB_CUTOUT_MAX_WIDTH:
+            continue
+        stab_pockets.append(Part.makeBox(wire_bounds.XLength, STAB_CLIP_LEDGE_WIDTH,
+                                         stab_pocket_depth,
+                                         App.Vector(wire_bounds.XMin, wire_bounds.YMax, 0)))
+        stab_pockets.append(Part.makeBox(wire_bounds.XLength, STAB_CLIP_LEDGE_WIDTH,
+                                         stab_pocket_depth,
+                                         App.Vector(wire_bounds.XMin,
+                                                    wire_bounds.YMin - STAB_CLIP_LEDGE_WIDTH, 0)))
+    final_shape = outline.cut(
+        Part.makeCompound(key_voids + screw_voids + stab_pockets)).removeSplitter()
 
     outline_object = add_feature(document, side + "_Plate_Outline", side + " plate outline (R5)", outline,
                                  (0.75, 0.75, 0.75), False)
@@ -270,6 +289,17 @@ def build_plate(document, side, dxf_filename, color):
     holes_object.addProperty("App::PropertyLength", "ClearanceDiameter", "M3 Countersink").ClearanceDiameter = M3_CLEARANCE_DIAMETER
     holes_object.addProperty("App::PropertyLength", "CountersinkDiameter", "M3 Countersink").CountersinkDiameter = M3_COUNTERSINK_DIAMETER
     holes_object.addProperty("App::PropertyLength", "CountersinkDepth", "M3 Countersink").CountersinkDepth = M3_COUNTERSINK_DEPTH
+    if stab_pockets:
+        stab_object = add_feature(document, side + "_Stab_Clip_Pockets",
+                                  side + " stabilizer clip pockets",
+                                  Part.makeCompound(stab_pockets), (0.90, 0.55, 0.20), False)
+        stab_object.addProperty("App::PropertyLength", "LedgeThickness", "Stabilizer Clip").LedgeThickness = STAB_CLIP_PLATE_THICKNESS
+        stab_object.addProperty("App::PropertyLength", "LedgeWidth", "Stabilizer Clip").LedgeWidth = STAB_CLIP_LEDGE_WIDTH
+        stab_object.addProperty("App::PropertyLength", "PocketDepth", "Stabilizer Clip").PocketDepth = stab_pocket_depth
+        stab_object.addProperty("App::PropertyString", "DesignNotes", "Stabilizer Clip").DesignNotes = (
+            "Underside relief on the top/bottom edges of each stabilizer cutout: %.1f mm wide, "
+            "leaving a %.1f mm ledge at the plate top so plate-mount stabilizer clips can latch."
+            % (STAB_CLIP_LEDGE_WIDTH, STAB_CLIP_PLATE_THICKNESS))
     plate_object = add_feature(document, side + "_Switch_Plate", side + " finished 4 mm switch plate",
                                final_shape, color, True)
     plate_object.addProperty("App::PropertyString", "DesignNotes", "Documentation").DesignNotes = (
@@ -439,7 +469,9 @@ for name, value in (("PlateThickness", PLATE_THICKNESS), ("Margin", OUTER_MARGIN
                     ("TRSJackAxisHeight", TRS_JACK_AXIS_HEIGHT),
                     ("PalmRestDepth", PALM_REST_DEPTH),
                     ("PalmRestRearHeight", PALM_REST_REAR_HEIGHT),
-                    ("PalmRestFrontHeight", PALM_REST_FRONT_HEIGHT)):
+                    ("PalmRestFrontHeight", PALM_REST_FRONT_HEIGHT),
+                    ("StabClipPlateThickness", STAB_CLIP_PLATE_THICKNESS),
+                    ("StabClipLedgeWidth", STAB_CLIP_LEDGE_WIDTH)):
     parameters.addProperty("App::PropertyLength", name, "Dimensions")
     setattr(parameters, name, value)
 
