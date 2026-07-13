@@ -28,6 +28,8 @@ RP2040_ZERO_WIDTH = 18.0
 RP2040_ZERO_PCB_THICKNESS = 1.6
 RP2040_SEAT_CLEARANCE = 0.6
 RP2040_SEAT_DEPTH = 1.0
+RP2040_STOP_THICKNESS = 3.0
+RP2040_STOP_HEIGHT = 2.0
 USB_C_OPENING_WIDTH = 10.0
 USB_C_OPENING_HEIGHT = 6.0
 USB_C_OPENING_RADIUS = 1.5
@@ -380,6 +382,18 @@ def build_body(document, side, layout, color, include_controller=False, usb_cent
         controller_object.addProperty("App::PropertyLength", "BoardWidth", "RP2040-Zero").BoardWidth = RP2040_ZERO_WIDTH
         controller_object.addProperty("App::PropertyLength", "SeatDepth", "RP2040-Zero").SeatDepth = RP2040_SEAT_DEPTH
         controller_object.addProperty("App::PropertyString", "Orientation", "RP2040-Zero").Orientation = orientation
+        # Floor backstop behind the board's non-USB end, mirroring the PJ-322 jack
+        # stop: a rib fused to the cavity floor that backs the controller's rear edge
+        # (same 2 mm height as the audio jack backstop).
+        stop_width = RP2040_ZERO_WIDTH
+        stop_y = (seat_y + seat_length if usb_at_rear
+                  else seat_y - RP2040_STOP_THICKNESS)
+        controller_stop = Part.makeBox(stop_width, RP2040_STOP_THICKNESS, RP2040_STOP_HEIGHT,
+                                       App.Vector(usb_center_x - stop_width / 2, stop_y,
+                                                  -cavity_height))
+        body_fuses.append(controller_stop)
+        controller_object.addProperty("App::PropertyLength", "StopThickness", "RP2040-Zero").StopThickness = RP2040_STOP_THICKNESS
+        controller_object.addProperty("App::PropertyLength", "StopHeight", "RP2040-Zero").StopHeight = RP2040_STOP_HEIGHT
 
     if jack_center_x is not None:
         # PJ-322 plug axis: jack body resting on the cavity floor, entry through the rear wall.
