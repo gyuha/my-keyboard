@@ -50,7 +50,6 @@ TRS_JACK_STOP_WIDTH = 12.0
 TRS_JACK_STOP_THICKNESS = 3.0
 TRS_JACK_STOP_HEIGHT = 2.0
 TRS_JACK_STOP_CLEARANCE = 0.2
-SCREW_CORNER_OFFSET = 4.3
 STAB_CLIP_PLATE_THICKNESS = 1.4
 STAB_CLIP_LEDGE_WIDTH = 1.2
 STAB_CUTOUT_MAX_WIDTH = 5.0
@@ -61,6 +60,15 @@ PALM_REST_FLAT_DEPTH = 35.0
 PALM_REST_GAP = 5.0
 PALM_REST_FILLET_RADIUS = 3.0
 DISPLAY_GAP = 25.0
+MAIN_PCB_THICKNESS = 1.6
+MX_PLATE_TO_PCB = 5.0
+PCB_SEAT_CLEARANCE = 0.3
+PCB_LEDGE_WIDTH = 1.5
+BOARD_OUTLINE_LAYER = "Board-Outline-Layer"
+MOUNTING_HOLE_MIN_DIAMETER = 3.0
+MOUNTING_HOLE_CORNER_RADIUS = 15.0
+MOUNTING_INSET = 3.0
+PCB_SCREW_CLEARANCE_DIAMETER = 4.0
 TOLERANCE = 0.001
 
 
@@ -109,6 +117,186 @@ def wire_from_loop(points):
     edges = [Part.makeLine(vectors[index], vectors[index + 1])
              for index in range(len(vectors) - 1)]
     return Part.Wire(edges)
+
+
+def pcb_outline_wire(path, layer=BOARD_OUTLINE_LAYER):
+    """Build a closed wire from the single board-outline LWPOLYLINE in a DXF.
+
+    Honors per-vertex bulge (code 42; bulge = tan(theta/4), sagitta = bulge*chord/2)
+    so 90-degree corner arcs become real Part.Arc edges rather than chords."""
+    entity = None
+    entity_layer = None
+    collecting = []
+    stream = None
+    for code, value in dxf_pairs(path):
+        if code == 0:
+            if entity == "LWPOLYLINE" and entity_layer == layer:
+                stream = collecting
+                break
+            entity = value
+            entity_layer = None
+            collecting = []
+        else:
+            if entity == "LWPOLYLINE":
+                collecting.append((code, value))
+            if code == 8:
+                entity_layer = value
+    if stream is None:
+        raise RuntimeError("no board outline on layer %s in %s" % (layer, path))
+
+    vertices = []  # (x, y, bulge)
+    x = y = None
+    bulge = 0.0
+    for code, value in stream:
+        if code == 10:
+            if x is not None:
+                vertices.append((x, y, bulge))
+            x = float(value)
+            y = None
+            bulge = 0.0
+        elif code == 20:
+            y = float(value)
+        elif code == 42:
+            bulge = float(value)
+    if x is not None:
+        vertices.append((x, y, bulge))
+
+    edges = []
+    count = len(vertices)
+    for index in range(count):
+        x1, y1, b = vertices[index]
+        x2, y2, _ = vertices[(index + 1) % count]
+        start = App.Vector(x1, y1, 0)
+        end = App.Vector(x2, y2, 0)
+        # EasyEDA emits arcs as a pair of coincident vertices with the bulge on the
+        # second; skip the zero-length segment between them (a degenerate edge would
+        # break Part.Face).
+        if start.distanceToPoint(end) < TOLERANCE:
+            continue
+        if abs(b) < TOLERANCE:
+            edges.append(Part.makeLine(start, end))
+        else:
+            dx, dy = x2 - x1, y2 - y1
+            mx, my = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+            # EasyEDA's bulge sign with this outline's (clockwise) winding rounds
+            # the corners inward (concave); negate the perpendicular offset so the
+            # corner arcs bulge outward (convex), i.e. real rounded corners.
+            apex = App.Vector(mx + (b / 2.0) * dy, my - (b / 2.0) * dx, 0)
+            edges.append(Part.Arc(start, apex, end).toShape())
+    return Part.Wire(Part.__sortEdges__(edges))
+
+
+def offset_wire_inward(wire, distance):
+    """Offset a closed wire inward by `distance`, regardless of its winding.
+
+    makeOffset2D shrinks or grows depending on the wire orientation, so try both
+    signs and keep the result whose bounding box is smaller (the inward one).
+    Returns None if neither sign produces a smaller closed wire."""
+    reference = wire.BoundBox
+    for signed in (-distance, distance):
+        try:
+            candidate = wire.makeOffset2D(signed)
+        except Exception:
+            continue
+        box = candidate.BoundBox
+        if box.XLength < reference.XLength - TOLERANCE and box.YLength < reference.YLength - TOLERANCE:
+            return candidate
+    return None
+
+
+def offset_wire_outward(wire, distance):
+    """Offset a closed wire outward by `distance`, regardless of its winding.
+
+    Mirror of offset_wire_inward: keep the result whose bounding box is larger."""
+    reference = wire.BoundBox
+    for signed in (distance, -distance):
+        try:
+            candidate = wire.makeOffset2D(signed)
+        except Exception:
+            continue
+        box = candidate.BoundBox
+        if box.XLength > reference.XLength + TOLERANCE and box.YLength > reference.YLength + TOLERANCE:
+            return candidate
+    return None
+
+
+def pcb_mounting_holes(path, bounds):
+    """Detect the corner mounting holes on a PCB DXF.
+
+    Reads circular pads/holes on the through-hole layers -- including the
+    2-vertex "circle" polylines EasyEDA emits (a circle drawn as two semicircle
+    arcs), which an earlier >= 3 vertex test silently discarded -- dedupes by
+    position, and keeps the ones large enough to be a screw hole
+    (>= MOUNTING_HOLE_MIN_DIAMETER). Of those, returns the one nearest each of
+    the four board-outline corners within MOUNTING_HOLE_CORNER_RADIUS, so
+    component through-holes elsewhere on the board are not mistaken for case
+    screws. Returns [(x, y), ...] (up to four)."""
+    layers = ("Hole-Layer", "Multi-Layer")
+    entity = layer = None
+    xs = []
+    ys = []
+    found = []
+
+    def flush():
+        if entity == "LWPOLYLINE" and layer in layers and len(xs) >= 2:
+            cx = sum(xs) / len(xs)
+            cy = sum(ys) / len(ys)
+            radius = sum(math.hypot(x - cx, y - cy) for x, y in zip(xs, ys)) / len(xs)
+            found.append((cx, cy, radius))
+
+    for code, value in dxf_pairs(path):
+        if code == 0:
+            flush()
+            entity = value
+            layer = None
+            xs = []
+            ys = []
+        elif code == 8:
+            layer = value
+        elif code == 10:
+            try:
+                xs.append(float(value))
+            except ValueError:
+                pass
+        elif code == 20:
+            try:
+                ys.append(float(value))
+            except ValueError:
+                pass
+    flush()
+
+    dedup = {}
+    for cx, cy, radius in found:
+        key = (round(cx, 1), round(cy, 1))
+        if key not in dedup or radius > dedup[key]:
+            dedup[key] = radius
+    points = [(x, y) for (x, y), r in dedup.items() if 2 * r >= MOUNTING_HOLE_MIN_DIAMETER]
+
+    corners = [(bounds.XMin, bounds.YMin), (bounds.XMax, bounds.YMin),
+               (bounds.XMin, bounds.YMax), (bounds.XMax, bounds.YMax)]
+    mounts = []
+    seen = set()
+    for corner_x, corner_y in corners:
+        candidates = [(math.hypot(x - corner_x, y - corner_y), x, y) for x, y in points
+                      if math.hypot(x - corner_x, y - corner_y) <= MOUNTING_HOLE_CORNER_RADIUS]
+        if not candidates:
+            continue
+        _, x, y = min(candidates)
+        key = (round(x, 1), round(y, 1))
+        if key not in seen:
+            seen.add(key)
+            mounts.append((x, y))
+    return mounts
+
+
+def corner_mounting_holes(bounds):
+    """Four screw positions at MOUNTING_INSET from each corner of a bounding box."""
+    return [
+        (bounds.XMin + MOUNTING_INSET, bounds.YMin + MOUNTING_INSET),
+        (bounds.XMax - MOUNTING_INSET, bounds.YMin + MOUNTING_INSET),
+        (bounds.XMin + MOUNTING_INSET, bounds.YMax - MOUNTING_INSET),
+        (bounds.XMax - MOUNTING_INSET, bounds.YMax - MOUNTING_INSET),
+    ]
 
 
 def rounded_prism(x_min, y_min, x_max, y_max, radius, prism_height, z_base):
@@ -240,25 +428,41 @@ def add_feature(document, name, label, shape, color, visible=True):
     return feature
 
 
-def build_plate(document, side, dxf_filename, color):
+def build_plate(document, side, dxf_filename, pcb_filename, color):
     loops = dxf_line_loops(os.path.join(BASE_DIR, dxf_filename))
     # The first loop is the supplied perimeter. All following loops are key cutouts.
-    key_wires = [wire_from_loop(loop) for loop in loops[1:]]
+    all_key_wires = [wire_from_loop(loop) for loop in loops[1:]]
+    # The plate outline is the PCB board outline; both DXFs share the same local
+    # origin, so keep only the cutouts that fall inside the PCB (drops the top
+    # function row that has no board underneath it).
+    pcb_wire = pcb_outline_wire(os.path.join(BASE_DIR, pcb_filename))
+    pcb_face = Part.Face(pcb_wire)
+    key_wires = [wire for wire in all_key_wires
+                 if pcb_face.isInside(wire.BoundBox.Center, TOLERANCE, True)]
     cutout_edges = Part.makeCompound(key_wires)
-    bounds = cutout_edges.BoundBox
-    x_min = bounds.XMin - OUTER_MARGIN
-    y_min = bounds.YMin - OUTER_MARGIN
-    x_max = bounds.XMax + OUTER_MARGIN
-    y_max = bounds.YMax + OUTER_MARGIN
+    # The case (plate + body) is a wall around the PCB: its outline is the PCB
+    # outline grown outward by the wall thickness plus the seat clearance, so the
+    # PCB sits inside the case rather than flush with its edge.
+    outer_wire = offset_wire_outward(pcb_wire, BODY_WALL_THICKNESS + PCB_SEAT_CLEARANCE)
+    outer_face = Part.Face(outer_wire)
+    bounds = outer_wire.BoundBox
+    x_min = bounds.XMin
+    y_min = bounds.YMin
+    x_max = bounds.XMax
+    y_max = bounds.YMax
 
-    outline = rounded_plate(x_min, y_min, x_max, y_max)
+    outline = outer_face.extrude(App.Vector(0, 0, PLATE_THICKNESS))
     key_voids = [Part.Face(wire).extrude(App.Vector(0, 0, PLATE_THICKNESS)) for wire in key_wires]
-    screw_locations = [
-        (x_min + SCREW_CORNER_OFFSET, y_min + SCREW_CORNER_OFFSET),
-        (x_max - SCREW_CORNER_OFFSET, y_min + SCREW_CORNER_OFFSET),
-        (x_min + SCREW_CORNER_OFFSET, y_max - SCREW_CORNER_OFFSET),
-        (x_max - SCREW_CORNER_OFFSET, y_max - SCREW_CORNER_OFFSET),
-    ]
+    # Screw positions follow the PCB's own mounting holes so the plate, body and
+    # board holes line up. If the board does not carry a clean set of four (e.g. an
+    # incomplete export), fall back to four corners of the board at MOUNTING_INSET.
+    mounting_holes = pcb_mounting_holes(os.path.join(BASE_DIR, pcb_filename), pcb_wire.BoundBox)
+    if len(mounting_holes) == 4:
+        screw_locations = mounting_holes
+        screw_source = "PCB mounting holes"
+    else:
+        screw_locations = corner_mounting_holes(pcb_wire.BoundBox)
+        screw_source = "board-corner fallback (%d holes detected)" % len(mounting_holes)
     screw_voids = [countersunk_m3_hole(x, y) for x, y in screw_locations]
     # Plate-mount stabilizer clips need a 1.4 mm plate; relieve the underside on the
     # top/bottom edges of each narrow stabilizer cutout so the clip can latch.
@@ -278,11 +482,10 @@ def build_plate(document, side, dxf_filename, color):
     final_shape = outline.cut(
         Part.makeCompound(key_voids + screw_voids + stab_pockets)).removeSplitter()
 
-    outline_object = add_feature(document, side + "_Plate_Outline", side + " plate outline (R5)", outline,
+    outline_object = add_feature(document, side + "_Plate_Outline", side + " plate outline (PCB)", outline,
                                  (0.75, 0.75, 0.75), False)
     outline_object.addProperty("App::PropertyLength", "Thickness", "Plate Parameters").Thickness = PLATE_THICKNESS
-    outline_object.addProperty("App::PropertyLength", "Margin", "Plate Parameters").Margin = OUTER_MARGIN
-    outline_object.addProperty("App::PropertyLength", "CornerRadius", "Plate Parameters").CornerRadius = CORNER_RADIUS
+    outline_object.addProperty("App::PropertyString", "SourcePCB", "Plate Parameters").SourcePCB = pcb_filename
     cutout_object = add_feature(document, side + "_Switch_Cutouts", side + " switch cutout references",
                                 cutout_edges, (0.90, 0.20, 0.20), False)
     cutout_object.addProperty("App::PropertyString", "SourceDXF", "Source").SourceDXF = dxf_filename
@@ -291,6 +494,7 @@ def build_plate(document, side, dxf_filename, color):
     holes_object.addProperty("App::PropertyLength", "ClearanceDiameter", "M3 Countersink").ClearanceDiameter = M3_CLEARANCE_DIAMETER
     holes_object.addProperty("App::PropertyLength", "CountersinkDiameter", "M3 Countersink").CountersinkDiameter = M3_COUNTERSINK_DIAMETER
     holes_object.addProperty("App::PropertyLength", "CountersinkDepth", "M3 Countersink").CountersinkDepth = M3_COUNTERSINK_DEPTH
+    holes_object.addProperty("App::PropertyString", "ScrewSource", "M3 Countersink").ScrewSource = screw_source
     if stab_pockets:
         stab_object = add_feature(document, side + "_Stab_Clip_Pockets",
                                   side + " stabilizer clip pockets",
@@ -305,14 +509,19 @@ def build_plate(document, side, dxf_filename, color):
     plate_object = add_feature(document, side + "_Switch_Plate", side + " finished 4 mm switch plate",
                                final_shape, color, True)
     plate_object.addProperty("App::PropertyString", "DesignNotes", "Documentation").DesignNotes = (
-        "Central switch array only; original DXF perimeter excluded. %.1f mm margin, R5 corners, " % OUTER_MARGIN +
-        "four M3x10 countersunk mounting holes (3.2 mm clearance, 6.0 mm top countersink).")
+        "Outline is the PCB board outline (%s) grown outward by %.1f mm (wall + seat clearance) so " % (
+            pcb_filename, BODY_WALL_THICKNESS + PCB_SEAT_CLEARANCE) +
+        "the case surrounds the PCB; only cutouts inside the board are kept (top function row dropped). "
+        "Four M3x10 countersunk mounting holes (3.2 mm clearance, 6.0 mm top countersink).")
     return plate_object, final_shape, {
         "x_min": x_min,
         "y_min": y_min,
         "x_max": x_max,
         "y_max": y_max,
         "screw_locations": screw_locations,
+        "pcb_wire": pcb_wire,
+        "pcb_face": pcb_face,
+        "outer_wire": outer_wire,
     }
 
 
@@ -322,20 +531,44 @@ def build_body(document, side, layout, color, include_controller=False, usb_cent
     y_min = layout["y_min"]
     x_max = layout["x_max"]
     y_max = layout["y_max"]
+    pcb_wire = layout["pcb_wire"]
     cavity_height = BODY_HEIGHT - BODY_WALL_THICKNESS
-    outer_body = rounded_prism(x_min, y_min, x_max, y_max, CORNER_RADIUS, BODY_HEIGHT, -BODY_HEIGHT)
-    inner_cavity = rounded_prism(x_min + BODY_WALL_THICKNESS, y_min + BODY_WALL_THICKNESS,
-                                 x_max - BODY_WALL_THICKNESS, y_max - BODY_WALL_THICKNESS,
-                                 CORNER_RADIUS - BODY_WALL_THICKNESS, cavity_height + 0.01,
-                                 -cavity_height)
-    case_shell = outer_body.cut(inner_cavity)
-    boss_height = cavity_height
+    outer_wire = layout["outer_wire"]
+    z_pcb_top = PLATE_THICKNESS - MX_PLATE_TO_PCB
+    z_pcb_bottom = z_pcb_top - MAIN_PCB_THICKNESS
+    # Outer wall follows the widened case outline (PCB grown outward), so the plate
+    # edge and body edge match and both surround the PCB.
+    outer_body = Part.Face(outer_wire).extrude(App.Vector(0, 0, -BODY_HEIGHT))
+    # Two-step cavity: the PCB drops into the upper pocket (PCB + seat clearance) and
+    # rests on a perimeter ledge at its underside; the lower cavity (PCB - ledge) is
+    # the electronics space down to the floor. Insert bosses rise only to the PCB
+    # underside and double as standoffs; the M3 screw passes through the PCB's own
+    # mounting hole into the insert (screw positions come from the PCB mounting holes).
+    drop_wire = offset_wire_outward(pcb_wire, PCB_SEAT_CLEARANCE)
+    lower_wire = offset_wire_inward(pcb_wire, PCB_LEDGE_WIDTH)
+    if drop_wire is not None and lower_wire is not None:
+        drop_face = Part.Face(drop_wire)
+        drop_face.translate(App.Vector(0, 0, 0.01))
+        upper_cavity = drop_face.extrude(App.Vector(0, 0, z_pcb_bottom - 0.01))
+        lower_face = Part.Face(lower_wire)
+        lower_face.translate(App.Vector(0, 0, z_pcb_bottom))
+        lower_cavity = lower_face.extrude(App.Vector(0, 0, -cavity_height - z_pcb_bottom))
+        case_shell = outer_body.cut(upper_cavity).cut(lower_cavity)
+    else:
+        # Fallback: single cavity inset from the outer wall by the wall thickness.
+        cavity_wire = offset_wire_inward(outer_wire, BODY_WALL_THICKNESS)
+        cavity_face = Part.Face(cavity_wire)
+        cavity_face.translate(App.Vector(0, 0, 0.01))
+        inner_cavity = cavity_face.extrude(App.Vector(0, 0, -(cavity_height + 0.01)))
+        case_shell = outer_body.cut(inner_cavity)
+    # Bosses rise from the cavity floor to the PCB underside (they support the board).
+    boss_height = z_pcb_bottom + cavity_height
     bosses = [Part.makeCylinder(INSERT_BOSS_DIAMETER / 2, boss_height,
                                 App.Vector(x, y, -cavity_height)).common(outer_body)
               for x, y in layout["screw_locations"]]
-    insert_pockets = [Part.makeCylinder(SPREDSERT_M3_LOCATING_DIAMETER / 2,
-                                        SPREDSERT_M3_LENGTH + M3_SCREW_TIP_RELIEF,
-                                        App.Vector(x, y, -(SPREDSERT_M3_LENGTH + M3_SCREW_TIP_RELIEF)))
+    insert_length = SPREDSERT_M3_LENGTH + M3_SCREW_TIP_RELIEF
+    insert_pockets = [Part.makeCylinder(SPREDSERT_M3_LOCATING_DIAMETER / 2, insert_length,
+                                        App.Vector(x, y, z_pcb_bottom - insert_length))
                       for x, y in layout["screw_locations"]]
     body_cuts = list(insert_pockets)
     body_fuses = []
@@ -457,10 +690,43 @@ def build_body(document, side, layout, color, include_controller=False, usb_cent
     body_object.addProperty("App::PropertyLength", "RestSideMargin", "Tilt Rest").RestSideMargin = REST_SIDE_MARGIN
     body_object.addProperty("App::PropertyLength", "RestRearMargin", "Tilt Rest").RestRearMargin = REST_REAR_MARGIN
     body_object.addProperty("App::PropertyAngle", "RestTiltAngle", "Tilt Rest").RestTiltAngle = rest_tilt
+    body_object.addProperty("App::PropertyLength", "PCBSeatTopZ", "PCB Seat").PCBSeatTopZ = z_pcb_top
+    body_object.addProperty("App::PropertyLength", "PCBSeatBottomZ", "PCB Seat").PCBSeatBottomZ = z_pcb_bottom
+    body_object.addProperty("App::PropertyLength", "PCBSeatClearance", "PCB Seat").PCBSeatClearance = PCB_SEAT_CLEARANCE
+    body_object.addProperty("App::PropertyLength", "PCBLedgeWidth", "PCB Seat").PCBLedgeWidth = PCB_LEDGE_WIDTH
     body_object.addProperty("App::PropertyString", "AssemblyNotes", "Documentation").AssemblyNotes = (
-        "Open-top body: install four SPREDSERT M3x5 inserts from the top, then fasten the 4 mm plate "
-        "with the matching M3x10 countersunk screws. A 2 mm relief below each insert prevents screw bottoming.")
+        "Open-top body whose wall surrounds the PCB (outline grown outward by %.1f mm). The insert bosses "
+        "sit at the PCB's own mounting-hole positions and rise to the board underside as standoffs. Install "
+        "four SPREDSERT M3x5 inserts into the bosses from the top, drop the PCB in (it rests on the %.1f mm "
+        "perimeter ledge and the boss tops at z=%.1f mm), then fasten the 4 mm plate: the M3 screws pass "
+        "through the plate and the PCB mounting holes into the inserts." % (
+            BODY_WALL_THICKNESS + PCB_SEAT_CLEARANCE, PCB_LEDGE_WIDTH, z_pcb_bottom))
     return body_object, final_body
+
+
+def build_pcb_reference(document, side, layout, color):
+    """1.6 mm PCB reference solid at the MX switch stack height, under the plate.
+
+    Cuts the M3 screw mounting holes at the screw positions so the reference shows
+    where the board bolts to the case (matching the PCB's own mounting holes)."""
+    z_pcb_top = PLATE_THICKNESS - MX_PLATE_TO_PCB
+    board = layout["pcb_face"].extrude(App.Vector(0, 0, -MAIN_PCB_THICKNESS))
+    board.translate(App.Vector(0, 0, z_pcb_top))
+    screw_holes = [Part.makeCylinder(PCB_SCREW_CLEARANCE_DIAMETER / 2, MAIN_PCB_THICKNESS + 1.0,
+                                     App.Vector(x, y, z_pcb_top - MAIN_PCB_THICKNESS - 0.5))
+                   for x, y in layout["screw_locations"]]
+    board = board.cut(Part.makeCompound(screw_holes)).removeSplitter()
+    pcb_object = add_feature(document, side + "_PCB_Reference", side + " PCB board reference",
+                             board, color, True)
+    pcb_object.addProperty("App::PropertyLength", "Thickness", "PCB").Thickness = MAIN_PCB_THICKNESS
+    pcb_object.addProperty("App::PropertyLength", "PlateTopToPCB", "PCB").PlateTopToPCB = MX_PLATE_TO_PCB
+    pcb_object.addProperty("App::PropertyLength", "TopZ", "PCB").TopZ = z_pcb_top
+    pcb_object.addProperty("App::PropertyLength", "ScrewHoleDiameter", "PCB").ScrewHoleDiameter = PCB_SCREW_CLEARANCE_DIAMETER
+    pcb_object.addProperty("App::PropertyString", "MountingNote", "PCB").MountingNote = (
+        "Reference at the MX stack height (PCB top %.1f mm below the plate top). Screw holes (dia %.1f mm) "
+        "sit at the plate/body screw positions; on the real board these must match the case screw axes." % (
+            MX_PLATE_TO_PCB, PCB_SCREW_CLEARANCE_DIAMETER))
+    return pcb_object, board
 
 
 document = App.newDocument("Keyboard_Switch_Plates")
@@ -489,8 +755,8 @@ for name, value in (("PlateThickness", PLATE_THICKNESS), ("Margin", OUTER_MARGIN
     parameters.addProperty("App::PropertyLength", name, "Dimensions")
     setattr(parameters, name, value)
 
-left_object, left_shape, left_layout = build_plate(document, "Left", "left-switch.dxf", (0.86, 0.70, 0.20))
-right_object, right_shape, right_layout = build_plate(document, "Right", "right-switch.dxf", (0.25, 0.65, 0.85))
+left_object, left_shape, left_layout = build_plate(document, "Left", "left-switch.dxf", "left-pcb.dxf", (0.86, 0.70, 0.20))
+right_object, right_shape, right_layout = build_plate(document, "Right", "right-switch.dxf", "right-pcb.dxf", (0.25, 0.65, 0.85))
 # Left half is the TRRS slave (MASTER_RIGHT firmware): no controller seat or
 # USB opening; the RP2040-Zero is placed freely and flashing needs the case
 # open anyway (BOOTSEL button access).
@@ -503,6 +769,8 @@ right_body_object, right_body_shape = build_body(
     right_layout["x_min"] + TRS_JACK_EDGE_OFFSET)
 left_palm_object, left_palm_shape = build_palm_rest(document, "Left", left_layout, (0.13, 0.13, 0.13))
 right_palm_object, right_palm_shape = build_palm_rest(document, "Right", right_layout, (0.13, 0.13, 0.13))
+left_pcb_object, left_pcb_shape = build_pcb_reference(document, "Left", left_layout, (0.10, 0.45, 0.20))
+right_pcb_object, right_pcb_shape = build_pcb_reference(document, "Right", right_layout, (0.10, 0.45, 0.20))
 
 # Both DXFs use a local origin. Move every right-side document object so the
 # two halves are visibly separate in FreeCAD while retaining their local STL geometry.
@@ -544,3 +812,10 @@ print("Left palm rest: %.2f x %.2f x %.2f mm" % (
     left_palm_shape.BoundBox.XLength, left_palm_shape.BoundBox.YLength, left_palm_shape.BoundBox.ZLength))
 print("Right palm rest: %.2f x %.2f x %.2f mm" % (
     right_palm_shape.BoundBox.XLength, right_palm_shape.BoundBox.YLength, right_palm_shape.BoundBox.ZLength))
+print("Left PCB ref: %.2f x %.2f x %.2f mm, top z=%.2f" % (
+    left_pcb_shape.BoundBox.XLength, left_pcb_shape.BoundBox.YLength,
+    left_pcb_shape.BoundBox.ZLength, left_pcb_shape.BoundBox.ZMax))
+print("Right PCB ref: %.2f x %.2f x %.2f mm, top z=%.2f" % (
+    right_pcb_shape.BoundBox.XLength, right_pcb_shape.BoundBox.YLength,
+    right_pcb_shape.BoundBox.ZLength, right_pcb_shape.BoundBox.ZMax))
+print("Kept switch cutouts (solids in plate) — inspect Left_Switch_Cutouts / Right_Switch_Cutouts counts in tree")
