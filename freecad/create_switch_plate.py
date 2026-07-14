@@ -24,7 +24,7 @@ OUTLINE_MARGIN = 8.0        # 컷아웃 bbox 에서 바깥으로
 CORNER_R = 5.0              # 둥근 사각 코너 반경
 PLATE_T = 1.5               # 상판 두께
 BOARD_T = 2.0               # PCB 보드 두께(시각화용)
-BOARD_GAP = 5.0             # 상판 바닥 ~ 보드 윗면 간격(MX plate-mount 기준, 조정 가능)
+BOARD_GAP = 0.0             # 상판 바닥 ~ 보드 윗면 간격. 0 = 상판을 보드에 밀착
 BOARD_CORNER_R = 3.0        # PCB 보드 모퉁이 라운드(실제 DXF bulge = R3)
 SCREW_CLEAR = 3.4           # M3 normal clearance 관통경
 CSK_DIA = 6.2               # 접시머리 카운터싱크 상단 지름 (Dk 6.0 + 0.2)
@@ -272,9 +272,11 @@ def build_all(export=True):
         board_solid, corner_holes = build_board(r)
         board.Shape = board_solid
         info["corner_fix_holes"] = [(x, y, d) for x, y, d in corner_holes]
-        if name == "right":
-            plate.Placement.Base.x = 230
-            board.Placement.Base.x = 230
+        # 바닥(z=0)에 앉히기: 스택 전체를 올려 보드 바닥이 z=0 에 오도록
+        z_floor = BOARD_GAP + BOARD_T
+        x_off = 230 if name == "right" else 0
+        plate.Placement.Base = App.Vector(x_off, 0, z_floor)
+        board.Placement.Base = App.Vector(x_off, 0, z_floor)
         infos.append(info)
         if export:
             solid.exportStl(os.path.join(HERE, "%s_switch_plate.stl" % name))
