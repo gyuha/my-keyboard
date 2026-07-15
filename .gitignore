@@ -1,3 +1,4 @@
 *.FCStd1
 freecad-mcp/
 freecad/__pycache__
+.DS_Store
