@@ -22,7 +22,7 @@ CUTOUT = 14.0               # 스위치 컷아웃 한 변 (목표 개구부)
 CUTOUT_OFFSET = 0.0         # FDM 튜닝: 실개구부 = CUTOUT + 2*CUTOUT_OFFSET
 OUTLINE_MARGIN = 8.0        # 컷아웃 bbox 에서 바깥으로
 CORNER_R = 5.0              # 둥근 사각 코너 반경
-PLATE_T = 1.5               # 상판 두께
+PLATE_T = 4.0               # 상판 두께(두껍게 — 소음 저감)
 BOARD_T = 2.0               # PCB 보드 두께(시각화용)
 BOARD_GAP = 0.0             # 상판 바닥 ~ 보드 윗면 간격. 0 = 상판을 보드에 밀착
 BOARD_CORNER_R = 3.0        # PCB 보드 모퉁이 라운드(실제 DXF bulge = R3)
@@ -30,6 +30,19 @@ SCREW_CLEAR = 3.4           # M3 normal clearance 관통경
 CSK_DIA = 6.2               # 접시머리 카운터싱크 상단 지름 (Dk 6.0 + 0.2)
 CSK_ANGLE = 90.0            # 접시머리 각
 CORNER_INSET = 3.0          # 나사홀을 보드 bbox 모서리에서 안쪽으로 (좌측 PCB Ø5 홀과 일치)
+
+# ---- body(하단 케이스) 파라미터 (ADR-0003) --------------------------------
+BODY_H = 17.0               # body 외부 총 높이
+WALL = 3.0                  # 벽 두께
+FLOOR = 3.0                 # 바닥 두께
+PLATE_GAP = 0.0             # 상판 바닥 ~ PCB 상면 간격. 0 = 상판이 PCB에 밀착
+LIP_CLEAR = 0.3             # (미사용) 상판 recess 여유 — 현재 상판은 body 위에 얹힘
+PCB_CLEAR = 0.4             # PCB 포켓 여유(반경 방향)
+SHELF_W = 2.0               # PCB 선반 폭(내벽에서 안쪽)
+POST_OD = 7.0               # 코너 인서트 포스트 지름
+INSERT_HOLE_D = 4.0         # Spredsert M3X5 파일럿 홀 지름
+INSERT_HOLE_DEPTH = 5.5     # 인서트 홀 깊이(블라인드)
+BODY_CORNER_R = 5.0         # body 외곽 코너 반경
 
 # 홀 지름 분류 (mm) — extract 리포트용
 D_CORNER = 5.0
@@ -340,6 +353,68 @@ def build_board(r):
     return solid, holes
 
 
+def build_body(name, r):
+    """하단 케이스(body) 솔리드를 만들어 (solid, info) 반환.
+
+    외곽 = PCB 외곽 기준(ADR-0003), 외부높이 BODY_H, 벽/바닥 WALL/FLOOR.
+    상단 lip 단턱(상판 recess) + 둘레 PCB 선반 + 4 코너 인서트 포스트.
+    좌표: 바닥 밑면 z=0.
+    """
+    import FreeCAD as App
+    import Part
+
+    # PCB 외곽 bbox
+    b = r["board"]
+    bx0, bx1 = min(v[0] for v in b), max(v[0] for v in b)
+    by0, by1 = min(v[1] for v in b), max(v[1] for v in b)
+
+    # 파생 Z (상판이 body 위에 얹힘 — 리세스 없음. PCB 는 최상단 선반에 안착)
+    floor_top = FLOOR                       # 3
+    pcb_top = BODY_H                        # 17 (PCB 상면 = body 상단 rim = 상판 바닥)
+    shelf_top = pcb_top - BOARD_T           # 15 (PCB 바닥 = 선반/포스트 top)
+
+    # 개구 경계
+    cav_x0, cav_x1 = bx0 - PCB_CLEAR, bx1 + PCB_CLEAR       # 캐비티 내벽(PCB+여유)
+    cav_y0, cav_y1 = by0 - PCB_CLEAR, by1 + PCB_CLEAR
+    out_x0, out_x1 = cav_x0 - WALL, cav_x1 + WALL           # 외벽 외곽
+    out_y0, out_y1 = cav_y0 - WALL, cav_y1 + WALL
+    sh_x0, sh_x1 = cav_x0 + SHELF_W, cav_x1 - SHELF_W       # 선반 내측(하부 캐비티)
+    sh_y0, sh_y1 = cav_y0 + SHELF_W, cav_y1 - SHELF_W
+
+    cav_r = max(BODY_CORNER_R - WALL, 0.5)
+    OV = 2.0
+
+    # 1) 외곽 솔리드
+    solid = _rounded_rect(out_x0, out_y0, out_x1, out_y1, BODY_CORNER_R, BODY_H)
+
+    # 2) 계단형 캐비티 (하부→상부, 상부가 넓어 z=shelf_top 선반 생성). 리세스 없음(상판이 위에 얹힘)
+    lo = _rounded_rect(sh_x0, sh_y0, sh_x1, sh_y1, max(cav_r - SHELF_W, 0.5), BODY_H - floor_top + OV)
+    lo.translate(App.Vector(0, 0, floor_top))
+    up = _rounded_rect(cav_x0, cav_y0, cav_x1, cav_y1, cav_r, BODY_H - shelf_top + OV)
+    up.translate(App.Vector(0, 0, shelf_top))
+    solid = solid.cut(lo.fuse(up))
+
+    # 3) 코너 인서트 포스트(바닥 top → 선반 top) + 인서트 홀(블라인드)
+    holes = r["corner_holes"]
+    posts = [Part.makeCylinder(POST_OD / 2.0, shelf_top - floor_top, App.Vector(cx, cy, floor_top))
+             for cx, cy, _ in holes]
+    if posts:
+        solid = solid.fuse(posts[0].multiFuse(posts[1:]) if len(posts) > 1 else posts[0])
+        tools = [Part.makeCylinder(INSERT_HOLE_D / 2.0, INSERT_HOLE_DEPTH,
+                                   App.Vector(cx, cy, shelf_top - INSERT_HOLE_DEPTH))
+                 for cx, cy, _ in holes]
+        solid = solid.cut(tools[0].multiFuse(tools[1:]) if len(tools) > 1 else tools[0])
+
+    bb = solid.BoundBox
+    info = dict(name=name + "_body", body_h=round(bb.ZLength, 2), wall=WALL, floor=FLOOR,
+                posts=len(holes), insert_d=INSERT_HOLE_D, insert_depth=INSERT_HOLE_DEPTH,
+                shelf_top=shelf_top, plate_seat=pcb_top,
+                valid=solid.isValid(), solids=len(solid.Solids),
+                bbox=(round(bb.XLength, 1), round(bb.YLength, 1), round(bb.ZLength, 2)),
+                post_pos=[(round(cx, 1), round(cy, 1)) for cx, cy, _ in holes])
+    return solid, info
+
+
 def build_all(export=True):
     """FreeCAD 문서에 좌·우 상판 + 그 아래 PCB 보드를 생성하고 (원하면) STL/STEP export."""
     import FreeCAD as App
@@ -349,22 +424,36 @@ def build_all(export=True):
     for name in ("left", "right"):
         path = os.path.join(HERE, "%s-pcb.dxf" % name)
         r = extract(path)
+        x_off = 230 if name == "right" else 0
+
+        # 상판
         solid, info = build_plate(name, r["switch"], r["board"])
         plate = doc.addObject("Part::Feature", "%s_switch_plate" % name)
         plate.Shape = solid
+        # PCB 보드
         board = doc.addObject("Part::Feature", "%s_pcb_board" % name)
         board_solid, corner_holes = build_board(r)
         board.Shape = board_solid
         info["corner_fix_holes"] = [(x, y, d) for x, y, d in corner_holes]
-        # 바닥(z=0)에 앉히기: 스택 전체를 올려 보드 바닥이 z=0 에 오도록
-        z_floor = BOARD_GAP + BOARD_T
-        x_off = 230 if name == "right" else 0
-        plate.Placement.Base = App.Vector(x_off, 0, z_floor)
-        board.Placement.Base = App.Vector(x_off, 0, z_floor)
+        # 하단 body
+        body = doc.addObject("Part::Feature", "%s_body" % name)
+        body_solid, binfo = build_body(name, r)
+        body.Shape = body_solid
+
+        # 조립 배치 (body 좌표: 바닥 밑면 z=0). body[0,17] · PCB[15,17] · 상판[17,21](위에 얹힘)
+        pcb_top = BODY_H                          # 17 (PCB 상면 = body 상단)
+        plate_bottom = pcb_top                    # 17 (상판이 PCB 위에 맞닿아 얹힘)
+        body.Placement.Base = App.Vector(x_off, 0, 0)
+        board.Placement.Base = App.Vector(x_off, 0, pcb_top - board_solid.BoundBox.ZMax)
+        plate.Placement.Base = App.Vector(x_off, 0, plate_bottom)
+
+        infos.append(binfo)
         infos.append(info)
         if export:
             solid.exportStl(os.path.join(HERE, "%s_switch_plate.stl" % name))
             solid.exportStep(os.path.join(HERE, "%s_switch_plate.step" % name))
+            body_solid.exportStl(os.path.join(HERE, "%s_body.stl" % name))
+            body_solid.exportStep(os.path.join(HERE, "%s_body.step" % name))
     doc.recompute()
     doc.saveAs(os.path.join(HERE, "switch_plates.FCStd"))
     for i in infos:
