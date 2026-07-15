@@ -165,6 +165,81 @@ def extract(path):
     }
 
 
+# ---- switch_hole DXF (스테빌라이저 슬롯) ----------------------------------
+def _iter_lines(path):
+    """switch_hole DXF 의 LINE 세그먼트 [((x1,y1),(x2,y2)), ...] 반환."""
+    with open(path, "r", errors="ignore") as f:
+        L = f.read().split("\n")
+    segs = []
+    ent = None
+    cur = {}
+    n = len(L)
+    i = 0
+    keymap = {"10": "x1", "20": "y1", "11": "x2", "21": "y2"}
+    while i + 1 < n:
+        code = L[i].strip()
+        val = L[i + 1].strip()
+        if code == "0":
+            if ent == "LINE" and len(cur) == 4:
+                segs.append(((cur["x1"], cur["y1"]), (cur["x2"], cur["y2"])))
+            ent = val
+            cur = {}
+        elif ent == "LINE" and code in keymap:
+            try:
+                cur[keymap[code]] = float(val)
+            except ValueError:
+                pass
+        i += 2
+    if ent == "LINE" and len(cur) == 4:
+        segs.append(((cur["x1"], cur["y1"]), (cur["x2"], cur["y2"])))
+    return segs
+
+
+def _loops(segs, tol=1e-3):
+    """연결된 세그먼트를 닫힌 루프로 묶는다(각 사각형/외곽 = 한 루프)."""
+    if not segs:
+        return []
+    out = []
+    cur = [segs[0]]
+    for s in segs[1:]:
+        pe = cur[-1][1]
+        if abs(s[0][0] - pe[0]) < tol and abs(s[0][1] - pe[1]) < tol:
+            cur.append(s)
+        else:
+            out.append(cur)
+            cur = [s]
+    out.append(cur)
+    return out
+
+
+def stab_slots(name, centers):
+    """switch_hole DXF 의 스테빌라이저 슬롯을 PCB/plate 좌표계로 정렬해 반환.
+
+    반환: [(x0, y0, x1, y1), ...] 축 정렬 사각형.
+    정렬: switch_hole 의 14mm 키홀 중심 집합을 plate 스위치 중심(centers)에
+    centroid 로 맞춰 순수 평행이동한다(회전/스케일 없음, 잔차 <0.1mm 확인됨).
+    """
+    path = os.path.join(HERE, "%s_switch_hole.dxf" % name)
+    keys, stabs = [], []
+    for lp in _loops(_iter_lines(path)):
+        xs = [p[0] for s in lp for p in s]
+        ys = [p[1] for s in lp for p in s]
+        x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
+        w, h = x1 - x0, y1 - y0
+        if 12 <= w <= 16 and 12 <= h <= 16:
+            keys.append(((x0 + x1) / 2, (y0 + y1) / 2))
+        elif (w < 6 and h <= 20) or (h < 6 and w <= 20):
+            stabs.append((x0, y0, x1, y1))
+    if not keys or not stabs or not centers:
+        return []
+    kx = sum(k[0] for k in keys) / len(keys)
+    ky = sum(k[1] for k in keys) / len(keys)
+    sx = sum(c[0] for c in centers) / len(centers)
+    sy = sum(c[1] for c in centers) / len(centers)
+    ox, oy = sx - kx, sy - ky
+    return [(x0 + ox, y0 + oy, x1 + ox, y1 + oy) for x0, y0, x1, y1 in stabs]
+
+
 # ---- FreeCAD 지오메트리 빌드 (FreeCAD 안에서만 동작) ---------------------
 def _square_face(cx, cy, size):
     import FreeCAD as App
@@ -208,6 +283,15 @@ def build_plate(name, centers, board):
         tools.append(t)
     solid = solid.cut(tools[0].multiFuse(tools[1:]) if len(tools) > 1 else tools[0])
 
+    # 2b) 스테빌라이저 슬롯 (switch_hole DXF, PCB 좌표 정렬 후 관통 컷)
+    slots = stab_slots(name, centers)
+    if slots:
+        stools = []
+        for x0, y0, x1, y1 in slots:
+            stools.append(Part.makeBox(x1 - x0, y1 - y0, PLATE_T + 2,
+                                       App.Vector(x0, y0, -1)))
+        solid = solid.cut(stools[0].multiFuse(stools[1:]) if len(stools) > 1 else stools[0])
+
     # 3) 나사홀(코너 4개) + 상면 카운터싱크 — 보드 bbox 모서리에서 CORNER_INSET
     bx = [v[0] for v in board]
     by = [v[1] for v in board]
@@ -225,7 +309,7 @@ def build_plate(name, centers, board):
     solid = solid.cut(st[0].multiFuse(st[1:]))
 
     bb = solid.BoundBox
-    info = dict(name=name, switches=len(centers), screws=len(screws),
+    info = dict(name=name, switches=len(centers), stabs=len(slots), screws=len(screws),
                 csk_depth=round(csk_depth, 2), valid=solid.isValid(),
                 solids=len(solid.Solids),
                 bbox=(round(bb.XLength, 1), round(bb.YLength, 1), round(bb.ZLength, 2)),
