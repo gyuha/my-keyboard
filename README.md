@@ -65,10 +65,10 @@
 | ![aux](image/parts/aux-cable.jpg)                 | 3.5mm aux 케이블             | 1   | 보드 연결 용                   | [연결](https://ko.aliexpress.com/item/1005006150639643.html)           |
 | ![코스타스테빌](image/parts/stabil.jpg)                 | 코스타 스테빌 라이저               | 2   | 긴 키 안정 (5개가 필요 해서 2세트 구매) | [연결](https://ko.aliexpress.com/w/wholesale-costar-stabilizer.html)   |
 | ![wire](image/parts/wire.jpg)                     | 전선                        | 1   | 랩핑와이어 추천(인두기로 녹여서 사용가능)   | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)             |
-| ![switch](image/parts/key-switch.jpg)             | 스위치                       | 77  | 개인 취향으로 게이트론 백축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955) |
+| ![switch](image/parts/key-switch.jpg)             | 스위치                       | 88  | 개인 취향으로 게이트론 백축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955) |
 | ![keycap](image/parts/keycap.jpg)                 | 키캡                        | -   | 되도록이면 XDA 또는 DSA를 선택 합니다. | [연결](https://ko.aliexpress.com/w/wholesale-xda-keycap.html)          |
 | ![bump](image/parts/bump.jpg)                     | 미끄럼 방지 패드 or 범퍼           | 1   | 바닥 미끄럼 방지                 | [연결](https://www.coupang.com/vp/products/6265639245)                 |
-| ![MMSD4148](image/parts/MMSD4148.png)             | 다이오드(1N4148/MMSD4148)     | 77  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=6382)                |
+| ![MMSD4148](image/parts/MMSD4148.png)             | 다이오드(1N4148/MMSD4148)     | 88  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=6382)                |
 | ![인서트(Spredsert)](image/parts/spredsert.png)      | 인서트(spredsert)            | 8   | 케이스 조립용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1067969)             |
 | ![나사](image/parts/M3x5.png)                       | 접시머리 십자볼트 M3*10           | 8   | 케이스 조립용                   | [연결](https://www.devicemart.co.kr/goods/view?no=34782)               |
 |                                                   | 납땜 재료                     | -   | 인두기, 납, 인두기 스탠드 등등        |                                                                      |
@@ -84,26 +84,26 @@ TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
 ![RP2040](./image/RP2040-Zero-pinout.png)
 
 
-| RP2040-Zero 핀 | 좌측 보드    | 우측 보드    |
-| :-------------: | :--------: | :--------: |
-| GP0           | ROW 0    | ROW 0    |
-| GP1           | ROW 1    | ROW 1    |
-| GP2           | ROW 2    | ROW 2    |
-| GP3           | ROW 3    | ROW 3    |
-| GP4           | ROW 4    | ROW 4    |
-| GP5           | ROW 5    | ROW 5    |
-| GP6           | COL 0    | COL 0    |
-| GP7           | COL 1    | COL 1    |
-| GP8           | COL 2    | COL 2    |
-| GP9           | COL 3    | COL 3    |
-| GP10          | COL 4    | COL 4    |
-| GP11          | COL 5    | COL 5    |
-| GP12          | COL 6    | COL 6    |
-| GP13          | —        | COL 7    |
-| GP14          | —        | COL 8    |
-| GP15          | TRRS 시리얼 | TRRS 시리얼 |
-| 5V            | TRRS VCC | TRRS VCC |
-| GND           | TRRS GND | TRRS GND |
+| RP2040-Zero 핀   | 좌측 보드    | 우측 보드    |
+| :---------------: | :--------: | :--------: |
+| GP0             | ROW 0    | ROW 0    |
+| GP1             | ROW 1    | ROW 1    |
+| GP2             | ROW 2    | ROW 2    |
+| GP3             | ROW 3    | ROW 3    |
+| GP4             | ROW 4    | ROW 4    |
+| GP5             | ROW 5    | ROW 5    |
+| GP6             | COL 0    | COL 0    |
+| GP7             | COL 1    | COL 1    |
+| GP8             | COL 2    | COL 2    |
+| GP9             | COL 3    | COL 3    |
+| GP10            | COL 4    | COL 4    |
+| GP11            | COL 5    | COL 5    |
+| GP12            | COL 6    | COL 6    |
+| GP13            | —        | COL 7    |
+| GP14            | —        | COL 8    |
+| GP15            | TRRS 시리얼 | TRRS 시리얼 |
+| uuuuuuuuuuuuu5V | TRRS VCC | TRRS VCC |
+| GND             | TRRS GND | TRRS GND |
 
 
 - 다이오드 방향: `COL2ROW`
