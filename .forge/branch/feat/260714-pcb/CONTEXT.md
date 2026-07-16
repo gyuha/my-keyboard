@@ -9,8 +9,8 @@
 _Avoid_: 플레이트(단독), 탑플레이트
 
 **상판 외곽 (plate outline)**:
-스위치 컷아웃(14mm) 합집합을 가장자리 기준 8mm 바깥으로 각진 확장한 뒤 모든 코너를 5R로 필렛한 폐곡선. PCB 보드 외곽선이 아니라 키 배열에서 도출한다. 규칙은 ADR-0002.
-_Avoid_: 보드 외곽선, 케이스 외곽
+**하단 body 외곽선과 동일하게** 도출한다 — PCB 외곽 bbox를 각 변 (PCB_CLEAR + WALL)만큼 확장하고 코너를 5R(BODY_CORNER_R)로 필렛한 둥근 사각. 상판과 body 가장자리가 flush해 **단차가 없다**. (초기 세대의 "키 배열에서 8mm 확장" 규칙(ADR-0002)은 이 결정으로 대체됨 — body보다 작아 단차가 생겼기 때문.)
+_Avoid_: 케이스 외곽(별개), 스위치-중심 외곽(구세대)
 
 **코너 보스 (corner boss)**:
 상판 하면에서 코너 나사홀 주변만 국부적으로 두껍게 만든 돌기. 1.5mm 판에서 접시머리 카운터싱크 깊이를 확보하기 위한 것. 중앙부 홀에는 두지 않는다.
@@ -46,3 +46,23 @@ _Avoid_: 홈(모호), 그루브
 **인서트 포스트 (insert post)**:
 body 코너에서 바닥부터 PCB 선반 높이까지 올라오는 기둥. 상단에 Spredsert M3X5 열융착 인서트를 매립해 상판 코너 나사를 받는다. 위치는 코너 고정 홀(=상판 코너 나사)과 일치한다. 상판의 [[코너 보스]](미적용)와는 다른, body 쪽 구조.
 _Avoid_: 스탠드오프, 코너 보스
+
+## Firmware (배선/펌웨어)
+
+**배선 원천 (wiring source)**:
+QMK 펌웨어의 키 매트릭스·핀 배치의 진실의 원천은 EasyEDA Pro 스키마(`pcb/split-keyboard.epro` 안 `SHEET/*.esch`)다. DXF는 넷 연결이 없고 README 핀 표는 낡았으므로 원천이 아니다(ADR 260716-15a). 기구(상판·body)의 배열 원천이 PCB DXF인 것과 구분된다 — 같은 `.epro`의 다른 export.
+_Avoid_: DXF 배선, README 핀 표(파생 문서)
+
+**키 매트릭스 (key matrix)**:
+스위치를 스캔하는 논리적 행·열 격자. 물리적으로 **5행**(스키마 넷 ROW0~ROW4), 최대 **9열**(COL0~COL8), 다이오드 방향 COL2ROW. QMK에서는 분할이라 행이 두 배가 되어 `MATRIX_ROWS=10`(좌 rows0–4, 우 rows5–9), `MATRIX_COLS=9`. 좌측은 7열(COL0–6)만, 우측은 9열(COL0–8)을 쓴다.
+_Avoid_: 6행(구세대 펌웨어 잔재), F키 전용 행
+
+**ROW/COL 넷 (row/col net)**:
+스키마에서 각 스위치를 GP핀에 잇는 넷 라벨. ROW0~ROW4는 행 스캔 핀, COL0~COL8은 열 판독 핀. 각 넷이 실제 어느 RP2040 GP핀인지는 스키마의 RP2040-Zero 모듈 핀↔넷 매핑에서 도출한다(README 핀 표가 아니라).
+
+**시리얼 배선 (TRRS serial)**:
+좌·우 보드를 잇는 TRRS 3.5mm 케이블의 데이터/전원 넷. 스키마 넷은 TX0·RX0·3V3·GND. README는 GP15 단선(half-duplex)이라 하나 스키마는 TX0·RX0 2선(full-duplex 가능성) — 실제 배선은 스키마에서 확정한다.
+_Avoid_: GP15 단정(README 기준)
+
+**가운데 B / 한영키 (middle B / Han-Yeong key)**:
+분할 키보드 가운데에 추가한 키. 양쪽 안쪽에 B를 배치(한글 'ㅠ' 입력 편의), 우측 B 아래에 한/영키(스키마 지정자 `R.ALT`, 윈도우 한영=우Alt 매핑). README 도입부의 설계 의도가 이것.

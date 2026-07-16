@@ -2,6 +2,7 @@
 # 실행 기록 — 키보드 하단 body(케이스) 생성
 
 > 2026-07-16 개정: 사용자 요청으로 상판을 4mm로 두껍게 하고(소음 저감), PCB에 밀착시키고(간격 0), body는 채결 역할로 단순화(상판이 body 위에 얹힘, lip recess 제거).
+> 2026-07-16 개정2: 상판 외곽을 body 외곽과 동일하게(PCB bbox ± (PCB_CLEAR+WALL), R5) 변경 — 상판/body 가장자리 flush, 단차 제거(기존 스위치-중심 기준 외곽은 body보다 각 변 ~2mm 작아 단차 발생).
 
 ## 산출물
 - `freecad/create_switch_plate.py` — `build_body(name, r)` + body 파라미터 + `build_all` 통합(body 생성·조립·export).
@@ -19,6 +20,7 @@
 
 ## 발산(Divergences)
 1. **[중간] 설계 변경(이번 개정)**: 초기 계획(상판 1.5mm recess·상판-PCB 3.5mm 간격·lip 단턱 z15.5·선반 z10)에서, 사용자 요청으로 **상판 4mm·간격 0·상판 body 위에 얹힘**으로 전환. lip recess 제거, PCB 선반이 body 최상단(z15)으로 이동, 총 높이 17→21mm. plan.md의 DoD 일부(lip z=15.5·선반 z=10·PLATE_GAP 3.5)는 이 개정으로 대체됨.
+1b. **[중간] 상판 외곽 변경(개정2)**: 상판 외곽을 스위치-중심 기준(OUTLINE_MARGIN+CUTOUT/2, R=CORNER_R)에서 **body 외곽과 동일**(PCB bbox ± (PCB_CLEAR+WALL), R=BODY_CORNER_R)로 변경 → 단차 제거. ADR-0002의 "상판 외곽 = 키 배열 기준" 규칙은 이 개정으로 사실상 대체됨(회고에서 ADR 정합성 정리 필요). 파라미터 `OUTLINE_MARGIN`·`CORNER_R`는 이제 미사용(orphan) — 삭제하지 않고 남겨둠.
 2. **[중간] 검증 방법**: `Shape.isInside`/`section` 신뢰 불가 → **common 볼륨 프로브**로 확정 검증. 우측 body는 `.Shape`가 조립 오프셋(x+230) 적용 상태로 반환되므로 프로브 좌표에 +230 보정. 좌·우 동일하게 통과.
 3. **[낮음] 상판 안착 rim/베젤 폭 얇음**: body가 plate보다 각 변 ~2mm만 크므로(ADR-0003) 상판이 얹히는 rim 폭이 좁다. 기능상 OK.
 4. **[낮음] 색상은 MCP에서만 적용**: 스크립트는 색 미설정(freecadcmd는 색 손실), MCP(GUI)에서 색 입혀 저장. 스크립트 미변경.

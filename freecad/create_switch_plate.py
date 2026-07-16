@@ -279,13 +279,12 @@ def build_plate(name, centers, board):
     import FreeCAD as App
     import Part
 
-    # 1) 외곽 = 컷아웃 bbox + 8mm 둥근 사각(R5)
-    cxs = [c[0] for c in centers]
-    cys = [c[1] for c in centers]
-    m = OUTLINE_MARGIN + CUTOUT / 2.0            # 중심 극점에서 8 + 7 = 15
-    x0, x1 = min(cxs) - m, max(cxs) + m
-    y0, y1 = min(cys) - m, max(cys) + m
-    solid = _rounded_rect(x0, y0, x1, y1, CORNER_R, PLATE_T)
+    # 1) 외곽 = body 외곽과 동일(단차 없음): PCB bbox ± (PCB_CLEAR + WALL), R = BODY_CORNER_R
+    bxs = [v[0] for v in board]
+    bys = [v[1] for v in board]
+    x0, x1 = min(bxs) - PCB_CLEAR - WALL, max(bxs) + PCB_CLEAR + WALL
+    y0, y1 = min(bys) - PCB_CLEAR - WALL, max(bys) + PCB_CLEAR + WALL
+    solid = _rounded_rect(x0, y0, x1, y1, BODY_CORNER_R, PLATE_T)
 
     # 2) 스위치 컷아웃 (14 + 2*offset)
     cut = CUTOUT + 2 * CUTOUT_OFFSET
