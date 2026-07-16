@@ -74,39 +74,42 @@
 
 ### RP2040-Zero 핀 배치
 
-행(ROW) 핀은 좌우 공통이고, 열(COL) 핀은 우측이 2열(GP13, GP14) 더 많습니다.
-TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
+행(ROW) 핀은 좌우 공통이고, 열(COL) 핀은 우측이 2열(GP14, GP15) 더 많습니다.
+TRRS 케이블은 시리얼 2선(GP0=TX0 · GP1=RX0, full-duplex)과 3V3 · GND를 사용합니다(4극).
 
+> 핀 배치는 PCB 스키마(`pcb/split-keyboard.epro`)에서 도출했습니다 — 이 표가 진실의 원천입니다.
 
 
 ![RP2040](./image/RP2040-Zero-pinout.png)
 
 
-| RP2040-Zero 핀 | 좌측 보드    | 우측 보드    |
-| :-------------: | :--------: | :--------: |
-| GP0           | ROW 0    | ROW 0    |
-| GP1           | ROW 1    | ROW 1    |
-| GP2           | ROW 2    | ROW 2    |
-| GP3           | ROW 3    | ROW 3    |
-| GP4           | ROW 4    | ROW 4    |
-| GP5           | ROW 5    | ROW 5    |
-| GP6           | COL 0    | COL 0    |
-| GP7           | COL 1    | COL 1    |
-| GP8           | COL 2    | COL 2    |
-| GP9           | COL 3    | COL 3    |
-| GP10          | COL 4    | COL 4    |
-| GP11          | COL 5    | COL 5    |
-| GP12          | COL 6    | COL 6    |
-| GP13          | —        | COL 7    |
-| GP14          | —        | COL 8    |
-| GP15          | TRRS 시리얼 | TRRS 시리얼 |
-| 5V            | TRRS VCC | TRRS VCC |
-| GND           | TRRS GND | TRRS GND |
+| RP2040-Zero 핀 | 좌측 보드     | 우측 보드     |
+| :-------------: | :---------: | :---------: |
+| GP0           | TRRS TX0  | TRRS TX0  |
+| GP1           | TRRS RX0  | TRRS RX0  |
+| GP2           | ROW 0     | ROW 0     |
+| GP3           | ROW 1     | ROW 1     |
+| GP4           | ROW 2     | ROW 2     |
+| GP5           | ROW 3     | ROW 3     |
+| GP6           | ROW 4     | ROW 4     |
+| GP7           | COL 0     | COL 0     |
+| GP8           | COL 1     | COL 1     |
+| GP9           | COL 2     | COL 2     |
+| GP10          | COL 3     | COL 3     |
+| GP11          | COL 4     | COL 4     |
+| GP12          | COL 5     | COL 5     |
+| GP13          | COL 6     | COL 6     |
+| GP14          | —         | COL 7     |
+| GP15          | —         | COL 8     |
+| 3V3           | TRRS 3V3  | TRRS 3V3  |
+| GND           | TRRS GND  | TRRS GND  |
 
 
+- 매트릭스: **5행 × 최대 9열**(좌측 7열 COL0~6 / 우측 9열 COL0~8), `MATRIX_ROWS 10`.
 - 다이오드 방향: `COL2ROW`
+- 시리얼: full-duplex(TX=GP0, RX=GP1). TRRS 4극(3V3·GND·TX0·RX0)을 모두 사용합니다.
 - USB는 우측 보드에 연결합니다(`MASTER_RIGHT`). 좌측은 TRRS로만 연결됩니다.
-- 펌웨어 정의: `gkey/config.h`의 `MATRIX_ROW_PINS` / `MATRIX_COL_PINS` / `SERIAL_USART_TX_PIN`
+- 펌웨어 정의: `gkey/config.h`의 `MATRIX_ROW_PINS` / `MATRIX_COL_PINS` / `SERIAL_USART_FULL_DUPLEX` · `SERIAL_USART_TX_PIN` · `SERIAL_USART_RX_PIN`
 
 
 
