@@ -40,6 +40,7 @@ PARAMS = {
     "StabClipPlateThickness": 1.4,
     "StabClipLedgeWidth": 1.2,
     "StabCutoutMaxWidth": 5.0,
+    "StabCutoutHeight": 14.1,
     "PalmRestDepth": 80.0,
     "PalmRestRearHeight": 25.0,
     "PalmRestFrontHeight": 12.0,
@@ -114,10 +115,37 @@ def dxf_line_loops(path):
     return loops
 
 
+def shrink_stab_slots(key_loops):
+    """Set each narrow stabilizer cutout's long dimension to StabCutoutHeight,
+    keeping its centre fixed (the short dimension is left untouched)."""
+    max_w = PARAMS["StabCutoutMaxWidth"]
+    target = PARAMS["StabCutoutHeight"]
+    adjusted = []
+    for loop in key_loops:
+        xs = [p[0] for p in loop]
+        ys = [p[1] for p in loop]
+        bx0, bx1, by0, by1 = min(xs), max(xs), min(ys), max(ys)
+        if min(bx1 - bx0, by1 - by0) > max_w:
+            adjusted.append(loop)
+            continue
+        if (by1 - by0) >= (bx1 - bx0):        # vertical slot: shrink Y
+            c = (by0 + by1) / 2.0
+            lo, hi = c - target / 2.0, c + target / 2.0
+            loop = [(x, hi if abs(y - by1) < abs(y - by0) else lo) for x, y in loop]
+        else:                                  # horizontal slot: shrink X
+            c = (bx0 + bx1) / 2.0
+            lo, hi = c - target / 2.0, c + target / 2.0
+            loop = [(hi if abs(x - bx1) < abs(x - bx0) else lo, y) for x, y in loop]
+        adjusted.append(loop)
+    return adjusted
+
+
 def compute_layout(dxf_filename):
     """Plate/body footprint from the DXF key cutouts (first loop is the perimeter)."""
     loops = dxf_line_loops(os.path.join(BASE_DIR, dxf_filename))
     key_loops = loops[1:]
+    # Outer footprint is derived from the original cutouts so the stab-height
+    # tweak below cannot move the plate/body outline.
     xs = [p[0] for loop in key_loops for p in loop]
     ys = [p[1] for loop in key_loops for p in loop]
     margin = PARAMS["OuterMargin"]
@@ -126,7 +154,7 @@ def compute_layout(dxf_filename):
         "y_min": min(ys) - margin,
         "x_max": max(xs) + margin,
         "y_max": max(ys) + margin,
-        "key_loops": key_loops,
+        "key_loops": shrink_stab_slots(key_loops),
     }
 
 
