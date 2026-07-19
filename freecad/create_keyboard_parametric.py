@@ -309,6 +309,36 @@ def build_plate(document, side, layout, color):
         print("  countersink chamfer skipped (%s): %s" % (side, str(chamfer_error)[:40]))
         document.recompute()
 
+    # Plate-mount stabilizer clip relief: on the two long edges of each narrow
+    # stabilizer cutout, widen the slot by StabClipLedgeWidth from the underside up
+    # to (thickness - StabClipPlateThickness), leaving a StabClipPlateThickness ledge
+    # at the plate top so the clip can latch (the 1.4 mm ledge / 1.2 mm relief callouts).
+    ledge = PARAMS["StabClipLedgeWidth"]
+    max_w = PARAMS["StabCutoutMaxWidth"]
+    stab = body.newObject("Sketcher::SketchObject", side + "_Stab_Relief")
+    stab.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation())
+    stab_count = 0
+    for loop in layout["key_loops"]:
+        xs = [p[0] for p in loop]
+        ys = [p[1] for p in loop]
+        bx0, bx1, by0, by1 = min(xs), max(xs), min(ys), max(ys)
+        if min(bx1 - bx0, by1 - by0) > max_w:
+            continue
+        add_polygon(stab, [(bx0, by1), (bx1, by1), (bx1, by1 + ledge), (bx0, by1 + ledge)])
+        add_polygon(stab, [(bx0, by0 - ledge), (bx1, by0 - ledge), (bx1, by0), (bx0, by0)])
+        stab_count += 1
+    if stab_count:
+        stab_pocket = body.newObject("PartDesign::Pocket", side + "_Stab_Relief_Pocket")
+        stab_pocket.Profile = stab
+        stab_pocket.Length = thickness - PARAMS["StabClipPlateThickness"]
+        stab_pocket.Reversed = True
+        stab_pocket.setExpression(
+            "Length", u"Parameters.PlateThickness - Parameters.StabClipPlateThickness")
+        document.recompute()
+    else:
+        document.removeObject(stab.Name)
+    print("  %s stab cutouts relieved: %d" % (side, stab_count))
+
     if body.ViewObject:
         body.ViewObject.ShapeColor = color
     return body
