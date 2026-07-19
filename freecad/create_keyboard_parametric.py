@@ -41,6 +41,7 @@ PARAMS = {
     "StabClipLedgeWidth": 1.2,
     "StabCutoutMaxWidth": 5.0,
     "StabCutoutHeight": 14.1,
+    "KeyholeSize": 13.902,
     "PalmRestDepth": 80.0,
     "PalmRestRearHeight": 25.0,
     "PalmRestFrontHeight": 12.0,
@@ -140,6 +141,28 @@ def shrink_stab_slots(key_loops):
     return adjusted
 
 
+def resize_keyholes(key_loops):
+    """Set each key switch cutout (the wide ones) to KeyholeSize x KeyholeSize,
+    keeping its centre fixed. Narrow stabilizer cutouts are left untouched."""
+    max_w = PARAMS["StabCutoutMaxWidth"]
+    size = PARAMS["KeyholeSize"]
+    adjusted = []
+    for loop in key_loops:
+        xs = [p[0] for p in loop]
+        ys = [p[1] for p in loop]
+        bx0, bx1, by0, by1 = min(xs), max(xs), min(ys), max(ys)
+        if min(bx1 - bx0, by1 - by0) <= max_w:        # stab slot -> skip
+            adjusted.append(loop)
+            continue
+        cx, cy = (bx0 + bx1) / 2.0, (by0 + by1) / 2.0
+        xlo, xhi = cx - size / 2.0, cx + size / 2.0
+        ylo, yhi = cy - size / 2.0, cy + size / 2.0
+        loop = [(xhi if abs(x - bx1) < abs(x - bx0) else xlo,
+                 yhi if abs(y - by1) < abs(y - by0) else ylo) for x, y in loop]
+        adjusted.append(loop)
+    return adjusted
+
+
 def compute_layout(dxf_filename):
     """Plate/body footprint from the DXF key cutouts (first loop is the perimeter)."""
     loops = dxf_line_loops(os.path.join(BASE_DIR, dxf_filename))
@@ -154,7 +177,7 @@ def compute_layout(dxf_filename):
         "y_min": min(ys) - margin,
         "x_max": max(xs) + margin,
         "y_max": max(ys) + margin,
-        "key_loops": shrink_stab_slots(key_loops),
+        "key_loops": resize_keyholes(shrink_stab_slots(key_loops)),
     }
 
 
