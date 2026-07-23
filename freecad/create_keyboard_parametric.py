@@ -41,7 +41,7 @@ PARAMS = {
     "StabClipLedgeWidth": 1.2,
     "StabCutoutMaxWidth": 5.0,
     "StabCutoutHeight": 14.1,
-    "KeyholeSize": 13.902,
+    "KeyholeSize": 13.96,
     "PalmRestDepth": 80.0,
     "PalmRestRearHeight": 25.0,
     "PalmRestFrontHeight": 12.0,
