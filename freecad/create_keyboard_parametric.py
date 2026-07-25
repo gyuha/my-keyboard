@@ -51,7 +51,8 @@ PARAMS = {
     "Rp2040ZeroLength": 25.0,
     "Rp2040ZeroWidth": 18.0,
     "Rp2040ZeroPcbThickness": 1.6,
-    "Rp2040SeatClearance": 0.6,
+    "Rp2040SeatSideClearance": 1.1,
+    "Rp2040SeatEndClearance": -0.4,
     "Rp2040SeatDepth": 1.0,
     "Rp2040StopThickness": 3.0,
     "Rp2040StopHeight": 2.0,
@@ -531,8 +532,10 @@ def build_body(document, side, layout, color, include_controller=False,
         document.recompute()
 
     if include_controller:
-        seat_w = PARAMS["Rp2040ZeroWidth"] + 2 * PARAMS["Rp2040SeatClearance"]
-        seat_l = PARAMS["Rp2040ZeroLength"] + 2 * PARAMS["Rp2040SeatClearance"]
+        seat_w = PARAMS["Rp2040ZeroWidth"] + 2 * PARAMS["Rp2040SeatSideClearance"]
+        # EndClearance is negative: seat is shorter than the board so the USB end
+        # protrudes through the wall opening and the board is held snugly.
+        seat_l = PARAMS["Rp2040ZeroLength"] + 2 * PARAMS["Rp2040SeatEndClearance"]
         seat_x = usb_center_x - seat_w / 2
         seat_y = y_rear - wall - seat_l  # USB faces the front edge (usb_at_rear=False)
 
@@ -545,7 +548,7 @@ def build_body(document, side, layout, color, include_controller=False,
         csp.Length = PARAMS["Rp2040SeatDepth"]
         document.recompute()
 
-        uz0 = z_base + 2.0
+        uz0 = z_base + 3.2
         uo = body.newObject("Sketcher::SketchObject", side + "_Usb_Opening")
         uo.Placement = App.Placement(App.Vector(0, y_rear, 0), XZ_ROTATION)
         add_rounded_rect(uo, usb_center_x - PARAMS["UsbOpeningWidth"] / 2, uz0,
