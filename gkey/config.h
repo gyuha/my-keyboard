@@ -2,8 +2,10 @@
 
 //#include "config_common.h"
 
-#define VENDOR_ID       0xFEED
-#define PRODUCT_ID      0x4445
+// 0xFEED is QMK's placeholder VID and VIA rejects it outright; 0x1209/0x0001 is
+// the pid.codes test PID, free for prototypes. Must stay in sync with via.json.
+#define VENDOR_ID       0x1209
+#define PRODUCT_ID      0x0001
 #define DEVICE_VER      0x0001
 #define PRODUCT         "Split-keyboard"
 #define MANUFACTURER    "Gyuha"
@@ -22,6 +24,15 @@
 
 #define DIODE_DIRECTION COL2ROW
 #define SERIAL_USART_TX_PIN GP15
+
+// Bootmagic runs before the split link is up, so the master can only read its
+// own rows. USB is on the right (MASTER_RIGHT), whose rows are 6-11, so without
+// the _RIGHT pair below it would poll (0,0) on the left half and never trigger.
+// (6,0) = right F7; (0,0) = left ESC, used when a half boots as the slave.
+#define BOOTMAGIC_ROW           0
+#define BOOTMAGIC_COLUMN        0
+#define BOOTMAGIC_ROW_RIGHT     6
+#define BOOTMAGIC_COLUMN_RIGHT  0
 
 // WS2812 RGB LED strip input and number of LEDs
 // #define RGB_DI_PIN D3
