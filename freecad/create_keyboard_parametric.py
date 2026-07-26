@@ -57,10 +57,10 @@ PARAMS = {
     "Rp2040StopThickness": 3.0,
     "Rp2040StopHeight": 2.0,
     "UsbOpeningWidth": 10.0,
-    "UsbOpeningHeight": 6.0,
+    "UsbOpeningHeight": 3.7,
     "UsbOpeningRadius": 1.5,
     "UsbBezelWidth": 14.0,
-    "UsbBezelHeight": 10.0,
+    "UsbBezelHeight": 7.7,
     "UsbBezelRadius": 5.0,
     "UsbBezelDepth": 1.0,
     "UsbEdgeOffset": 37.0,
@@ -548,7 +548,9 @@ def build_body(document, side, layout, color, include_controller=False,
         csp.Length = PARAMS["Rp2040SeatDepth"]
         document.recompute()
 
-        uz0 = z_base + 3.2
+        # Opening center sits 0.8 below the TRS jack axis so both line up on the wall.
+        uz0 = (z_base + PARAMS["TrsJackAxisHeight"] - 0.8
+               - PARAMS["UsbOpeningHeight"] / 2)
         uo = body.newObject("Sketcher::SketchObject", side + "_Usb_Opening")
         uo.Placement = App.Placement(App.Vector(0, y_rear, 0), XZ_ROTATION)
         add_rounded_rect(uo, usb_center_x - PARAMS["UsbOpeningWidth"] / 2, uz0,
@@ -560,11 +562,13 @@ def build_body(document, side, layout, color, include_controller=False,
         uop.Reversed = True
         document.recompute()
 
+        # Bezel is concentric with the opening so the ring margin is uniform.
+        bz0 = uz0 - (PARAMS["UsbBezelHeight"] - PARAMS["UsbOpeningHeight"]) / 2
         ub = body.newObject("Sketcher::SketchObject", side + "_Usb_Bezel")
         ub.Placement = App.Placement(App.Vector(0, y_rear, 0), XZ_ROTATION)
-        add_rounded_rect(ub, usb_center_x - PARAMS["UsbBezelWidth"] / 2, z_base,
+        add_rounded_rect(ub, usb_center_x - PARAMS["UsbBezelWidth"] / 2, bz0,
                          usb_center_x + PARAMS["UsbBezelWidth"] / 2,
-                         z_base + PARAMS["UsbBezelHeight"], PARAMS["UsbBezelRadius"])
+                         bz0 + PARAMS["UsbBezelHeight"], PARAMS["UsbBezelRadius"])
         ubp = body.newObject("PartDesign::Pocket", side + "_Usb_Bezel_Pocket")
         ubp.Profile = ub
         ubp.Length = PARAMS["UsbBezelDepth"] + 0.1
