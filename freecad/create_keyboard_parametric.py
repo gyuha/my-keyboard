@@ -41,6 +41,7 @@ PARAMS = {
     "StabClipLedgeWidth": 1.2,
     "StabCutoutMaxWidth": 5.0,
     "StabCutoutHeight": 14.1,
+    "StabCutoutYOffset": 1.0,
     "KeyholeSize": 13.96,
     "PalmRestDepth": 80.0,
     "PalmRestRearHeight": 25.0,
@@ -119,9 +120,14 @@ def dxf_line_loops(path):
 
 def shrink_stab_slots(key_loops):
     """Set each narrow stabilizer cutout's long dimension to StabCutoutHeight,
-    keeping its centre fixed (the short dimension is left untouched)."""
+    keeping its centre fixed (the short dimension is left untouched), then lift
+    it by StabCutoutYOffset. The DXF puts the slots 0.65 below the switch centre,
+    which made the keycap foul the stabilizer, so the offset raises them without
+    editing the DXF. Stab slots never overlap a switch cutout in X, so moving
+    them in Y cannot introduce a collision with one."""
     max_w = PARAMS["StabCutoutMaxWidth"]
     target = PARAMS["StabCutoutHeight"]
+    dy = PARAMS["StabCutoutYOffset"]
     adjusted = []
     for loop in key_loops:
         xs = [p[0] for p in loop]
@@ -138,7 +144,7 @@ def shrink_stab_slots(key_loops):
             c = (bx0 + bx1) / 2.0
             lo, hi = c - target / 2.0, c + target / 2.0
             loop = [(hi if abs(x - bx1) < abs(x - bx0) else lo, y) for x, y in loop]
-        adjusted.append(loop)
+        adjusted.append([(x, y + dy) for x, y in loop])
     return adjusted
 
 
