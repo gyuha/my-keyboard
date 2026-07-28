@@ -49,6 +49,7 @@ PARAMS = {
     "PalmRestFlatDepth": 35.0,
     "PalmRestGap": 5.0,
     "PalmRestFilletRadius": 3.0,
+    "PalmRestTaperAngleDeg": 10.0,
     "Rp2040ZeroLength": 25.0,
     "Rp2040ZeroWidth": 18.0,
     "Rp2040ZeroPcbThickness": 1.6,
@@ -215,6 +216,41 @@ def add_rounded_rect(sketch, x0, y0, x1, y1, radius):
         sketch.addGeometry(geo, False)
 
 
+def add_rounded_polygon(sketch, points, radius):
+    """Add a closed wire through `points` (convex, counter-clockwise) with every
+    corner rounded. `radius` is either one value for all corners or one value per
+    point, where 0 leaves that corner sharp. Same output as add_rounded_rect for a
+    rectangle, but also handles corners that are not right angles."""
+    normal = App.Vector(0, 0, 1)
+    radii = radius if isinstance(radius, (list, tuple)) else [radius] * len(points)
+    corners = []
+    for index in range(len(points)):
+        cx, cy = points[index]
+        corner = App.Vector(cx, cy, 0)
+        if radii[index] <= 0:
+            corners.append((corner, corner, None))
+            continue
+        px, py = points[index - 1]
+        nx, ny = points[(index + 1) % len(points)]
+        to_prev = (App.Vector(px, py, 0) - corner).normalize()
+        to_next = (App.Vector(nx, ny, 0) - corner).normalize()
+        half = math.acos(max(-1.0, min(1.0, to_prev.dot(to_next)))) / 2.0
+        setback = radii[index] / math.tan(half)
+        corners.append((corner + to_prev * setback, corner + to_next * setback,
+                        corner + (to_prev + to_next).normalize() * (radii[index] / math.sin(half))))
+
+    def angle(point, centre):
+        return math.atan2(point.y - centre.y, point.x - centre.x)
+
+    for index, (entry, leave, centre) in enumerate(corners):
+        if centre is not None:
+            circle = Part.Circle(centre, normal, radii[index])
+            sketch.addGeometry(
+                Part.ArcOfCircle(circle, angle(entry, centre), angle(leave, centre)), False)
+        sketch.addGeometry(
+            Part.LineSegment(leave, corners[(index + 1) % len(corners)][0]), False)
+
+
 def add_polygon(sketch, points):
     for index in range(len(points)):
         ax, ay = points[index]
@@ -252,12 +288,22 @@ def build_palm_rest(document, side, layout):
     front_h = PARAMS["PalmRestFrontHeight"]
     flat = PARAMS["PalmRestFlatDepth"]
     radius = PARAMS["CornerRadius"]
+    # Both flanks lean inwards by PalmRestTaperAngleDeg, so the rear edge keeps the
+    # plate width while the front edge (nearest the user) narrows.
+    inset = PARAMS["PalmRestDepth"] * math.tan(math.radians(PARAMS["PalmRestTaperAngleDeg"]))
 
     body = document.addObject("PartDesign::Body", side + "_Palm_Rest")
 
     base = body.newObject("Sketcher::SketchObject", side + "_Palm_Base")
     base.Placement = App.Placement(App.Vector(0, 0, z_base), App.Rotation())
-    add_rounded_rect(base, x0, y_front, x1, y_rear, radius)
+    # Front corners keep the CornerRadius rounding; the two rear corners stay sharp
+    # so the rest butts squarely against the case.
+    add_rounded_polygon(base, [
+        (x0 + inset, y_front),
+        (x1 - inset, y_front),
+        (x1, y_rear),
+        (x0, y_rear),
+    ], [radius, radius, 0, 0])
 
     pad = body.newObject("PartDesign::Pad", side + "_Palm_Pad")
     pad.Profile = base
