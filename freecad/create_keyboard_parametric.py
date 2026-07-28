@@ -49,6 +49,7 @@ PARAMS = {
     "PalmRestFlatDepth": 35.0,
     "PalmRestGap": 5.0,
     "PalmRestFilletRadius": 3.0,
+    "PalmRestCrestRadius": 60.0,
     "PalmRestTaperAngleDeg": 10.0,
     "Rp2040ZeroLength": 25.0,
     "Rp2040ZeroWidth": 18.0,
@@ -328,11 +329,36 @@ def build_palm_rest(document, side, layout):
     pocket.Midplane = True
     document.recompute()
 
-    tip = pocket.Shape
+    # The crest (where the flat deck meets the slope) is filleted separately: the two
+    # faces meet at a very obtuse angle, so PalmRestFilletRadius would only round a
+    # fraction of a millimetre there and the crest would still look sharp.
+    def crest_edges(shape):
+        return ["Edge%d" % (index + 1) for index, edge in enumerate(shape.Edges)
+                if edge.Vertexes
+                and all(abs(v.Point.y - (y_rear - flat)) < TOLERANCE
+                        and abs(v.Point.z - z_top) < TOLERANCE for v in edge.Vertexes)]
+
+    # The crest is filleted before the small edges: run the other way round and the
+    # R3 fillet leaves 0.14mm slivers at both ends of the crest, which makes the
+    # crest fillet fail at every radius.
+    crest = body.newObject("PartDesign::Fillet", side + "_Palm_Crest")
+    crest.Base = (pocket, crest_edges(pocket.Shape))
+    crest.Radius = PARAMS["PalmRestCrestRadius"]
+    crest.setExpression("Radius", u"Parameters.PalmRestCrestRadius")
+    document.recompute()
+
+    # Edges bounding the crest surface are already tangent continuous, so they must
+    # not be filleted again.
+    tip = crest.Shape
+    smooth = [edge for face in tip.Faces
+              if "Cylinder" in face.Surface.TypeId
+              and abs(face.Surface.Radius - PARAMS["PalmRestCrestRadius"]) < TOLERANCE
+              for edge in face.Edges]
     top_edges = ["Edge%d" % (index + 1) for index, edge in enumerate(tip.Edges)
-                 if edge.Vertexes and min(v.Point.z for v in edge.Vertexes) > z_base + front_h / 2]
+                 if edge.Vertexes and min(v.Point.z for v in edge.Vertexes) > z_base + front_h / 2
+                 and not any(edge.isSame(other) for other in smooth)]
     fillet = body.newObject("PartDesign::Fillet", side + "_Palm_Fillet")
-    fillet.Base = (pocket, top_edges)
+    fillet.Base = (crest, top_edges)
     fillet.Radius = PARAMS["PalmRestFilletRadius"]
     fillet.setExpression("Radius", u"Parameters.PalmRestFilletRadius")
     document.recompute()
