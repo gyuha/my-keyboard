@@ -51,6 +51,14 @@ PARAMS = {
     "PalmRestFilletRadius": 3.0,
     "PalmRestCrestRadius": 60.0,
     "PalmRestTaperAngleDeg": 10.0,
+    # Round neodymium discs (10mm diameter, 2mm thick) hold the palm rest to the
+    # body. The pocket is 4mm deep so the magnet rides on a 2mm double-sided
+    # sticker and its outer face still ends up flush with the mating surface.
+    "MagnetDiameter": 10.0,
+    "MagnetHoleDepth": 4.0,
+    "MagnetHoleClearance": 0.3,
+    "MagnetCentreHeight": 9.0,
+    "MagnetBossThickness": 3.0,
     "Rp2040ZeroLength": 25.0,
     "Rp2040ZeroWidth": 18.0,
     "Rp2040ZeroPcbThickness": 1.6,
@@ -267,6 +275,35 @@ YZ_ROTATION = App.Rotation(0.5, 0.5, 0.5, 0.5)
 XZ_ROTATION = App.Rotation(App.Vector(1, 0, 0), 90)
 
 
+def rest_tilt(layout):
+    """Nose-up angle (rad) the Body_Rest wedge props the case at once it is on the desk."""
+    depth = (layout["y_max"] - PARAMS["RestRearMargin"]) - layout["y_min"]
+    return math.asin(PARAMS["RestSlantWidth"]
+                     * math.sin(math.radians(PARAMS["RestSlantAngleDeg"])) / depth)
+
+
+def magnet_centres_x(layout):
+    """X positions of the magnet pair, at a quarter and three quarters of the width."""
+    span = layout["x_max"] - layout["x_min"]
+    return [layout["x_min"] + span * fraction for fraction in (0.25, 0.75)]
+
+
+def add_magnet_pockets(document, body, name, placement, centres):
+    """Bore the magnet pockets into `placement`'s plane, one per entry in `centres`."""
+    sketch = body.newObject("Sketcher::SketchObject", name + "_Magnet_Holes")
+    sketch.Placement = placement
+    for u, v in centres:
+        sketch.addGeometry(Part.Circle(
+            App.Vector(u, v, 0), App.Vector(0, 0, 1),
+            (PARAMS["MagnetDiameter"] + PARAMS["MagnetHoleClearance"]) / 2), False)
+    pocket = body.newObject("PartDesign::Pocket", name + "_Magnet_Pockets")
+    pocket.Profile = sketch
+    pocket.Length = PARAMS["MagnetHoleDepth"]
+    pocket.setExpression("Length", u"Parameters.MagnetHoleDepth")
+    document.recompute()
+    return pocket
+
+
 def build_spreadsheet(document):
     sheet = document.addObject("Spreadsheet::Sheet", "Parameters")
     for row, (name, value) in enumerate(PARAMS.items(), start=1):
@@ -312,9 +349,36 @@ def build_palm_rest(document, side, layout):
     pad.setExpression("Length", u"Parameters.PalmRestRearHeight")
     document.recompute()
 
+    z_top = z_base + rear_h
+
+    # The case stands nose-up on its Body_Rest wedge while the palm rest sits flat on
+    # the desk, so in the desk frame the body's front face leans forward by the tilt
+    # angle while a plain vertical rear face would not. Lean the rear face by the same
+    # angle: the two faces then meet flush over their whole height instead of touching
+    # along the bottom edge only, which is what lets the magnets pull face to face.
+    tilt = rest_tilt(layout)
+    lean = math.tan(tilt)
+
+    def rear_at(z):
+        return y_rear - (z - z_base) * lean
+
+    lean_sk = body.newObject("Sketcher::SketchObject", side + "_Palm_LeanCut")
+    lean_sk.Placement = App.Placement(App.Vector(0, 0, 0), YZ_ROTATION)
+    z_lo, z_hi = z_base - 1.0, z_top + 1.0
+    add_polygon(lean_sk, [
+        (rear_at(z_lo), z_lo),
+        (rear_at(z_hi), z_hi),
+        (y_rear + 5.0, z_hi),
+        (y_rear + 5.0, z_lo),
+    ])
+    lean_cut = body.newObject("PartDesign::Pocket", side + "_Palm_Lean")
+    lean_cut.Profile = lean_sk
+    lean_cut.Type = "ThroughAll"
+    lean_cut.Midplane = True
+    document.recompute()
+
     # Remove the wedge above the sloped top: quad on a YZ-normal plane, symmetric
     # through-all pocket so it cuts the full X width regardless of position.
-    z_top = z_base + rear_h
     cut = body.newObject("Sketcher::SketchObject", side + "_Palm_WedgeCut")
     cut.Placement = App.Placement(App.Vector(0, 0, 0), YZ_ROTATION)
     add_polygon(cut, [
@@ -362,6 +426,17 @@ def build_palm_rest(document, side, layout):
     fillet.Radius = PARAMS["PalmRestFilletRadius"]
     fillet.setExpression("Radius", u"Parameters.PalmRestFilletRadius")
     document.recompute()
+
+    # Magnet seats, bored perpendicular to the leaning rear face (not along Y) so the
+    # magnet lies flat in its pocket. The sketch plane is tilted with the face, its
+    # local +X follows global X and its origin sits on the face at the magnet height,
+    # so each magnet centre is just (x, 0) in sketch coordinates.
+    z_centre = z_base + PARAMS["MagnetCentreHeight"]
+    add_magnet_pockets(
+        document, body, side + "_Palm",
+        App.Placement(App.Vector(0, rear_at(z_centre), z_centre),
+                      App.Rotation(App.Vector(1, 0, 0), math.degrees(tilt) - 90)),
+        [(x, 0.0) for x in magnet_centres_x(layout)])
 
     if body.ViewObject:
         body.ViewObject.ShapeColor = (0.13, 0.13, 0.13)
@@ -547,7 +622,7 @@ def build_body(document, side, layout, color, include_controller=False,
     y_front = y0
     y_rear = y1 - rear_margin
     depth = y_rear - y_front
-    tilt = math.asin(slant_w * math.sin(slant) / depth)
+    tilt = rest_tilt(layout)
     bottom_length = depth * math.cos(tilt) - slant_w * math.cos(slant)
     rear_bottom_y = y_front + bottom_length * math.cos(tilt)
     rear_bottom_z = z_base - bottom_length * math.sin(tilt)
@@ -581,7 +656,36 @@ def build_body(document, side, layout, color, include_controller=False,
         print("  rest fillet skipped (%s): %s" % (side, str(rest_error)[:40]))
         document.recompute()
 
-    # 6. Connectors. y_max (y1) is the rear wall; the cavity floor is at floor_z.
+    # 6. Magnet seats in the front wall, facing the palm rest. The wall is only
+    # BodyWallThickness thick, so a 4mm pocket would breach the cavity: pad a local
+    # backing block onto the inside of the wall first. It sits well forward of the
+    # front switch row, so it never fouls the switch pins.
+    magnet_x = magnet_centres_x(layout)
+    hole_r = (PARAMS["MagnetDiameter"] + PARAMS["MagnetHoleClearance"]) / 2
+    pad_half = hole_r + 3.0
+    back_sk = body.newObject("Sketcher::SketchObject", side + "_Magnet_Backing")
+    back_sk.Placement = App.Placement(App.Vector(0, 0, -cavity_h), App.Rotation())
+    for x in magnet_x:
+        add_polygon(back_sk, [
+            (x - pad_half, y0 + wall),
+            (x + pad_half, y0 + wall),
+            (x + pad_half, y0 + wall + PARAMS["MagnetBossThickness"]),
+            (x - pad_half, y0 + wall + PARAMS["MagnetBossThickness"]),
+        ])
+    back_pad = body.newObject("PartDesign::Pad", side + "_Magnet_Backing_Pad")
+    back_pad.Profile = back_sk
+    back_pad.Length = cavity_h
+    back_pad.setExpression("Length", u"Parameters.BodyHeight - Parameters.BodyWallThickness")
+    document.recompute()
+
+    # The front face is vertical here; it acquires the tilt when the case sits on its
+    # wedge, and the palm rest's rear face is leaned to match (see build_palm_rest).
+    add_magnet_pockets(
+        document, body, side + "_Body",
+        App.Placement(App.Vector(0, y0, 0), XZ_ROTATION),
+        [(x, z_base + PARAMS["MagnetCentreHeight"]) for x in magnet_x])
+
+    # 7. Connectors. y_max (y1) is the rear wall; the cavity floor is at floor_z.
     floor_z = -cavity_h
     y_rear = y1
 
