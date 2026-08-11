@@ -52,10 +52,13 @@ PARAMS = {
     "PalmRestCrestRadius": 60.0,
     "PalmRestTaperAngleDeg": 10.0,
     # Round neodymium discs (10mm diameter, 2mm thick) hold the palm rest to the
-    # body. The pocket is 4mm deep so the magnet rides on a 2mm double-sided
-    # sticker and its outer face still ends up flush with the mating surface.
+    # body, glued into their pockets. The pocket is 2.2mm deep: ~0.1mm of glue
+    # plus the 2mm disc leaves it 0.1mm shy of the mating surface, so the two
+    # magnets sit 0.2mm apart once the faces close. A 2mm disc loses pull fast
+    # with the gap, so err shallow — a pocket that prints under depth ends up
+    # flush rather than standing the magnet proud and holding the faces open.
     "MagnetDiameter": 10.0,
-    "MagnetHoleDepth": 4.0,
+    "MagnetHoleDepth": 2.2,
     "MagnetHoleClearance": 0.3,
     "MagnetCentreHeight": 9.0,
     "MagnetBossThickness": 3.0,
@@ -656,10 +659,11 @@ def build_body(document, side, layout, color, include_controller=False,
         print("  rest fillet skipped (%s): %s" % (side, str(rest_error)[:40]))
         document.recompute()
 
-    # 6. Magnet seats in the front wall, facing the palm rest. The wall is only
-    # BodyWallThickness thick, so a 4mm pocket would breach the cavity: pad a local
-    # backing block onto the inside of the wall first. It sits well forward of the
-    # front switch row, so it never fouls the switch pins.
+    # 6. Magnet seats in the front wall, facing the palm rest. A 2.2mm pocket stops
+    # short of breaching the BodyWallThickness wall, but only by 0.8mm — too thin to
+    # survive the palm rest being pulled off — so pad a local backing block onto the
+    # inside of the wall, leaving 3.8mm behind each magnet. It sits well forward of
+    # the front switch row, so it never fouls the switch pins.
     magnet_x = magnet_centres_x(layout)
     hole_r = (PARAMS["MagnetDiameter"] + PARAMS["MagnetHoleClearance"]) / 2
     pad_half = hole_r + 3.0
