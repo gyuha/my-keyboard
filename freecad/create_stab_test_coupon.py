@@ -25,13 +25,11 @@ import Mesh
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# StabCutoutYOffset values under test — one station per value. Measured so far:
-# +0.4 the keycap hits the wire and +0.6 the wire hits the switch, so between
-# them the wire is trapped under the keycap skirt in a 0.2 mm window. Moving the
-# switch 1 mm away instead worked, which is the same relative geometry as an
-# offset around -0.8: far enough down that the wire clears the keycap footprint
-# entirely, so the margin widens instead of pinching.
-OFFSETS = [-0.6, -0.8, -1.0]
+# StabCutoutYOffset values under test — one station per value. The plate now
+# ships +0.4, which works once the 2u switch is fitted rotated 180 degrees
+# (ADR 260812-224138). Without that rotation the usable window was only 0.2 mm
+# wide: +0.4 caught the keycap and +0.6 caught the switch.
+OFFSETS = [0.5]
 
 THICKNESS = 2.0                    # coupon bar (real plate is PlateThickness 4.0)
 CLIP_LEDGE = 1.4                   # StabClipPlateThickness — kept at the real value
