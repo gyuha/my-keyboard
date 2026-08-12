@@ -41,7 +41,7 @@ PARAMS = {
     "StabClipLedgeWidth": 1.2,
     "StabCutoutMaxWidth": 5.0,
     "StabCutoutHeight": 14.1,
-    "StabCutoutYOffset": 0.2,
+    "StabCutoutYOffset": 0.4,
     "KeyholeSize": 13.96,
     "PalmRestDepth": 80.0,
     "PalmRestRearHeight": 25.0,
@@ -135,9 +135,11 @@ def shrink_stab_slots(key_loops):
     """Set each narrow stabilizer cutout's long dimension to StabCutoutHeight,
     keeping its centre fixed (the short dimension is left untouched), then shift
     it by StabCutoutYOffset. The DXF puts slots 0.65 mm below the switch centre
-    (X +-11.900, size 3.30 x 14.20), all within 0.3 mm of the commonly used
-    Cherry values, so offset 0 is the spec position; the approved +0.2 mm sits
-    0.2 mm above it, putting the slot centre 0.45 mm below the switch centre.
+    (X +-11.900, DXF slot 3.30 x 14.201 -- the long dimension is then shrunk to
+    StabCutoutHeight = 14.1), all within 0.3 mm of the commonly used Cherry
+    values, so offset 0 is the spec position. +0.2 was printed and still bound
+    slightly, so the approved +0.4 mm sits 0.4 mm above the spec position,
+    putting the slot centre 0.25 mm below the switch centre.
     The offset is a fine adjustment, not a clearance fix: the stabilizer wire
     runs *under* the plate, and this plate has no wire passage between the two
     slots, so the housings are fitted first and the wire is hooked on from
