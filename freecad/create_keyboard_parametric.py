@@ -41,7 +41,7 @@ PARAMS = {
     "StabClipLedgeWidth": 1.2,
     "StabCutoutMaxWidth": 5.0,
     "StabCutoutHeight": 14.1,
-    "StabCutoutYOffset": 1.0,
+    "StabCutoutYOffset": 0.2,
     "KeyholeSize": 13.96,
     "PalmRestDepth": 80.0,
     "PalmRestRearHeight": 25.0,
@@ -133,11 +133,17 @@ def dxf_line_loops(path):
 
 def shrink_stab_slots(key_loops):
     """Set each narrow stabilizer cutout's long dimension to StabCutoutHeight,
-    keeping its centre fixed (the short dimension is left untouched), then lift
-    it by StabCutoutYOffset. The DXF puts the slots 0.65 below the switch centre,
-    which made the keycap foul the stabilizer, so the offset raises them without
-    editing the DXF. Stab slots never overlap a switch cutout in X, so moving
-    them in Y cannot introduce a collision with one."""
+    keeping its centre fixed (the short dimension is left untouched), then shift
+    it by StabCutoutYOffset. The DXF puts slots 0.65 mm below the switch centre
+    (X +-11.900, size 3.30 x 14.20), all within 0.3 mm of the commonly used
+    Cherry values, so offset 0 is the spec position; the approved +0.2 mm sits
+    0.2 mm above it, putting the slot centre 0.45 mm below the switch centre.
+    The offset is a fine adjustment, not a clearance fix: the stabilizer wire
+    runs *under* the plate, and this plate has no wire passage between the two
+    slots, so the housings are fitted first and the wire is hooked on from
+    below -- see .forge/adr/260812-224138-stab-wire-under-plate-assembly-order.md.
+    Stab slots never overlap a switch cutout in X, so moving them in Y cannot
+    introduce a collision with one."""
     max_w = PARAMS["StabCutoutMaxWidth"]
     target = PARAMS["StabCutoutHeight"]
     dy = PARAMS["StabCutoutYOffset"]
