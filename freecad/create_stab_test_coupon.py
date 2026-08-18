@@ -1,8 +1,8 @@
 """Stabilizer Y-offset test coupon.
 
-Three 2u test stations on one bar, identical to the real switch plate except for
-StabCutoutYOffset, so the wire-vs-keycap clearance can be compared in a single
-short print instead of one full plate per candidate value.
+One 2u test station per candidate offset on a single bar, identical to the real
+switch plate except for StabCutoutYOffset, so the wire-vs-keycap clearance can be
+compared in a single short print instead of one full plate per candidate value.
 
 Geometry constants are copied from create_keyboard_parametric.py (that script
 runs main() on import, so it cannot be imported for them). Keep them in sync.
@@ -25,12 +25,12 @@ import Mesh
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# StabCutoutYOffset values under test — one station per value. The plate ships
-# +0.5; this coupon sweeps the low end (+0.0 to +0.3) below the +0.4/+0.5/+0.6
-# bracket already printed. All depend on the 2u switch being fitted rotated 180
-# degrees (ADR 260812-224138). Without that rotation the usable window was only
-# 0.2 mm wide: +0.4 caught the keycap and +0.6 caught the switch.
-OFFSETS = [0.0, 0.1, 0.2, 0.3]
+# StabCutoutYOffset values under test — one station per value. This is the
+# default sweep: +0.0 (the DXF spec position) through +0.5 in 0.1 steps, which
+# has covered every value adopted so far, so a switch change can be re-tuned
+# from one print. The exported STL is committed for that reuse. All values
+# depend on the 2u switch being fitted rotated 180 degrees (ADR 260812-224138).
+OFFSETS = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
 
 THICKNESS = 2.0                    # coupon bar (real plate is PlateThickness 4.0)
 CLIP_LEDGE = 1.4                   # StabClipPlateThickness — kept at the real value
