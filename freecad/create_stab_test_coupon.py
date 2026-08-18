@@ -25,11 +25,12 @@ import Mesh
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# StabCutoutYOffset values under test — one station per value. The plate now
-# ships +0.4, which works once the 2u switch is fitted rotated 180 degrees
-# (ADR 260812-224138). Without that rotation the usable window was only 0.2 mm
-# wide: +0.4 caught the keycap and +0.6 caught the switch.
-OFFSETS = [0.5]
+# StabCutoutYOffset values under test — one station per value. The plate ships
+# +0.5; this coupon sweeps the low end (+0.0 to +0.3) below the +0.4/+0.5/+0.6
+# bracket already printed. All depend on the 2u switch being fitted rotated 180
+# degrees (ADR 260812-224138). Without that rotation the usable window was only
+# 0.2 mm wide: +0.4 caught the keycap and +0.6 caught the switch.
+OFFSETS = [0.0, 0.1, 0.2, 0.3]
 
 THICKNESS = 2.0                    # coupon bar (real plate is PlateThickness 4.0)
 CLIP_LEDGE = 1.4                   # StabClipPlateThickness — kept at the real value
