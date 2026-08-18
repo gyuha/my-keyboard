@@ -128,6 +128,101 @@ TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
 
 ![핀](https://github.com/gyuha/my-keyboard/blob/main/image/stero%20connect%20ping.png?raw=true)
 
+# 스테빌라이저 슬롯 오프셋 조정
+
+코스타 스테빌라이저는 와이어가 스위치 플레이트 **아래쪽**을 지나갑니다. 이 플레이트에는 두 슬롯 사이를 잇는 와이어 통로가 없어서, 하우징을 먼저 끼운 뒤 아래에서 와이어를 걸어 조립합니다. (2u 키의 스위치는 180도 돌려 끼워야 와이어와 간섭하지 않습니다.)
+
+DXF 원본의 스테빌 슬롯은 스위치 중심보다 0.65mm 아래에 있습니다. 이 위치 그대로 출력하면 스위치·키캡 조합에 따라 와이어가 키캡 스커트나 스위치 하우징에 닿아서 눌림이 뻑뻑해집니다. 그래서 슬롯을 Y 방향으로 미세하게 밀어 주는 보정값 `StabCutoutYOffset`을 두었습니다.
+
+**적정값은 쓰는 스위치와 키캡에 따라 달라집니다.** 스위치를 바꾸면 그 값도 다시 잡아야 하므로, 아래 순서로 테스트 쿠폰을 뽑아 확인한 뒤 플레이트에 반영합니다.
+
+| 항목 | 값 |
+| --- | --- |
+| 파라미터 | `freecad/create_keyboard_parametric.py`의 `PARAMS["StabCutoutYOffset"]` |
+| 현재 값 | **+0.2 mm** (슬롯 중심이 스위치 중심 대비 -0.45mm) |
+| 이전 값 | +0.5 mm — 다른 스위치를 기준으로 잡았던 값 |
+| 오프셋 0 | DXF 원본 위치 (스위치 중심 대비 -0.65mm) |
+
+## 1. 테스트 쿠폰 출력
+
+플레이트 전체를 몇 시간씩 출력하면서 값을 찾는 대신, 스위치홀 1개 + 스테빌 슬롯 2개만 남긴 2mm 두께 쿠폰을 후보값마다 한 판에 뽑습니다.
+
+`freecad/create_stab_test_coupon.py`의 `OFFSETS` 리스트에 시험할 값을 넣고 실행합니다.
+
+```python
+OFFSETS = [0.0, 0.1, 0.2, 0.3]
+```
+
+```bash
+/Applications/FreeCAD.app/Contents/MacOS/FreeCAD --console freecad/create_stab_test_coupon.py < /dev/null
+```
+
+- 결과물은 `freecad/parametric_stl/stab_test_coupon_<값들>.stl` 입니다. 파일명에 값이 들어가므로 이전 쿠폰을 덮어쓰지 않습니다.
+- 스테이션은 왼쪽부터 값 오름차순이고, 앞쪽 모서리의 **노치 개수 = 스테이션 번호**입니다. 잘라 쓰거나 뒤집어도 어느 값인지 알 수 있습니다.
+- 스테이션 간격은 32mm로 2u 키캡 전폭보다 좁습니다. 한 번에 한 자리씩 조립해서 확인합니다.
+- 클립 렛지(1.4mm)는 실제 플레이트와 같지만 바 두께가 2mm라 슬롯 벽이 얕습니다. 하우징이 실제 플레이트보다 헐겁게 느껴질 수 있습니다.
+
+## 2. 값 판정
+
+각 스테이션에 스테빌 하우징을 끼우고, 아래에서 와이어를 건 뒤, 2u 키캡을 씌워 눌러 봅니다. 걸림이나 뻑뻑함 없이 끝까지 눌리는 값을 고릅니다. 통과하는 값이 없으면 범위를 옮겨 쿠폰을 다시 뽑습니다.
+
+## 3. 플레이트에 반영
+
+`freecad/create_keyboard_parametric.py`의 `PARAMS["StabCutoutYOffset"]`를 확정값으로 고친 뒤, **GUI 모드**로 스크립트를 재실행합니다.
+
+> ⚠️ `keyboard_parametric.FCStd`를 FreeCAD에서 열어 `Parameters` 스프레드시트의 값만 바꾸면 슬롯은 움직이지 않습니다. 스케치 지오메트리는 생성 시점의 값으로 구워지기 때문에, 반드시 스크립트를 재실행해야 합니다.
+>
+> ⚠️ 헤드리스(`--console`)로 재생성하면 파트 색상이 빠진 채 저장됩니다. GUI 모드로 실행하세요.
+
+스크립트 자체는 `.FCStd`만 저장하므로, 스위치 플레이트 STL은 이어서 직접 내보냅니다. 아래 내용을 파일로 저장해 GUI 모드로 실행하거나, FreeCAD의 파이썬 콘솔에 붙여 넣습니다.
+
+```python
+import os
+import FreeCAD as App
+import Mesh
+
+BASE = os.path.expanduser("~/workspace/my-keyboard/freecad")   # 저장소 경로에 맞게 수정
+script = os.path.join(BASE, "create_keyboard_parametric.py")
+
+for name in list(App.listDocuments().keys()):
+    App.closeDocument(name)
+exec(compile(open(script).read(), script, "exec"),
+     {"__file__": script, "__name__": "__main__"})
+
+doc = App.getDocument("Keyboard_Parametric")
+for side in ("Left", "Right"):
+    obj = doc.getObject(side + "_Switch_Plate")
+    Mesh.export([obj], os.path.join(BASE, "parametric_stl",
+                                   "%s_switch_plate.stl" % side.lower()))
+```
+
+```bash
+/Applications/FreeCAD.app/Contents/MacOS/FreeCAD 위에서_저장한_스크립트.py
+```
+
+오프셋은 슬롯 위치만 바꾸므로 바디·팜레스트 STL은 다시 내보낼 필요가 없습니다. 재생성 뒤에는 STL의 스테빌 슬롯 Y좌표가 값 차이만큼(예: +0.5 → +0.2 이면 -0.3mm) 이동했는지 확인하면 됩니다. 슬롯은 좌측 4개, 우측 6개입니다.
+
+## 전체 흐름
+
+```mermaid
+flowchart TD
+    A[후보 오프셋 정하기] --> B[create_stab_test_coupon.py<br/>OFFSETS 수정 후 실행]
+    B --> C[쿠폰 STL 출력]
+    C --> D[하우징 · 와이어 · 2u 키캡 조립 테스트]
+    D -->|걸림 있음| A
+    D -->|깔끔하게 눌림| E[create_keyboard_parametric.py<br/>StabCutoutYOffset 확정값 반영]
+    E --> F[GUI 모드로 재생성<br/>keyboard_parametric.FCStd]
+    F --> G[좌 · 우 switch plate STL 내보내기]
+    G --> H[플레이트 최종 출력]
+
+    style A fill:#fff3cd,stroke:#d39e00,color:#000
+    style D fill:#cfe2ff,stroke:#0d6efd,color:#000
+    style E fill:#d1e7dd,stroke:#198754,color:#000
+    style F fill:#d1e7dd,stroke:#198754,color:#000
+    style G fill:#d1e7dd,stroke:#198754,color:#000
+    style H fill:#f8d7da,stroke:#dc3545,color:#000
+```
+
 # QMK
 
 ## QMK 설치
