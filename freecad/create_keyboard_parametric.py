@@ -29,6 +29,12 @@ PARAMS = {
     "RestSlantWidth": 10.0,
     "RestSlantAngleDeg": 70.0,
     "RestRearCornerFillet": 3.0,
+    "WedgeMinThickness": 1.5,
+    "WedgeAlignPinDiameter": 4.0,
+    "WedgeAlignPinHeight": 1.3,
+    "WedgeAlignPinClearance": 0.3,
+    "WedgeAlignPinHoleDepth": 1.5,
+    "WedgeAlignPinInset": 15.0,
     "M3ClearanceDiameter": 3.2,
     "M3CountersinkDiameter": 6.0,
     "M3CountersinkDepth": 1.5,
@@ -293,6 +299,31 @@ def rest_tilt(layout):
     depth = (layout["y_max"] - PARAMS["RestRearMargin"]) - layout["y_min"]
     return math.asin(PARAMS["RestSlantWidth"]
                      * math.sin(math.radians(PARAMS["RestSlantAngleDeg"])) / depth)
+
+
+def wedge_front_y(layout):
+    """Y where the tilt wedge is cut off -- where it first reaches WedgeMinThickness.
+
+    The wedge tapers to nothing at the case's front edge. Fused to the body that is
+    just the line where it meets the bottom face, but as a separate part it would be
+    a feather edge that curls off the bed, so everything thinner is dropped. The rest
+    position is unaffected: the body's bottom plane extended forward still meets the
+    desk at the front edge, so the case sits at the same angle and height."""
+    return layout["y_min"] + PARAMS["WedgeMinThickness"] / math.tan(rest_tilt(layout))
+
+
+def wedge_pin_centres(layout):
+    """XY of the two alignment pins, on the wedge's top face.
+
+    Read by both the wedge (which pads the pins) and the body (which pockets the
+    matching holes), so the two cannot drift apart. Set well apart across the width:
+    two pins constrain rotation, and the further apart they are the less angular
+    error a given fit tolerance allows."""
+    inset = PARAMS["WedgeAlignPinInset"]
+    rx0 = layout["x_min"] + PARAMS["RestSideMargin"]
+    rx1 = layout["x_max"] - PARAMS["RestSideMargin"]
+    y = (wedge_front_y(layout) + (layout["y_max"] - PARAMS["RestRearMargin"])) / 2.0
+    return [(rx0 + inset, y), (rx1 - inset, y)]
 
 
 def magnet_centres_x(layout):
@@ -625,49 +656,24 @@ def build_body(document, side, layout, color, include_controller=False,
     ins.setExpression("Length", u"Parameters.SpredsertM3Length + Parameters.M3ScrewTipRelief")
     document.recompute()
 
-    # 5. Tilt-rest wedge fused under the body (triangular YZ profile, additive pad).
-    side_margin = PARAMS["RestSideMargin"]
-    rear_margin = PARAMS["RestRearMargin"]
-    slant_w = PARAMS["RestSlantWidth"]
-    slant = math.radians(PARAMS["RestSlantAngleDeg"])
-    rx0 = x0 + side_margin
-    rx1 = x1 - side_margin
-    y_front = y0
-    y_rear = y1 - rear_margin
-    depth = y_rear - y_front
-    tilt = rest_tilt(layout)
-    bottom_length = depth * math.cos(tilt) - slant_w * math.cos(slant)
-    rear_bottom_y = y_front + bottom_length * math.cos(tilt)
-    rear_bottom_z = z_base - bottom_length * math.sin(tilt)
-    x_center = (rx0 + rx1) / 2.0
-
-    rest_sk = body.newObject("Sketcher::SketchObject", side + "_Body_Rest")
-    rest_sk.Placement = App.Placement(App.Vector(x_center, 0, 0), YZ_ROTATION)
-    add_polygon(rest_sk, [
-        (y_front, z_base),
-        (y_rear, z_base),
-        (rear_bottom_y, rear_bottom_z),
-    ])
-    rest_pad = body.newObject("PartDesign::Pad", side + "_Body_Rest_Pad")
-    rest_pad.Profile = rest_sk
-    rest_pad.Length = rx1 - rx0
-    rest_pad.Midplane = True
+    # 5. Alignment holes for the tilt wedge, bored up into the bottom face. The
+    # wedge is no longer fused here: inset from the body outline it left a 6 mm rim
+    # of the bottom face floating, which is 91% of everything the printer had to
+    # support. It is a separate glued part now -- see build_tilt_wedge and
+    # .forge/adr/260819-204944-tilt-wedge-as-separate-glued-part.md. These holes take
+    # its pins. They stop half way into the floor, so nothing opens into the cavity.
+    pin_r = (PARAMS["WedgeAlignPinDiameter"] + PARAMS["WedgeAlignPinClearance"]) / 2
+    pin_sk = body.newObject("Sketcher::SketchObject", side + "_Wedge_Pin_Holes")
+    pin_sk.Placement = App.Placement(App.Vector(0, 0, z_base), App.Rotation())
+    for x, y in wedge_pin_centres(layout):
+        pin_sk.addGeometry(Part.Circle(App.Vector(x, y, 0), App.Vector(0, 0, 1),
+                                       pin_r), False)
+    pin_pocket = body.newObject("PartDesign::Pocket", side + "_Wedge_Pin_Pockets")
+    pin_pocket.Profile = pin_sk
+    pin_pocket.Length = PARAMS["WedgeAlignPinHoleDepth"]
+    pin_pocket.Reversed = True
+    pin_pocket.setExpression("Length", u"Parameters.WedgeAlignPinHoleDepth")
     document.recompute()
-
-    # R3 round-over on the rear knife-edge ridge (the lowest X-running edge).
-    try:
-        ridge = ["Edge%d" % (index + 1) for index, edge in enumerate(rest_pad.Shape.Edges)
-                 if edge.Vertexes
-                 and all(abs(v.Point.z - rear_bottom_z) < 0.05 for v in edge.Vertexes)]
-        if ridge:
-            rest_fillet = body.newObject("PartDesign::Fillet", side + "_Body_Rest_Fillet")
-            rest_fillet.Base = (rest_pad, ridge)
-            rest_fillet.Radius = PARAMS["RestRearCornerFillet"]
-            rest_fillet.setExpression("Radius", u"Parameters.RestRearCornerFillet")
-            document.recompute()
-    except Exception as rest_error:
-        print("  rest fillet skipped (%s): %s" % (side, str(rest_error)[:40]))
-        document.recompute()
 
     # 6. Magnet seats in the front wall, facing the palm rest. A 2.2mm pocket stops
     # short of breaching the BodyWallThickness wall, but only by 0.8mm — too thin to
@@ -815,6 +821,77 @@ def build_body(document, side, layout, color, include_controller=False,
     return body
 
 
+# ---- Tilt wedge (separate glued part) ------------------------------------------
+def build_tilt_wedge(document, side, layout, color):
+    """The wedge that props the case nose-up, printed on its own and glued under the
+    body (ADR 260819-204944). Same profile as when it was fused, minus the feather
+    edge at the front (wedge_front_y), plus two alignment pins on its top face.
+
+    Printed on its slanted underside it has no overhang at all; the body, freed of
+    it, lies flat on its bottom face. Together that is what removes the ~2.6k mm^2
+    of support the fused shape needed."""
+    side_margin = PARAMS["RestSideMargin"]
+    slant_w = PARAMS["RestSlantWidth"]
+    slant = math.radians(PARAMS["RestSlantAngleDeg"])
+    z_base = -PARAMS["BodyHeight"]
+    rx0 = layout["x_min"] + side_margin
+    rx1 = layout["x_max"] - side_margin
+    y_front = layout["y_min"]
+    y_rear = layout["y_max"] - PARAMS["RestRearMargin"]
+    tilt = rest_tilt(layout)
+    bottom_length = (y_rear - y_front) * math.cos(tilt) - slant_w * math.cos(slant)
+    rear_bottom_y = y_front + bottom_length * math.cos(tilt)
+    rear_bottom_z = z_base - bottom_length * math.sin(tilt)
+    y_cut = wedge_front_y(layout)
+
+    body = document.addObject("PartDesign::Body", side + "_Tilt_Wedge")
+
+    profile = body.newObject("Sketcher::SketchObject", side + "_Wedge_Profile")
+    profile.Placement = App.Placement(App.Vector((rx0 + rx1) / 2.0, 0, 0), YZ_ROTATION)
+    add_polygon(profile, [
+        (y_cut, z_base),
+        (y_rear, z_base),
+        (rear_bottom_y, rear_bottom_z),
+        (y_cut, z_base - PARAMS["WedgeMinThickness"]),
+    ])
+    pad = body.newObject("PartDesign::Pad", side + "_Wedge_Pad")
+    pad.Profile = profile
+    pad.Length = rx1 - rx0
+    pad.Midplane = True
+    document.recompute()
+
+    # R3 round-over on the rear knife-edge ridge (the lowest X-running edge).
+    try:
+        ridge = ["Edge%d" % (index + 1) for index, edge in enumerate(pad.Shape.Edges)
+                 if edge.Vertexes
+                 and all(abs(v.Point.z - rear_bottom_z) < 0.05 for v in edge.Vertexes)]
+        if ridge:
+            fillet = body.newObject("PartDesign::Fillet", side + "_Wedge_Fillet")
+            fillet.Base = (pad, ridge)
+            fillet.Radius = PARAMS["RestRearCornerFillet"]
+            fillet.setExpression("Radius", u"Parameters.RestRearCornerFillet")
+            document.recompute()
+    except Exception as fillet_error:
+        print("  wedge fillet skipped (%s): %s" % (side, str(fillet_error)[:40]))
+        document.recompute()
+
+    # Alignment pins standing on the top (mating) face, into the body's holes.
+    pins = body.newObject("Sketcher::SketchObject", side + "_Wedge_Pins")
+    pins.Placement = App.Placement(App.Vector(0, 0, z_base), App.Rotation())
+    for x, y in wedge_pin_centres(layout):
+        pins.addGeometry(Part.Circle(App.Vector(x, y, 0), App.Vector(0, 0, 1),
+                                     PARAMS["WedgeAlignPinDiameter"] / 2), False)
+    pin_pad = body.newObject("PartDesign::Pad", side + "_Wedge_Pin_Pad")
+    pin_pad.Profile = pins
+    pin_pad.Length = PARAMS["WedgeAlignPinHeight"]
+    pin_pad.setExpression("Length", u"Parameters.WedgeAlignPinHeight")
+    document.recompute()
+
+    if body.ViewObject:
+        body.ViewObject.ShapeColor = color
+    return body
+
+
 # ---- main ----------------------------------------------------------------------
 def main():
     for name in list(App.listDocuments().keys()):
@@ -834,6 +911,8 @@ def main():
                include_controller=True,
                usb_center_x=right_layout["x_min"] + PARAMS["UsbEdgeOffset"],
                jack_center_x=right_layout["x_min"] + PARAMS["TrsJackEdgeOffset"])
+    build_tilt_wedge(document, "Left", left_layout, (0.50, 0.30, 0.55))
+    build_tilt_wedge(document, "Right", right_layout, (0.30, 0.35, 0.55))
     build_palm_rest(document, "Left", left_layout)
     build_palm_rest(document, "Right", right_layout)
 

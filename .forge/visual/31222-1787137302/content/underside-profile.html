@@ -1,0 +1,120 @@
+<h2>케이스 바디 밑면 프로파일 — 어느 쪽인가?</h2>
+<p class="subtitle">뒤에서 본 단면(가장 간극이 큰 뒤쪽 기준). 회색 = 케이스 벽 18mm, 파랑 = 틸트 웨지, 빨강 = 서포트가 붙는 면. 상단 형상은 네 안 모두 손대지 않는다.</p>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-header">현재 — 웨지가 좌우·뒤로 6mm 인셋되어 바닥면 테두리가 공중에 뜬다</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 360 130" style="width:100%;height:auto">
+        <line x1="10" y1="106" x2="350" y2="106" stroke="#888" stroke-width="2"/>
+        <text x="14" y="122" font-size="11" fill="#888">베드</text>
+        <rect x="20" y="52" width="298" height="36" fill="#c9ced6" stroke="#6b7280" stroke-width="1.5"/>
+        <rect x="32" y="88" width="274" height="18" fill="#8fb6de" stroke="#3f6fa3" stroke-width="1.5"/>
+        <line x1="20" y1="88" x2="32" y2="88" stroke="#e5484d" stroke-width="5"/>
+        <line x1="306" y1="88" x2="318" y2="88" stroke="#e5484d" stroke-width="5"/>
+        <text x="8" y="46" font-size="11" fill="#e5484d">6mm 언더컷 (좌·우 각각)</text>
+        <text x="150" y="101" font-size="11" fill="#25406b">웨지</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<h3>후보</h3>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div>
+        <svg viewBox="0 0 360 130" style="width:100%;height:auto">
+          <line x1="10" y1="106" x2="350" y2="106" stroke="#888" stroke-width="2"/>
+          <rect x="20" y="52" width="298" height="36" fill="#c9ced6" stroke="#6b7280" stroke-width="1.5"/>
+          <polygon points="20,88 318,88 306,106 32,106" fill="#8fb6de" stroke="#3f6fa3" stroke-width="1.5"/>
+          <text x="24" y="46" font-size="11" fill="#2b7a4b">서포트 0</text>
+          <text x="120" y="101" font-size="11" fill="#25406b">접지면이 좌우 6mm씩 좁다</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 웨지 측벽을 경사로</h3>
+      <p>인셋을 없애는 대신 웨지 옆면을 바깥·위로 기울여 케이스 바깥선까지 잇는다. 바닥에 닿는 폭은 지금 웨지 그대로라 <b>접지면이 케이스보다 좁아</b> 들려 보이는 느낌은 유지된다. 파라미터 1~2개 추가로 끝난다.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div>
+        <svg viewBox="0 0 360 130" style="width:100%;height:auto">
+          <line x1="10" y1="106" x2="350" y2="106" stroke="#888" stroke-width="2"/>
+          <rect x="20" y="52" width="298" height="36" fill="#c9ced6" stroke="#6b7280" stroke-width="1.5"/>
+          <polygon points="20,88 318,88 318,100 312,106 26,106 20,100" fill="#8fb6de" stroke="#3f6fa3" stroke-width="1.5"/>
+          <text x="24" y="46" font-size="11" fill="#2b7a4b">서포트 0</text>
+          <text x="130" y="101" font-size="11" fill="#25406b">3mm 모따기</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 전 폭 웨지 + 밑둘레 모따기</h3>
+      <p>웨지를 케이스 전 폭으로 넓히고, 바닥 가장자리만 3mm 45°로 깎는다. 옆면은 27mm 통짜에 가깝고 맨 아래 그림자 선 하나만 남는다. <b>가장 단순하지만 가장 두꺼워 보이는</b> 안.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div>
+        <svg viewBox="0 0 360 130" style="width:100%;height:auto">
+          <line x1="10" y1="106" x2="350" y2="106" stroke="#888" stroke-width="2"/>
+          <rect x="20" y="46" width="298" height="36" fill="#c9ced6" stroke="#6b7280" stroke-width="1.5"/>
+          <rect x="32" y="88" width="274" height="18" fill="#8fb6de" stroke="#3f6fa3" stroke-width="1.5" stroke-dasharray="5 3"/>
+          <text x="24" y="40" font-size="11" fill="#2b7a4b">둘 다 서포트 0</text>
+          <text x="120" y="101" font-size="11" fill="#25406b">별도 출력 후 접착</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 웨지를 별도 부품으로 분리</h3>
+      <p>케이스는 바닥이 평평한 상태로 눕혀 출력하고, 웨지는 따로 뽑아 붙인다. <b>6mm 인셋을 그대로 유지</b>할 수 있는 유일한 안. 대신 부품 2개가 늘고 접착·정렬 공정이 생긴다.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div>
+        <svg viewBox="0 0 360 130" style="width:100%;height:auto">
+          <line x1="10" y1="106" x2="350" y2="106" stroke="#888" stroke-width="2"/>
+          <rect x="20" y="52" width="298" height="36" fill="#c9ced6" stroke="#6b7280" stroke-width="1.5"/>
+          <rect x="20" y="88" width="298" height="18" fill="#8fb6de" stroke="#3f6fa3" stroke-width="1.5"/>
+          <text x="24" y="46" font-size="11" fill="#b07d00">측면 서포트만 0</text>
+          <text x="110" y="101" font-size="11" fill="#25406b">뒷면 인셋은 그대로 (서포트 남음)</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>D. 측면만 전 폭 (최소 변경)</h3>
+      <p>떼기 어려운 측면 인셋만 없애고, 잘 떨어진다는 뒷면 6mm 인셋은 그대로 둔다. 파라미터 <code>RestSideMargin</code>을 0으로 바꾸는 한 줄. 대신 <b>서포트 894mm²가 뒷면에 남는다</b>.</p>
+    </div>
+  </div>
+
+</div>
+
+<button class="mock-button" onclick="
+  var sel = Array.from(document.querySelectorAll('.option.selected, .card.selected'))
+                 .map(function(e){ return e.dataset.choice; });
+  var key = sel.join(',') || 'none';
+  if (this.dataset.sent === key) return;
+  this.dataset.sent = key;
+  window.brainstorm.send({type:'confirm', choice:'confirm:'+key, value:sel});
+  this.textContent='확정됨';
+">이걸로 확정</button>
+
+<div class="section" style="margin-top:24px">
+  <h3>덧붙일 말이 있으면</h3>
+  <div class="ask-input">
+    <textarea id="note" rows="3" placeholder="예: A인데 접지 폭을 더 좁히고 싶다 / 발 고무패드 붙일 자리가 필요하다" style="width:100%"></textarea>
+    <button class="mock-button" onclick="
+      window.brainstorm.send({type:'text', choice:'text:profile-note',
+                              field:'profile-note', value:document.getElementById('note').value});
+      this.textContent='보냄';
+    ">보내기</button>
+  </div>
+</div>
