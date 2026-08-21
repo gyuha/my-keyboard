@@ -17,7 +17,6 @@
 
 ![layout](./image/keyboard-layout.png?raw=true)
 
-> ⚠ 이 그림은 펑션 행이 있던 6행 88키 구배열 기준이다. 현재 배열은 아래 `# 데이터`의 KLE 원본(5행 72키)이 원천이며, 그림은 5행 실물이 확정된 뒤 갱신한다.
 
 제작 : [http://www.keyboard-layout-editor.com/](http://www.keyboard-layout-editor.com/)
 
@@ -74,9 +73,7 @@ keylayout-left/right.json 수정
 [{c:"#ffe08d"},"한/영",{c:"#c8c3b8",w:2.75},"Space","Fn.1","Ins","Del",{c:"#ea4221",a:7},"←","↓","→"]
 ```
 
-# 써머리
-
-![alt text](./image//summary.png)
+키 갯수 : 72키
 
 # 준비물
 
@@ -88,12 +85,13 @@ keylayout-left/right.json 수정
 | ![aux](image/parts/aux-cable.jpg)                 | 3.5mm aux 케이블             | 1   | 보드 연결 용                   | [연결](https://ko.aliexpress.com/item/1005006150639643.html)           |
 | ![코스타스테빌](image/parts/stabil.jpg)                 | 코스타 스테빌 라이저               | 2   | 긴 키 안정 (5개가 필요 해서 2세트 구매) | [연결](https://ko.aliexpress.com/w/wholesale-costar-stabilizer.html)   |
 | ![wire](image/parts/wire.jpg)                     | 전선                        | 1   | 랩핑와이어 추천(인두기로 녹여서 사용가능)   | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)             |
-| ![switch](image/parts/key-switch.jpg)             | 스위치                       | 72  | 개인 취향으로 게이트론 백축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955) |
+| ![switch](image/parts/key-switch.jpg)             | 스위치                       | 72  | 개인 취향으로 오테뮤 레몬축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955) |
 | ![keycap](image/parts/keycap.jpg)                 | 키캡                        | -   | 되도록이면 XDA 또는 DSA를 선택 합니다. | [연결](https://ko.aliexpress.com/w/wholesale-xda-keycap.html)          |
 | ![bump](image/parts/bump.jpg)                     | 미끄럼 방지 패드 or 범퍼           | 1   | 바닥 미끄럼 방지                 | [연결](https://www.coupang.com/vp/products/6265639245)                 |
-| ![MMSD4148](image/parts/MMSD4148.png)             | 다이오드(1N4148/MMSD4148)     | 72  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=6382)                |
+| ![MMSD4148](image/parts/diode.jpg)             | 다이오드(1N4148)     | 72  |                           | [연결](https://ko.aliexpress.com/w/wholesale-1n4148.html?spm=a2g0o.productlist.search.0)                |
 | ![인서트(Spredsert)](image/parts/spredsert.png)      | 인서트(spredsert)            | 8   | 케이스 조립용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1067969)             |
 | ![나사](image/parts/M3x5.png)                       | 접시머리 십자볼트 M3*10           | 8   | 케이스 조립용                   | [연결](https://www.devicemart.co.kr/goods/view?no=34782)               |
+| ![네오디옴 자석](image/parts/magnetic-5x2.png) | 네오디옴 자석 5x2mm | 4 | 팜레스트 연결 | [연결](https://ko.aliexpress.com/w/wholesale-magnetic-5x2.html?spm=a2g0o.detail.search.0) |
 |                                                   | 납땜 재료                     | -   | 인두기, 납, 인두기 스탠드 등등        |                                                                      |
 
 
@@ -139,13 +137,10 @@ TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
 
 ### 좌측
 
-> ⚠ 6행 배선 기준 — 현재 배열은 5행(`MATRIX_ROW_PINS { GP0..GP4 }`)이므로 이 그림은 낡았다. 5행 실물이 확정된 뒤 다시 그린다.
-
 ![Left wiring](image/wiring-left.png?raw=true)
 
 ### 우측
 
-> ⚠ 6행 배선 기준 — 위와 같이 낡았다.
 
 ![Right wiring](image/wiring-right.png?raw=true)
 
