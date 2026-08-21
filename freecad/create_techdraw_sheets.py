@@ -1,4 +1,9 @@
-"""Generate TechDraw sheets (A4 landscape) with core dimensions for every
+"""[낡음] 6행 구배열 기준이며 현재 쓰이지 않는다 — 이 스크립트가 여는
+keyboard_switch_plates.FCStd 는 낡은 create_keyboard_plates.py 의 산출물이다.
+현행은 create_keyboard_parametric.py / keyboard_parametric.FCStd 이며, 도면을
+살리려면 이 스크립트를 그쪽 문서로 옮겨야 한다(별개 작업).
+
+Generate TechDraw sheets (A4 landscape) with core dimensions for every
 manufacturable part in keyboard_switch_plates.FCStd.
 
 Per part: orthographic views + overall extent dimensions (makeExtentDim) +

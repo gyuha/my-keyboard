@@ -10,11 +10,14 @@
 1. 한글 타이핑을 할 경우 'ㅠ' 키를 자주 사용하게 되는데, 기존의 분할 키보드들은 가운데에 키가 없어서 불편했습니다.
 그래서, 양쪽 키보드 B키를 추가 배치 했습니다.
 2. 그리고, '한/영'가 윈도우에서는 스페이스바 옆 ALT 키로 매핑이 되어 있는데, 개발하면서 한영키를 자주 전환을 하게 되는데, 이 때 주로 엄지 손가락으로 ALT키를 눌러서 손가락이 불편했습니다. 그렇다고 한영키를 누르기 위해서 손을 키보드 아래로 내려가 하는 것도 불편해서 한/영키를 오른쪽 키보드 B키 밑으로 배치를 했습니다.
-3. 잘 사용하지 않는 Caps Lock 키를 펑션키로 매핑을 했습니다. 이렇게 하면, 펑션키를 누르기 위해서 손을 키보드 아래로 내릴 필요가 없어서 편리합니다.
+3. 잘 사용하지 않는 Caps Lock 자리를 **Fn 키**로 매핑을 했습니다. 이렇게 하면, **F1~F12**를 누르기 위해서 손을 키보드 아래로 내릴 필요가 없어서 편리합니다.
+4. 그래서 펑션 행(F1~F12 전용 최상단 줄)을 아예 없앴습니다. `Fn`+숫자로 F1~F12가 나오므로 잃는 기능이 없고, 반쪽당 한 행씩 줄어 키보드가 작아집니다. 비워진 좌상단 자리는 Esc가 차지합니다 — 그냥 누르면 `Esc`, `Shift`와 함께 누르면 `~`, `Fn`과 함께 누르면 `` ` `` 입니다.
 
 # 키보드 전체 레이아웃
 
 ![layout](./image/keyboard-layout.png?raw=true)
+
+> ⚠ 이 그림은 펑션 행이 있던 6행 88키 구배열 기준이다. 현재 배열은 아래 `# 데이터`의 KLE 원본(5행 72키)이 원천이며, 그림은 5행 실물이 확정된 뒤 갱신한다.
 
 제작 : [http://www.keyboard-layout-editor.com/](http://www.keyboard-layout-editor.com/)
 
@@ -28,27 +31,47 @@
 
 키보드 [www.keyboard-layout-editor.com](http://www.keyboard-layout-editor.com) 에서 아래 데이터를 `</> Raw Data` 탭을 선택해서 넣어 주면 키보드의 구성을 편집 할 수 있습니다.
 
+## 배열을 바꿀 때
+
+배열의 원천은 **`keylayout-left.json` · `keylayout-right.json` 두 파일뿐**입니다. 아래는 모두 생성물이므로 손으로 고치지 마세요.
+
+| 생성물 | 생성기 |
+| --- | --- |
+| `keylayout.json` (통합본), README 의 아래 인라인 블록 | `python3 tools/gen_keylayout.py` |
+| `freecad/left-switch.dxf` · `right-switch.dxf` | `python3 tools/gen_dxf.py` |
+
+절차는 이렇습니다.
+
+```
+keylayout-left/right.json 수정
+  → python3 tools/gen_keylayout.py     (통합본 + README 인라인)
+  → python3 tools/gen_dxf.py           (스위치 플레이트 DXF)
+  → python3 tools/test_gen_dxf.py      (생성기가 원본을 재현하는지 회귀 검사)
+  → python3 tools/verify_keylayout.py  (배열·펌웨어 7곳 일치 검사)
+  → gkey/ 펌웨어 수정 (행·열이 바뀐 경우)
+  → FreeCAD 모델 재생성 (아래 "케이스 3D 출력" 참고)
+```
+
+`tools/test_gen_dxf.py` 는 `freecad/reference/` 의 6행 기준 픽스처로 "구 KLE → 생성 → 원본 DXF 대조"를 수행합니다. 생성기를 고쳤을 때 회귀를 잡는 유일한 검사이므로 지우지 마세요.
+
 ### 좌측
 
 ```json
-[{c:"#ff0000",t:"#ffffff"},"ESC",{x:0.25,c:"#cccccc",t:"#000000",a:7},"F1","F2","F3","F4","F5","F6"],
-[{y:0.25,a:4},"~\n\n\n\n\n\n\n\n\n`","!\n1\n\nF1","@\n2\n\nF2","#\n3\n\nF3","$\n4\n\nF4","%\n5\n\nF5","^\n6\n\nF6"],
+[{a:4},"~\nESC\n\n`","!\n1\n\nF1","@\n2\n\nF2","#\n3\n\nF3","$\n4\n\nF4","%\n5\n\nF5","^\n6\n\nF6"],
 [{c:"#c8c3b8",w:1.5},"Tab",{c:"#cccccc"},"Q\n\n\n\n\n\n\n\n\nㅂ","W\n\n\n\n\n\n\n\n\nㅈ","E\n\n\n\n\n\n\n\n\nㄷ","R\n\n\n\n\n\n\n\n\nㄱ","T\n\n\n\n\n\n\n\n\nㅅ"],
 [{c:"#c8c3b8",w:1.75},"Function.1",{c:"#cccccc"},"A\n\n\n\n\n\n\n\n\nㅁ","S\n\n\n\n\n\n\n\n\nㄴ","D\n\n\n\n\n\n\n\n\nㅇ","F\n\n\n\n\n\n\n\n\nㄹ","G\n\n\n\n\n\n\n\n\nㅎ"],
 [{c:"#c8c3b8",w:2.25},"Shift",{c:"#cccccc"},"Z\n\n\n\n\n\n\n\n\nㅋ","X\n\n\n\n\n\n\n\n\nㅌ","C\n\n\n\n\n\n\n\n\nㅊ","V\n\n\n\n\n\n\n\n\nㅍ","B\n\n\n\n\n\n\n\n\nㅠ"],
 [{c:"#c8c3b8",w:1.25},"Ctrl",{w:1.25},"Win",{w:1.25},"Alt",{w:1.25},"Fn.2",{w:2.25},"Space"]
-
 ```
 
 ### 우측
 
 ```json
-[{x:0.5,a:7},"F7","F8","F9","F10","F11","F12",{x:0.25},"SCR","Mute","Sleep"],
-[{y:0.25,x:0.75,a:4},"&\n7\n\nF7","*\n8\n\nF8","(\n9\n\nF9",")\n0\n\nF10","_\n-\n\nF11","+\n=\n\nF12",{c:"#c8c3b8",w:2},"Backspace",{c:"#63696a"},"Home"],
+[{x:0.75,a:4},"&\n7\n\nF7","*\n8\n\nF8","(\n9\n\nF9",")\n0\n\nF10","_\n-\n\nF11","+\n=\n\nF12",{c:"#c8c3b8",w:2},"Backspace",{c:"#63696a"},"Home"],
 [{x:0.25,c:"#cccccc"},"Y\n\n\n\n\n\n\n\n\nㅛ","U\n\n\n\n\n\n\n\n\nㅕ","I\n\n\n\n\n\n\n\n\nㅑ","O\n\n\n\n\n\n\n\n\nㅐ","P\n\n\n\n\n\n\n\n\nㅔ","{\n[","}\n]",{c:"#c8c3b8",w:1.5},"|\n\\",{c:"#63696a"},"End"],
 [{x:0.5,c:"#cccccc"},"H\n\n\n\n\n\n\n\n\nㅗ","J\n\n\n\n\n\n\n\n\nㅓ","K\n\n\n\n\n\n\n\n\nㅏ","L\n\n\n\n\n\n\n\n\nㅣ",":\n;","\"\n'",{c:"#c8c3b8",w:2.25},"Enter",{c:"#63696a"},"PgUp"],
 [{c:"#ffe08d"},"B\n\n\n\n\n\n\n\n\nㅠ",{c:"#cccccc"},"N\n\n\n\n\n\n\n\n\nㅜ","M\n\n\n\n\n\n\n\n\nㅡ","<\n,",">\n.","?\n/",{c:"#c8c3b8",w:1.75},"Shift",{c:"#ea4221",a:7},"↑",{c:"#63696a",a:4},"PgDn"],
-[{c:"#ffe08d"},"한/영",{c:"#c8c3b8",w:2.75},"Space","Alt","Fn.1","Del",{c:"#ea4221",a:7},"←","↓","→"]
+[{c:"#ffe08d"},"한/영",{c:"#c8c3b8",w:2.75},"Space","Fn.1","Ins","Del",{c:"#ea4221",a:7},"←","↓","→"]
 ```
 
 # 써머리
@@ -65,10 +88,10 @@
 | ![aux](image/parts/aux-cable.jpg)                 | 3.5mm aux 케이블             | 1   | 보드 연결 용                   | [연결](https://ko.aliexpress.com/item/1005006150639643.html)           |
 | ![코스타스테빌](image/parts/stabil.jpg)                 | 코스타 스테빌 라이저               | 2   | 긴 키 안정 (5개가 필요 해서 2세트 구매) | [연결](https://ko.aliexpress.com/w/wholesale-costar-stabilizer.html)   |
 | ![wire](image/parts/wire.jpg)                     | 전선                        | 1   | 랩핑와이어 추천(인두기로 녹여서 사용가능)   | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)             |
-| ![switch](image/parts/key-switch.jpg)             | 스위치                       | 88  | 개인 취향으로 게이트론 백축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955) |
+| ![switch](image/parts/key-switch.jpg)             | 스위치                       | 72  | 개인 취향으로 게이트론 백축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955) |
 | ![keycap](image/parts/keycap.jpg)                 | 키캡                        | -   | 되도록이면 XDA 또는 DSA를 선택 합니다. | [연결](https://ko.aliexpress.com/w/wholesale-xda-keycap.html)          |
 | ![bump](image/parts/bump.jpg)                     | 미끄럼 방지 패드 or 범퍼           | 1   | 바닥 미끄럼 방지                 | [연결](https://www.coupang.com/vp/products/6265639245)                 |
-| ![MMSD4148](image/parts/MMSD4148.png)             | 다이오드(1N4148/MMSD4148)     | 88  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=6382)                |
+| ![MMSD4148](image/parts/MMSD4148.png)             | 다이오드(1N4148/MMSD4148)     | 72  |                           | [연결](https://www.devicemart.co.kr/goods/view?no=6382)                |
 | ![인서트(Spredsert)](image/parts/spredsert.png)      | 인서트(spredsert)            | 8   | 케이스 조립용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1067969)             |
 | ![나사](image/parts/M3x5.png)                       | 접시머리 십자볼트 M3*10           | 8   | 케이스 조립용                   | [연결](https://www.devicemart.co.kr/goods/view?no=34782)               |
 |                                                   | 납땜 재료                     | -   | 인두기, 납, 인두기 스탠드 등등        |                                                                      |
@@ -116,9 +139,13 @@ TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
 
 ### 좌측
 
+> ⚠ 6행 배선 기준 — 현재 배열은 5행(`MATRIX_ROW_PINS { GP0..GP4 }`)이므로 이 그림은 낡았다. 5행 실물이 확정된 뒤 다시 그린다.
+
 ![Left wiring](image/wiring-left.png?raw=true)
 
 ### 우측
+
+> ⚠ 6행 배선 기준 — 위와 같이 낡았다.
 
 ![Right wiring](image/wiring-right.png?raw=true)
 
@@ -177,6 +204,8 @@ python3 freecad/verify_no_support.py
 ## 슬라이서 프로젝트
 
 `freecad/parametric_stl/split keyboard.3mf` 는 Bambu Studio 프로젝트입니다. **STL을 다시 내보내도 이 파일은 따라서 갱신되지 않습니다** — 슬라이서가 STL을 프로젝트 안으로 복사해 두기 때문입니다. 형상을 바꿨다면 프로젝트를 열어 부품을 다시 불러오세요.
+
+> ⚠ 배열이 5행 72키로 바뀌었으므로 이 프로젝트는 6행 형상을 담고 있습니다. 출력 전에 열어서 부품 8개를 모두 다시 불러오세요.
 
 # 스테빌라이저 슬롯 오프셋 조정
 
