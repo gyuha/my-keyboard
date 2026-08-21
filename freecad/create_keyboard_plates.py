@@ -1,3 +1,10 @@
+"""[낡음] 6행 구배열 기준이며 현재 쓰이지 않는다.
+
+현행 파이프라인은 create_keyboard_parametric.py 다 — 자석 포켓과 별도 틸트 웨지가
+이 스크립트에는 없고, 출력용 STL 은 freecad/parametric_stl/ 로 그쪽에서 나온다.
+이 갈래를 5행 배열로 갱신하거나 삭제하는 일은 별개 작업으로 남겼다.
+"""
+
 import math
 import os
 

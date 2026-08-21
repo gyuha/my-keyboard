@@ -2,3 +2,4 @@
 freecad-mcp/
 freecad/__pycache__
 .DS_Store
+tools/__pycache__
