@@ -123,7 +123,7 @@ TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
 | GP13            | —        | COL 7    |
 | GP14            | —        | COL 8    |
 | GP15            | TRRS 시리얼 | TRRS 시리얼 |
-| uuuuuuuuuuuuu5V | TRRS VCC | TRRS VCC |
+| 5V | TRRS VCC | TRRS VCC |
 | GND             | TRRS GND | TRRS GND |
 
 
