@@ -10,8 +10,11 @@
 #endif
 #endif
 
+// 행별 빈 자리(KC_NO)의 열 위치는 PCB 실배선에서 나온다 — 우측은 row2 의 COL7 과
+// row4 의 COL2 뿐이고, row0 은 9열이 다 찬다. tools/verify_pcb_matrix.py 가
+// pcb/split-keyboard.epro 와 이 매크로를 대조해 어긋나면 빌드 전에 잡는다.
 #define LAYOUT(\
-  L00, L01, L02, L03, L04, L05, L06,          R00, R01, R02, R03, R04, R05, R06, R07, \
+  L00, L01, L02, L03, L04, L05, L06,          R00, R01, R02, R03, R04, R05, R06, R07, R08, \
   L10, L11, L12, L13, L14, L15,               R10, R11, R12, R13, R14, R15, R16, R17, R18, \
   L20, L21, L22, L23, L24, L25,               R20, R21, R22, R23, R24, R25, R26, R27, \
   L30, L31, L32, L33, L34, L35,               R30, R31, R32, R33, R34, R35, R36, R37, R38, \
@@ -23,9 +26,9 @@
     { L20, L21, L22, L23, L24, L25, KC_NO, KC_NO, KC_NO }, \
     { L30, L31, L32, L33, L34, L35, KC_NO, KC_NO, KC_NO }, \
     { L40, L41, L42, L43, L44, KC_NO, KC_NO, KC_NO, KC_NO }, \
-    { R00, R01, R02, R03, R04, R05, R06, KC_NO, R07 }, \
+    { R00, R01, R02, R03, R04, R05, R06, R07, R08 }, \
     { R10, R11, R12, R13, R14, R15, R16, R17, R18 }, \
-    { R20, R21, R22, R23, R24, R25, KC_NO, R26, R27 }, \
+    { R20, R21, R22, R23, R24, R25, R26, KC_NO, R27 }, \
     { R30, R31, R32, R33, R34, R35, R36, R37, R38 }, \
-    { R40, KC_NO, R41, R42, R43, R44, R45, R46, R47 } \
+    { R40, R41, KC_NO, R42, R43, R44, R45, R46, R47 } \
 }

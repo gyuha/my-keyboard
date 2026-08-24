@@ -18,18 +18,27 @@
 // #define ENCODERS_PAD_A { F4 }
 // #define ENCODERS_PAD_B { F5 }
 
-// wiring of each half
-// The function row is gone (5 rows per half), so GP5 is free.
-#define MATRIX_ROW_PINS { GP0, GP1, GP2, GP3, GP4 }
-#define MATRIX_COL_PINS { GP6, GP7, GP8, GP9, GP10, GP11, GP12, GP13, GP14 }
+// wiring of each half -- read off the PCB schematic (pcb/split-keyboard.epro),
+// which is the source of truth for the pin map. tools/verify_pcb_matrix.py
+// re-derives it from that file and fails the build if these drift.
+// GP0/GP1 are taken by the split link, so no GPIO is spare below GP16.
+#define MATRIX_ROW_PINS { GP2, GP3, GP4, GP5, GP6 }
+#define MATRIX_COL_PINS { GP7, GP8, GP9, GP10, GP11, GP12, GP13, GP14, GP15 }
 
 #define DIODE_DIRECTION COL2ROW
-#define SERIAL_USART_TX_PIN GP15
 
-// Bootmagic runs before the split link is up, so the master can only read its
-// own rows. USB is on the right (MASTER_RIGHT), whose rows are 5-9, so without
-// the _RIGHT pair below it would poll (0,0) on the left half and never trigger.
-// (5,0) = right 7; (0,0) = left Esc, used when a half boots as the slave.
+// One-wire half-duplex on GP0. Both halves wire the connector identically
+// (V/G/D+ -> 3V3/GND/GP0), so a straight cable ties TX to TX -- full duplex
+// cannot work on this hardware however the firmware is configured. The PIO
+// driver (SERIAL_DRIVER = vendor in rules.mk) needs only this one pin: no RX
+// pin, no external pull-up.
+#define SERIAL_USART_TX_PIN GP0
+
+// Bootmagic runs before the split link is up, so each half can only read its
+// own rows. USB is on the left now (see keymaps/default/config.h), whose rows
+// are 0-4, so the unsuffixed pair below is what the master polls: (0,0) = left
+// Esc. The _RIGHT pair is what the right half polls when it is the one being
+// reset -- (5,0) is its top-row 6, the key this PCB added.
 #define BOOTMAGIC_ROW           0
 #define BOOTMAGIC_COLUMN        0
 #define BOOTMAGIC_ROW_RIGHT     5
