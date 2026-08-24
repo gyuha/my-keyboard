@@ -1,4 +1,4 @@
-"""Headless check that the magnet pockets are sized for glue-mounted 10x2mm discs.
+"""Headless check that the magnet pockets are sized for glue-mounted 8x2mm discs.
 
 Run with the console binary (never the GUI — saving from freecadcmd drops the
 GuiDocument and the part colours go with it):
@@ -24,8 +24,10 @@ DOC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "keyboard_paramet
 EXPECTED_DEPTH = 2.2
 # Front wall 3.0 + backing pad 3.0 - pocket 2.2.
 EXPECTED_BACKING = 3.8
-# (MagnetDiameter 10.0 + MagnetHoleClearance 0.3) / 2, unchanged by this task.
-HOLE_RADIUS = 5.15
+# (MagnetDiameter 8.0 + MagnetHoleClearance 0.3) / 2. Dropped from 10mm when
+# BodyHeight went to 14: a 10.3mm bore centred in a 14mm wall leaves only a
+# 1.85mm rib above and below it.
+HOLE_RADIUS = 4.15
 
 POCKETS = [
     "Left_Palm_Magnet_Pockets",

@@ -22,8 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #define USE_I2C
 
 /* Select hand configuration */
-// #define MASTER_LEFT
-#define MASTER_RIGHT
+// USB goes to the LEFT half. The two halves' aux boards do not sit in the same
+// place relative to their main PCBs -- the left board's USB-C lands flush with
+// the rear edge, the right one is stranded 16.3mm inside the wall, so the right
+// port cannot be reached with the case closed. See
+// adr/260824-003937-usb-host-is-the-left-half.md.
+#define MASTER_LEFT
+// #define MASTER_RIGHT
 
 // #define EE_HANDS
 // #undef RGBLED_NUM

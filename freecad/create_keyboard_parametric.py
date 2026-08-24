@@ -10,20 +10,26 @@ Plate and body parts are added in following increments.
 
 import math
 import os
+import sys
 
 import FreeCAD as App
 import Part
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(BASE_DIR), "tools"))
+import pcb as pcb_source          # noqa: E402  -- epro parser, see ADR 260824-001947
+
 TOLERANCE = 0.001
 
 # ---- master parameters: alias -> default value (mm / deg) ----------------------
+PCB = pcb_source.load()
+
 PARAMS = {
     "PlateThickness": 4.0,
-    "OuterMargin": 8.0,
+    "OuterMargin": 11.5,
     "CornerRadius": 5.0,
     "BodyWallThickness": 3.0,
-    "BodyHeight": 18.0,
+    "BodyHeight": 14.0,
     "RestSideMargin": 6.0,
     "RestRearMargin": 6.0,
     "RestSlantWidth": 10.0,
@@ -50,52 +56,53 @@ PARAMS = {
     "StabCutoutYOffset": 0.2,
     "KeyholeSize": 13.96,
     "PalmRestDepth": 80.0,
-    "PalmRestRearHeight": 25.0,
-    "PalmRestFrontHeight": 12.0,
+    "PalmRestRearHeight": 21.0,
+    "PalmRestFrontHeight": 8.0,
     "PalmRestFlatDepth": 35.0,
     "PalmRestGap": 5.0,
     "PalmRestFilletRadius": 3.0,
     "PalmRestCrestRadius": 60.0,
     "PalmRestTaperAngleDeg": 10.0,
-    # Round neodymium discs (10mm diameter, 2mm thick) hold the palm rest to the
-    # body, glued into their pockets. The pocket is 2.2mm deep: ~0.1mm of glue
+    # Round neodymium discs (8mm diameter, 2mm thick) hold the palm rest to the
+    # body, glued into their pockets. 8mm rather than 10mm because the wall is
+    # only BodyHeight tall now: a 10.3mm bore centred in a 14mm wall would leave
+    # a 1.85mm rib above and below it, and 8.3mm restores that to 2.85mm.
+    # A 2mm disc holds the palm rest fine at 8mm across. The pocket is 2.2mm deep: ~0.1mm of glue
     # plus the 2mm disc leaves it 0.1mm shy of the mating surface, so the two
     # magnets sit 0.2mm apart once the faces close. A 2mm disc loses pull fast
     # with the gap, so err shallow — a pocket that prints under depth ends up
     # flush rather than standing the magnet proud and holding the faces open.
-    "MagnetDiameter": 10.0,
+    "MagnetDiameter": 8.0,
     "MagnetHoleDepth": 2.2,
     "MagnetHoleClearance": 0.3,
-    "MagnetCentreHeight": 9.0,
+    "MagnetCentreHeight": 7.0,
     "MagnetBossThickness": 3.0,
-    "Rp2040ZeroLength": 25.0,
-    "Rp2040ZeroWidth": 18.0,
-    "Rp2040ZeroPcbThickness": 1.6,
-    "Rp2040SeatSideClearance": 1.1,
-    "Rp2040SeatEndClearance": -0.4,
-    "Rp2040SeatDepth": 1.0,
-    "Rp2040StopThickness": 3.0,
-    "Rp2040StopHeight": 2.0,
+    # --- PCB assembly stack -----------------------------------------------------
+    # The controller is no longer a bare module lying on the cavity floor: it is
+    # soldered to a 40x55 aux board that hangs off the main PCB's 16-pin header.
+    # So the Z stack is driven from the plate down, and BodyHeight follows from it:
+    #   plate top +PlateThickness / plate bottom 0
+    #   PCB top   PlateThickness - PlateToPcb        (MX standard, 5.0 from the top)
+    #   PCB bottom  - PcbThickness
+    #   aux top     - AuxStackHeight                 (the mated header height)
+    #   aux bottom  - AuxBoardThickness
+    #   cavity floor- AuxBayClearance
+    # AuxStackHeight cannot go below 6.1: the RP2040-Zero standing on the aux board
+    # is 3.6mm tall and has to clear the switch pin tips 1.9mm under the PCB.
+    "PcbThickness": 1.6,
+    "PlateToPcb": 5.0,
+    "PcbSeatClearance": 0.3,
+    "AuxStackHeight": 6.1,
+    "AuxBoardThickness": 1.6,
+    "AuxModuleThickness": 1.0,
+    "AuxBayClearance": 0.5,
+    "AuxGuideHeight": 1.5,
+    "AuxGuideSize": 4.0,
+    "PlateCollarDiameter": 6.0,
     "UsbOpeningWidth": 10.0,
-    "UsbOpeningHeight": 3.7,
+    "UsbOpeningHeight": 4.5,
     "UsbOpeningRadius": 1.5,
-    "UsbBezelWidth": 14.0,
-    "UsbBezelHeight": 7.7,
-    "UsbBezelRadius": 5.0,
-    "UsbBezelDepth": 1.0,
-    "UsbEdgeOffset": 37.0,
-    "TrsJackEdgeOffset": 17.5,
-    "TrsJackHoleDiameter": 6.5,
-    "TrsJackAxisHeight": 6.5,
-    "TrsJackBodyLength": 15.0,
-    "TrsJackBodyWidth": 9.0,
-    "TrsJackBodyHeight": 7.0,
-    "TrsJackNoseDiameter": 5.0,
-    "TrsJackNoseLength": 2.0,
-    "TrsJackStopWidth": 12.0,
-    "TrsJackStopThickness": 3.0,
-    "TrsJackStopHeight": 2.0,
-    "TrsJackStopClearance": 0.2,
+    "UsbCBodyHeight": 3.3,
     "DisplayGap": 25.0,
 }
 
@@ -199,8 +206,41 @@ def resize_keyholes(key_loops):
     return adjusted
 
 
-def compute_layout(dxf_filename):
-    """Plate/body footprint from the DXF key cutouts (first loop is the perimeter)."""
+def pcb_offset(side, key_loops):
+    """Rigid offset that maps PCB (epro) coordinates into this DXF's frame.
+
+    Both describe the same physical switches, so the offset is read off the keys
+    themselves rather than configured -- and because every key must agree on it,
+    a bad read fails loudly instead of shifting the case by a few millimetres.
+    Only the 14mm switch cutouts are matched; the narrow stabilizer slots have no
+    counterpart in the switch list."""
+    centres = []
+    for loop in key_loops:
+        xs = [p[0] for p in loop]
+        ys = [p[1] for p in loop]
+        if abs((max(xs) - min(xs)) - 14.0) < 0.1 and abs((max(ys) - min(ys)) - 14.0) < 0.1:
+            centres.append(((min(xs) + max(xs)) / 2.0, (min(ys) + max(ys)) / 2.0))
+    keys = PCB.matrix(side)
+    if len(centres) != len(keys):
+        raise ValueError("%s: DXF has %d switch cutouts, PCB has %d"
+                         % (side, len(centres), len(keys)))
+    dx = min(k.x for k in keys) - min(c[0] for c in centres)
+    dy = min(k.y for k in keys) - min(c[1] for c in centres)
+    worst = 0.0
+    for cx, cy in centres:
+        worst = max(worst, min(max(abs(cx + dx - k.x), abs(cy + dy - k.y)) for k in keys))
+    if worst > 0.1:
+        raise ValueError("%s: DXF and PCB switch positions differ by %.3fmm" % (side, worst))
+    return -dx, -dy, worst
+
+
+def compute_layout(dxf_filename, side):
+    """Plate/body footprint from the DXF key cutouts (first loop is the perimeter).
+
+    Also carries everything the case needs from the PCB, mapped into this frame:
+    the screw datum (the PCB's own mounting holes), the PCB outline, and where the
+    aux board and its connectors land. ADR 260824-001947 makes the epro the source
+    of those numbers, so nothing here is a literal."""
     loops = dxf_line_loops(os.path.join(BASE_DIR, dxf_filename))
     key_loops = loops[1:]
     # Outer footprint is derived from the original cutouts so the stab-height
@@ -208,13 +248,40 @@ def compute_layout(dxf_filename):
     xs = [p[0] for loop in key_loops for p in loop]
     ys = [p[1] for loop in key_loops for p in loop]
     margin = PARAMS["OuterMargin"]
+    ox, oy, worst = pcb_offset(side, key_loops)
+    board = PCB.main(side)
+    outline = board.outline
+    aux = PCB.aux_placement(side)
+    conn = PCB.aux_connectors(side)
+    print("  %s PCB offset (%.2f, %.2f), worst key deviation %.3fmm" % (side, ox, oy, worst))
     return {
         "x_min": min(xs) - margin,
         "y_min": min(ys) - margin,
         "x_max": max(xs) + margin,
         "y_max": max(ys) + margin,
         "key_loops": resize_keyholes(shrink_stab_slots(key_loops)),
+        # --- PCB-derived, already in this frame ---
+        "screw_xy": [(h.x + ox, h.y + oy) for h in board.mounting_holes],
+        "screw_diameter": board.mounting_holes[0].diameter,
+        "pcb_rect": (outline.x_min + ox, outline.y_min + oy,
+                     outline.x_max + ox, outline.y_max + oy, outline.radius),
+        "aux_rect": (aux.x_min + ox, aux.y_min + oy, aux.x_max + ox, aux.y_max + oy),
+        "aux_overhang": aux.y_max - outline.y_max,
+        "usb_host_x": conn["host"] + ox,
+        "usb_split_x": conn["split"] + ox,
     }
+
+
+def stack_z():
+    """The assembly Z levels, all derived from PlateThickness downwards."""
+    plate = PARAMS["PlateThickness"]
+    pcb_top = plate - PARAMS["PlateToPcb"]
+    pcb_bottom = pcb_top - PARAMS["PcbThickness"]
+    aux_top = pcb_bottom - PARAMS["AuxStackHeight"]
+    aux_bottom = aux_top - PARAMS["AuxBoardThickness"]
+    usb_axis = aux_top + PARAMS["AuxModuleThickness"] + PARAMS["UsbCBodyHeight"] / 2.0
+    return {"pcb_top": pcb_top, "pcb_bottom": pcb_bottom,
+            "aux_top": aux_top, "aux_bottom": aux_bottom, "usb_axis": usb_axis}
 
 
 # ---- Sketcher helpers ----------------------------------------------------------
@@ -493,7 +560,7 @@ def build_plate(document, side, layout, color):
     x1, y1 = layout["x_max"], layout["y_max"]
     thickness = PARAMS["PlateThickness"]
     radius = PARAMS["CornerRadius"]
-    offset = PARAMS["ScrewCornerOffset"]
+    stack = stack_z()
 
     body = document.addObject("PartDesign::Body", side + "_Switch_Plate")
 
@@ -521,11 +588,31 @@ def build_plate(document, side, layout, color):
     key_pocket.Midplane = True
     document.recompute()
 
-    # M3 countersunk mounting holes at the four corners.
-    screw_xy = [
-        (x0 + offset, y0 + offset), (x1 - offset, y0 + offset),
-        (x0 + offset, y1 - offset), (x1 - offset, y1 - offset),
-    ]
+    # M3 countersunk mounting holes. The datum is the PCB's own four mounting
+    # holes, not an inset from the case corner: one screw has to pass through
+    # plate, PCB and boss, so the three cannot each pick their own position.
+    # (The old corner inset happened to land within 0.5mm of them, but only
+    # because both were "just outside the key field" -- OuterMargin moved and
+    # that coincidence went with it.)
+    screw_xy = layout["screw_xy"]
+    # Clamp collars on the underside. The plate bottom sits at z=0 and the PCB top
+    # is PlateToPcb below the plate top, so with a 4mm plate there is a 1mm air gap
+    # between them -- a screw pulled tight would clamp the plate against the wall
+    # rim and leave the PCB loose. These collars bridge exactly that gap, so the
+    # screw stack becomes plate -> collar -> PCB -> boss.
+    collar_drop = -stack["pcb_top"]
+    if collar_drop > TOLERANCE:
+        collar = body.newObject("Sketcher::SketchObject", side + "_Plate_Collars")
+        collar.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation())
+        for x, y in screw_xy:
+            collar.addGeometry(Part.Circle(App.Vector(x, y, 0), App.Vector(0, 0, 1),
+                                           PARAMS["PlateCollarDiameter"] / 2), False)
+        collar_pad = body.newObject("PartDesign::Pad", side + "_Plate_Collar_Pad")
+        collar_pad.Profile = collar
+        collar_pad.Length = collar_drop
+        collar_pad.Reversed = True
+        document.recompute()
+
     holes = body.newObject("Sketcher::SketchObject", side + "_Screw_Holes")
     holes.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation())
     for x, y in screw_xy:
@@ -594,21 +681,21 @@ def build_plate(document, side, layout, color):
 
 
 # ---- Keyboard body (core: shell + cavity + insert bosses/pockets) --------------
-def build_body(document, side, layout, color, include_controller=False,
-               usb_center_x=None, jack_center_x=None):
+def build_body(document, side, layout, color, host_usb=False):
+    """The case body. `host_usb` opens a second rear-wall port for the RP2040-Zero's
+    own USB-C -- only true for the half whose aux board actually reaches the wall
+    (ADR 260824-003937; the other half's module port is 16.3mm inboard and a hole
+    there would be unreachable, so it gets none)."""
     x0, y0 = layout["x_min"], layout["y_min"]
     x1, y1 = layout["x_max"], layout["y_max"]
     height = PARAMS["BodyHeight"]
     wall = PARAMS["BodyWallThickness"]
     radius = PARAMS["CornerRadius"]
-    offset = PARAMS["ScrewCornerOffset"]
     cavity_h = height - wall
     z_base = -height
     r_inner = max(radius - wall, 0.5)
-    screw_xy = [
-        (x0 + offset, y0 + offset), (x1 - offset, y0 + offset),
-        (x0 + offset, y1 - offset), (x1 - offset, y1 - offset),
-    ]
+    stack = stack_z()
+    screw_xy = layout["screw_xy"]
 
     body = document.addObject("PartDesign::Body", side + "_Keyboard_Body")
 
@@ -638,15 +725,17 @@ def build_body(document, side, layout, color, include_controller=False,
     for x, y in screw_xy:
         boss_sk.addGeometry(Part.Circle(App.Vector(x, y, 0), App.Vector(0, 0, 1),
                                         PARAMS["InsertBossDiameter"] / 2), False)
+    # The boss stops at the PCB underside, not at the top rim: the PCB seats on it
+    # and the plate lands on the wall rim above, so one screw clamps the sandwich.
+    boss_top = stack["pcb_bottom"]
     boss_pad = body.newObject("PartDesign::Pad", side + "_Body_Boss_Pad")
     boss_pad.Profile = boss_sk
-    boss_pad.Length = cavity_h
-    boss_pad.setExpression("Length", u"Parameters.BodyHeight - Parameters.BodyWallThickness")
+    boss_pad.Length = boss_top - (z_base + wall)
     document.recompute()
 
     # 4. Insert pockets bored into the bosses from the top.
     ins_sk = body.newObject("Sketcher::SketchObject", side + "_Body_Insert_Holes")
-    ins_sk.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation())
+    ins_sk.Placement = App.Placement(App.Vector(0, 0, boss_top), App.Rotation())
     for x, y in screw_xy:
         ins_sk.addGeometry(Part.Circle(App.Vector(x, y, 0), App.Vector(0, 0, 1),
                                        PARAMS["SpredsertM3LocatingDiameter"] / 2), False)
@@ -705,118 +794,101 @@ def build_body(document, side, layout, color, include_controller=False,
         App.Placement(App.Vector(0, y0, 0), XZ_ROTATION),
         [(x, z_base + PARAMS["MagnetCentreHeight"]) for x in magnet_x])
 
-    # 7. Connectors. y_max (y1) is the rear wall; the cavity floor is at floor_z.
+    # 7. Rear-wall connectors and the aux-board bay. y_max (y1) is the rear wall.
+    #
+    # The controller and the split-link connector both live on the aux board that
+    # hangs under the main PCB, so there is nothing to seat on the cavity floor any
+    # more -- the old RP2040 seat, its stop and the TRS jack barrel are gone. What
+    # is left is: openings at the height the aux board puts the connectors at, and
+    # guides that stop the board swinging on its header.
     floor_z = -cavity_h
     y_rear = y1
+    ax0, ay0, ax1, ay1 = layout["aux_rect"]
 
-    if jack_center_x is not None:
-        jack_z = z_base + PARAMS["TrsJackAxisHeight"]
-        jh = body.newObject("Sketcher::SketchObject", side + "_Jack_Hole")
-        jh.Placement = App.Placement(App.Vector(0, y_rear, 0), XZ_ROTATION)
-        jh.addGeometry(Part.Circle(App.Vector(jack_center_x, jack_z, 0),
-                                   App.Vector(0, 0, 1), PARAMS["TrsJackHoleDiameter"] / 2), False)
-        jhp = body.newObject("PartDesign::Pocket", side + "_Jack_Hole_Pocket")
-        jhp.Profile = jh
-        jhp.Length = wall + 0.2
-        jhp.Reversed = True
+    # 7a. Aux-board guide posts. The board's Z is set by the mated header, so these
+    # only fence its X/Y. They stand on the cavity floor just outside the board
+    # outline and stop below it, so they are plain vertical prisms with nothing
+    # overhanging.
+    guide = PARAMS["AuxGuideSize"]
+    gap = PARAMS["AuxBayClearance"]
+    guide_top = stack["aux_top"] - 0.5
+    posts = []
+    for gx, gy in ((ax0, ay0), (ax1, ay0), (ax0, ay1), (ax1, ay1)):
+        sx = gx - guide - gap if gx == ax0 else gx + gap
+        sy = gy - guide - gap if gy == ay0 else gy + gap
+        # A post that would land in or past the wall is dropped rather than clipped.
+        if (sx < x0 + wall or sx + guide > x1 - wall
+                or sy < y0 + wall or sy + guide > y1 - wall):
+            continue
+        posts.append((sx, sy))
+    if posts:
+        gsk = body.newObject("Sketcher::SketchObject", side + "_Aux_Guides")
+        gsk.Placement = App.Placement(App.Vector(0, 0, floor_z), App.Rotation())
+        for sx, sy in posts:
+            add_polygon(gsk, [(sx, sy), (sx + guide, sy),
+                              (sx + guide, sy + guide), (sx, sy + guide)])
+        gpad = body.newObject("PartDesign::Pad", side + "_Aux_Guide_Pad")
+        gpad.Profile = gsk
+        gpad.Length = guide_top - floor_z
         document.recompute()
+    print("  %s aux guide posts: %d of 4 (bay %.1f x %.1f, rear overhang %+.2f)"
+          % (side, len(posts), ax1 - ax0, ay1 - ay0, layout["aux_overhang"]))
 
-        jack_inner_y = y_rear - wall - (PARAMS["TrsJackBodyLength"] - PARAMS["TrsJackNoseLength"])
-        sw, st = PARAMS["TrsJackStopWidth"], PARAMS["TrsJackStopThickness"]
-        sy = jack_inner_y - PARAMS["TrsJackStopClearance"] - st
-        js = body.newObject("Sketcher::SketchObject", side + "_Jack_Stop")
-        js.Placement = App.Placement(App.Vector(0, 0, floor_z), App.Rotation())
-        add_polygon(js, [(jack_center_x - sw / 2, sy), (jack_center_x + sw / 2, sy),
-                         (jack_center_x + sw / 2, sy + st), (jack_center_x - sw / 2, sy + st)])
-        jsp = body.newObject("PartDesign::Pad", side + "_Jack_Stop_Pad")
-        jsp.Profile = js
-        jsp.Length = PARAMS["TrsJackStopHeight"]
+    # 7b. USB-C openings, centred on the connector axis the aux stack produces.
+    # Every half gets the split-link port (its breakout is wired with three flying
+    # leads, so it can be put where the wall is); only `host_usb` gets the module's
+    # own port -- see the docstring.
+    usb_z = stack["usb_axis"]
+    ports = [("Split", layout["usb_split_x"])]
+    if host_usb:
+        ports.append(("Host", layout["usb_host_x"]))
+    for name, cx in ports:
+        sk = body.newObject("Sketcher::SketchObject", side + "_Usb_" + name)
+        sk.Placement = App.Placement(App.Vector(0, y_rear, 0), XZ_ROTATION)
+        add_rounded_rect(sk, cx - PARAMS["UsbOpeningWidth"] / 2,
+                         usb_z - PARAMS["UsbOpeningHeight"] / 2,
+                         cx + PARAMS["UsbOpeningWidth"] / 2,
+                         usb_z + PARAMS["UsbOpeningHeight"] / 2,
+                         PARAMS["UsbOpeningRadius"])
+        pk = body.newObject("PartDesign::Pocket", side + "_Usb_" + name + "_Pocket")
+        pk.Profile = sk
+        pk.Length = wall + 0.2
+        pk.Reversed = True
         document.recompute()
-
-    if include_controller:
-        seat_w = PARAMS["Rp2040ZeroWidth"] + 2 * PARAMS["Rp2040SeatSideClearance"]
-        # EndClearance is negative: seat is shorter than the board so the USB end
-        # protrudes through the wall opening and the board is held snugly.
-        seat_l = PARAMS["Rp2040ZeroLength"] + 2 * PARAMS["Rp2040SeatEndClearance"]
-        seat_x = usb_center_x - seat_w / 2
-        seat_y = y_rear - wall - seat_l  # USB faces the front edge (usb_at_rear=False)
-
-        cs = body.newObject("Sketcher::SketchObject", side + "_Ctrl_Seat")
-        cs.Placement = App.Placement(App.Vector(0, 0, floor_z), App.Rotation())
-        add_polygon(cs, [(seat_x, seat_y), (seat_x + seat_w, seat_y),
-                         (seat_x + seat_w, seat_y + seat_l), (seat_x, seat_y + seat_l)])
-        csp = body.newObject("PartDesign::Pocket", side + "_Ctrl_Seat_Pocket")
-        csp.Profile = cs
-        csp.Length = PARAMS["Rp2040SeatDepth"]
-        document.recompute()
-
-        # Opening center sits 0.8 below the TRS jack axis so both line up on the wall.
-        uz0 = (z_base + PARAMS["TrsJackAxisHeight"] - 0.8
-               - PARAMS["UsbOpeningHeight"] / 2)
-        uo = body.newObject("Sketcher::SketchObject", side + "_Usb_Opening")
-        uo.Placement = App.Placement(App.Vector(0, y_rear, 0), XZ_ROTATION)
-        add_rounded_rect(uo, usb_center_x - PARAMS["UsbOpeningWidth"] / 2, uz0,
-                         usb_center_x + PARAMS["UsbOpeningWidth"] / 2,
-                         uz0 + PARAMS["UsbOpeningHeight"], PARAMS["UsbOpeningRadius"])
-        uop = body.newObject("PartDesign::Pocket", side + "_Usb_Opening_Pocket")
-        uop.Profile = uo
-        uop.Length = wall + 0.2
-        uop.Reversed = True
-        document.recompute()
-
-        # Bezel is concentric with the opening so the ring margin is uniform.
-        bz0 = uz0 - (PARAMS["UsbBezelHeight"] - PARAMS["UsbOpeningHeight"]) / 2
-        ub = body.newObject("Sketcher::SketchObject", side + "_Usb_Bezel")
-        ub.Placement = App.Placement(App.Vector(0, y_rear, 0), XZ_ROTATION)
-        add_rounded_rect(ub, usb_center_x - PARAMS["UsbBezelWidth"] / 2, bz0,
-                         usb_center_x + PARAMS["UsbBezelWidth"] / 2,
-                         bz0 + PARAMS["UsbBezelHeight"], PARAMS["UsbBezelRadius"])
-        ubp = body.newObject("PartDesign::Pocket", side + "_Usb_Bezel_Pocket")
-        ubp.Profile = ub
-        ubp.Length = PARAMS["UsbBezelDepth"] + 0.1
-        ubp.Reversed = True
-        document.recompute()
-
-        stop_w = PARAMS["Rp2040ZeroWidth"]
-        stop_y = seat_y - PARAMS["Rp2040StopThickness"]
-        cst = body.newObject("Sketcher::SketchObject", side + "_Ctrl_Stop")
-        cst.Placement = App.Placement(App.Vector(0, 0, floor_z), App.Rotation())
-        add_polygon(cst, [(usb_center_x - stop_w / 2, stop_y), (usb_center_x + stop_w / 2, stop_y),
-                          (usb_center_x + stop_w / 2, stop_y + PARAMS["Rp2040StopThickness"]),
-                          (usb_center_x - stop_w / 2, stop_y + PARAMS["Rp2040StopThickness"])])
-        cstp = body.newObject("PartDesign::Pad", side + "_Ctrl_Stop_Pad")
-        cstp.Profile = cst
-        cstp.Length = PARAMS["Rp2040StopHeight"]
-        document.recompute()
+    print("  %s rear USB-C openings: %s (axis z=%.2f)"
+          % (side, ", ".join(n for n, _ in ports), usb_z))
 
     if body.ViewObject:
         body.ViewObject.ShapeColor = color
 
     # Reference-only parts (not structural), placed in body-local coords.
-    if include_controller:
-        seat_z = floor_z - PARAMS["Rp2040SeatDepth"]
-        board_y = seat_y + seat_l - PARAMS["Rp2040ZeroLength"]
-        board = Part.makeBox(PARAMS["Rp2040ZeroWidth"], PARAMS["Rp2040ZeroLength"],
-                             PARAMS["Rp2040ZeroPcbThickness"],
-                             App.Vector(usb_center_x - PARAMS["Rp2040ZeroWidth"] / 2, board_y, seat_z))
-        ref = document.addObject("Part::Feature", side + "_RP2040_Zero_Reference")
-        ref.Shape = board
-        if ref.ViewObject:
-            ref.ViewObject.ShapeColor = (0.15, 0.60, 0.30)
-    if jack_center_x is not None:
-        jack_z = z_base + PARAMS["TrsJackAxisHeight"]
-        jack_inner_y = y_rear - wall - (PARAMS["TrsJackBodyLength"] - PARAMS["TrsJackNoseLength"])
-        jbody = Part.makeBox(PARAMS["TrsJackBodyWidth"],
-                             PARAMS["TrsJackBodyLength"] - PARAMS["TrsJackNoseLength"],
-                             PARAMS["TrsJackBodyHeight"],
-                             App.Vector(jack_center_x - PARAMS["TrsJackBodyWidth"] / 2, jack_inner_y,
-                                        jack_z - PARAMS["TrsJackBodyHeight"] / 2))
-        jnose = Part.makeCylinder(PARAMS["TrsJackNoseDiameter"] / 2, PARAMS["TrsJackNoseLength"],
-                                  App.Vector(jack_center_x, y_rear - wall, jack_z), App.Vector(0, 1, 0))
-        ref2 = document.addObject("Part::Feature", side + "_PJ322_Jack_Reference")
-        ref2.Shape = jbody.fuse(jnose)
-        if ref2.ViewObject:
-            ref2.ViewObject.ShapeColor = (0.75, 0.65, 0.15)
+    # The PCB itself, so the seat height and the connector axes can be checked
+    # against real geometry instead of trusted. Not exported.
+    px0, py0, px1, py1, prad = layout["pcb_rect"]
+    board = Part.makeBox(px1 - px0, py1 - py0, PARAMS["PcbThickness"],
+                         App.Vector(px0, py0, stack["pcb_bottom"]))
+    if prad > TOLERANCE:
+        vertical = [e for e in board.Edges
+                    if abs(e.Vertexes[0].Point.x - e.Vertexes[-1].Point.x) < TOLERANCE
+                    and abs(e.Vertexes[0].Point.y - e.Vertexes[-1].Point.y) < TOLERANCE]
+        try:
+            board = board.makeFillet(prad, vertical)
+        except Exception as fillet_error:
+            print("  %s PCB corner fillet skipped: %s" % (side, str(fillet_error)[:40]))
+    ref = document.addObject("Part::Feature", side + "_PCB_Reference")
+    ref.Shape = board
+    if ref.ViewObject:
+        ref.ViewObject.ShapeColor = (0.10, 0.45, 0.20)
+
+    # The aux board too -- it is what forced BodyHeight and the opening height, and
+    # on one half it overhangs the main PCB's rear edge.
+    aux = Part.makeBox(ax1 - ax0, ay1 - ay0, PARAMS["AuxBoardThickness"],
+                       App.Vector(ax0, ay0, stack["aux_bottom"]))
+    aux_ref = document.addObject("Part::Feature", side + "_Aux_Board_Reference")
+    aux_ref.Shape = aux
+    if aux_ref.ViewObject:
+        aux_ref.ViewObject.ShapeColor = (0.20, 0.35, 0.55)
+
     document.recompute()
     return body
 
@@ -900,17 +972,19 @@ def main():
     document = App.newDocument("Keyboard_Parametric")
 
     build_spreadsheet(document)
-    left_layout = compute_layout("left-switch.dxf")
-    right_layout = compute_layout("right-switch.dxf")
+    left_layout = compute_layout("left-switch.dxf", "left")
+    right_layout = compute_layout("right-switch.dxf", "right")
 
     build_plate(document, "Left", left_layout, (0.86, 0.70, 0.20))
     build_plate(document, "Right", right_layout, (0.25, 0.65, 0.85))
-    build_body(document, "Left", left_layout, (0.60, 0.35, 0.12),
-               jack_center_x=left_layout["x_max"] - PARAMS["TrsJackEdgeOffset"])
-    build_body(document, "Right", right_layout, (0.12, 0.38, 0.60),
-               include_controller=True,
-               usb_center_x=right_layout["x_min"] + PARAMS["UsbEdgeOffset"],
-               jack_center_x=right_layout["x_min"] + PARAMS["TrsJackEdgeOffset"])
+    # Only the half whose aux board reaches the rear wall gets a host USB-C
+    # opening; the other one's module port is inboard of the wall and a hole there
+    # would be unreachable (ADR 260824-003937). Which half that is comes from the
+    # PCB, not from a constant here.
+    for side, layout, color in (("Left", left_layout, (0.60, 0.35, 0.12)),
+                                ("Right", right_layout, (0.12, 0.38, 0.60))):
+        build_body(document, side, layout, color,
+                   host_usb=layout["aux_overhang"] > -PARAMS["BodyWallThickness"])
     build_tilt_wedge(document, "Left", left_layout, (0.50, 0.30, 0.55))
     build_tilt_wedge(document, "Right", right_layout, (0.30, 0.35, 0.55))
     build_palm_rest(document, "Left", left_layout)
@@ -927,11 +1001,22 @@ def main():
     document.recompute()
     document.saveAs(os.path.join(BASE_DIR, "keyboard_parametric.FCStd"))
 
+    stl_dir = os.path.join(BASE_DIR, "parametric_stl")
+    if not os.path.isdir(stl_dir):
+        os.makedirs(stl_dir)
+    import Mesh
     for obj in document.Objects:
         if obj.TypeId == "PartDesign::Body" and hasattr(obj, "Shape") and obj.Shape.Solids:
             shape = obj.Shape
             print("%s: valid=%s solids=%d vol=%.0f" % (
                 obj.Name, shape.isValid(), len(shape.Solids), shape.Volume))
+            # Export at the origin: the display offset applied above is for looking
+            # at the two halves side by side, not something a slicer should inherit.
+            placed = shape.copy()
+            placed.Placement = App.Placement()
+            Mesh.Mesh(placed.tessellate(0.05)).write(
+                os.path.join(stl_dir, obj.Name.lower() + ".stl"))
+    print("STL exported to %s" % stl_dir)
 
 
 main()

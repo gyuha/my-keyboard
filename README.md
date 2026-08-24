@@ -66,11 +66,11 @@ keylayout-left/right.json 수정
 ### 우측
 
 ```json
-[{x:0.75,a:4},"&\n7\n\nF7","*\n8\n\nF8","(\n9\n\nF9",")\n0\n\nF10","_\n-\n\nF11","+\n=\n\nF12",{c:"#c8c3b8",w:2},"Backspace",{c:"#63696a"},"Home"],
-[{x:0.25,c:"#cccccc"},"Y\n\n\n\n\n\n\n\n\nㅛ","U\n\n\n\n\n\n\n\n\nㅕ","I\n\n\n\n\n\n\n\n\nㅑ","O\n\n\n\n\n\n\n\n\nㅐ","P\n\n\n\n\n\n\n\n\nㅔ","{\n[","}\n]",{c:"#c8c3b8",w:1.5},"|\n\\",{c:"#63696a"},"End"],
-[{x:0.5,c:"#cccccc"},"H\n\n\n\n\n\n\n\n\nㅗ","J\n\n\n\n\n\n\n\n\nㅓ","K\n\n\n\n\n\n\n\n\nㅏ","L\n\n\n\n\n\n\n\n\nㅣ",":\n;","\"\n'",{c:"#c8c3b8",w:2.25},"Enter",{c:"#63696a"},"PgUp"],
-[{c:"#ffe08d"},"B\n\n\n\n\n\n\n\n\nㅠ",{c:"#cccccc"},"N\n\n\n\n\n\n\n\n\nㅜ","M\n\n\n\n\n\n\n\n\nㅡ","<\n,",">\n.","?\n/",{c:"#c8c3b8",w:1.75},"Shift",{c:"#ea4221",a:7},"↑",{c:"#63696a",a:4},"PgDn"],
-[{c:"#ffe08d"},"한/영",{c:"#c8c3b8",w:2.75},"Space","Fn.1","Ins","Del",{c:"#ea4221",a:7},"←","↓","→"]
+[{c:"#ffe08d",a:4},"^\n6\n\nF6",{c:"#cccccc"},"&\n7\n\nF7","*\n8\n\nF8","(\n9\n\nF9",")\n0\n\nF10","_\n-\n\nF11","+\n=\n\nF12",{c:"#c8c3b8",w:2},"Backspace",{c:"#63696a"},"Home"],
+[{x:0.5,c:"#cccccc"},"Y\n\n\n\n\n\n\n\n\nㅛ","U\n\n\n\n\n\n\n\n\nㅕ","I\n\n\n\n\n\n\n\n\nㅑ","O\n\n\n\n\n\n\n\n\nㅐ","P\n\n\n\n\n\n\n\n\nㅔ","{\n[","}\n]",{c:"#c8c3b8",w:1.5},"|\n\\",{c:"#63696a"},"End"],
+[{x:0.75,c:"#cccccc"},"H\n\n\n\n\n\n\n\n\nㅗ","J\n\n\n\n\n\n\n\n\nㅓ","K\n\n\n\n\n\n\n\n\nㅏ","L\n\n\n\n\n\n\n\n\nㅣ",":\n;","\"\n'",{c:"#c8c3b8",w:2.25},"Enter",{c:"#63696a"},"PgUp"],
+[{x:0.25,c:"#ffe08d"},"B\n\n\n\n\n\n\n\n\nㅠ",{c:"#cccccc"},"N\n\n\n\n\n\n\n\n\nㅜ","M\n\n\n\n\n\n\n\n\nㅡ","<\n,",">\n.","?\n/",{c:"#c8c3b8",w:1.75},"Shift",{c:"#ea4221",a:7},"↑",{c:"#63696a",a:4},"PgDn"],
+[{x:0.25,c:"#ffe08d"},"한/영",{c:"#c8c3b8",w:2.75},"Space","Fn.1","Ins","Del",{c:"#ea4221",a:7},"←","↓","→"]
 ```
 
 키 갯수 : 72키
@@ -81,74 +81,103 @@ keylayout-left/right.json 수정
 |                                                   | 부품명                       | 수량  | 설명                        | 링크                                                                   |
 | :-------------------------------------------------: | ------------------------- | :---: | ------------------------- | -------------------------------------------------------------------- |
 | ![rp2040](image/parts/RP2040-Zero-details-3.jpg)  | RP2040-Zero RP2040        | 2   | 보드용                       | [연결](https://ko.aliexpress.com/item/1005003823256706.html)           |
-| ![PJ-322 3.5Pie](image/parts/PJ-322%203.5Pie.jpg) | 스테레오 커넥터 / 3.5mm / FEMALE | 2   | 보드 연결 용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1067728)             |
-| ![aux](image/parts/aux-cable.jpg)                 | 3.5mm aux 케이블             | 1   | 보드 연결 용                   | [연결](https://ko.aliexpress.com/item/1005006150639643.html)           |
+|                                                   | 메인 PCB                    | 2   | 좌 146.21×103.35 / 우 198.60×103.35mm. 회로도 `pcb/split-keyboard.epro` |                                                                      |
+|                                                   | aux 보드                    | 2   | 40×55mm. RP2040-Zero + 16핀 소켓                          |                                                                      |
+|                                                   | USB-C 브레이크아웃 (V/D-/D+/G)  | 2   | 분할 링크 용. 12×15mm                    | [연결](https://ko.aliexpress.com/w/wholesale-usb-c-breakout-16pin.html) |
+|                                                   | USB-C ↔ USB-C 케이블          | 1   | 분할 링크 용                    | [연결](https://ko.aliexpress.com/w/wholesale-usb-c-to-usb-c-cable.html) |
+|                                                   | 1×16 저상형 여성 소켓 / 남성 헤더 2.54mm | 각 2 | aux 보드 ↔ 메인 PCB. 결합 높이 6.1mm 이하여야 합니다 | [연결](https://www.devicemart.co.kr/goods/view?no=1321216)             |
 | ![코스타스테빌](image/parts/stabil.jpg)                 | 코스타 스테빌 라이저               | 2   | 긴 키 안정 (5개가 필요 해서 2세트 구매) | [연결](https://ko.aliexpress.com/w/wholesale-costar-stabilizer.html)   |
-| ![wire](image/parts/wire.jpg)                     | 전선                        | 1   | 랩핑와이어 추천(인두기로 녹여서 사용가능)   | [연결](https://www.devicemart.co.kr/goods/view?no=1274107)             |
-| ![switch](image/parts/key-switch.jpg)             | 스위치                       | 72  | 개인 취향으로 오테뮤 레몬축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955) |
+| ![switch](image/parts/key-switch.jpg)             | 스위치                       | 73  | 개인 취향으로 오테뮤 레몬축을 선택 했습니다. | [연결](https://smartstore.naver.com/happysaturday/products/5541876955) |
 | ![keycap](image/parts/keycap.jpg)                 | 키캡                        | -   | 되도록이면 XDA 또는 DSA를 선택 합니다. | [연결](https://ko.aliexpress.com/w/wholesale-xda-keycap.html)          |
 | ![bump](image/parts/bump.jpg)                     | 미끄럼 방지 패드 or 범퍼           | 1   | 바닥 미끄럼 방지                 | [연결](https://www.coupang.com/vp/products/6265639245)                 |
-| ![MMSD4148](image/parts/diode.jpg)             | 다이오드(1N4148)     | 72  |                           | [연결](https://ko.aliexpress.com/w/wholesale-1n4148.html?spm=a2g0o.productlist.search.0)                |
+| ![MMSD4148](image/parts/diode.jpg)             | 다이오드 1N4148WS (SOD-323, SMD)     | 73  | 메인 PCB 하면에 실장             | [연결](https://ko.aliexpress.com/w/wholesale-1n4148.html?spm=a2g0o.productlist.search.0)                |
 | ![인서트(Spredsert)](image/parts/spredsert.png)      | 인서트(spredsert)            | 8   | 케이스 조립용                   | [연결](https://www.devicemart.co.kr/goods/view?no=1067969)             |
-| ![나사](image/parts/M3x5.png)                       | 접시머리 십자볼트 M3*10           | 8   | 케이스 조립용                   | [연결](https://www.devicemart.co.kr/goods/view?no=34782)               |
-| ![네오디옴 자석](image/parts/magnetic-5x2.png) | 네오디옴 자석 5x2mm | 4 | 팜레스트 연결 | [연결](https://ko.aliexpress.com/w/wholesale-magnetic-5x2.html?spm=a2g0o.detail.search.0) |
+| ![나사](image/parts/M3x5.png)                       | 접시머리 십자볼트 M3*12           | 8   | 플레이트 → 칼라 → PCB → 인서트를 관통합니다 | [연결](https://www.devicemart.co.kr/goods/view?no=34782)               |
+| ![네오디옴 자석](image/parts/magnetic-5x2.png) | 네오디옴 자석 8x2mm | 4 | 팜레스트 연결 | [연결](https://ko.aliexpress.com/w/wholesale-magnetic-5x2.html?spm=a2g0o.detail.search.0) |
 |                                                   | 납땜 재료                     | -   | 인두기, 납, 인두기 스탠드 등등        |                                                                      |
 
 
 ### RP2040-Zero 핀 배치
 
-행(ROW) 핀은 좌우 공통이고, 열(COL) 핀은 우측이 2열(GP13, GP14) 더 많습니다.
-TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
+행(ROW) 핀은 좌우 공통이고, 열(COL) 핀은 우측이 2열(GP14, GP15) 더 많습니다.
+좌우를 잇는 [분할 링크](#분할-링크)는 3선입니다 — `3V3` · `GND` · `GP0`(1선 half-duplex).
 
-
+> 이 표의 원천은 회로도 `pcb/split-keyboard.epro` 입니다. `tools/pcb.py` 가 거기서
+> 직접 읽고, `tools/verify_pcb_matrix.py` 가 `gkey/config.h`·`gkey/gkey.h` 와 대조해
+> 어긋나면 빌드 전에 잡습니다. 손으로 고치지 마십시오.
 
 ![RP2040](./image/RP2040-Zero-pinout.png)
 
 
-| RP2040-Zero 핀   | 좌측 보드    | 우측 보드    |
-| :---------------: | :--------: | :--------: |
-| GP0             | ROW 0    | ROW 0    |
-| GP1             | ROW 1    | ROW 1    |
-| GP2             | ROW 2    | ROW 2    |
-| GP3             | ROW 3    | ROW 3    |
-| GP4             | ROW 4    | ROW 4    |
-| GP5             | ROW 5    | ROW 5    |
-| GP6             | COL 0    | COL 0    |
-| GP7             | COL 1    | COL 1    |
-| GP8             | COL 2    | COL 2    |
-| GP9             | COL 3    | COL 3    |
-| GP10            | COL 4    | COL 4    |
-| GP11            | COL 5    | COL 5    |
-| GP12            | COL 6    | COL 6    |
-| GP13            | —        | COL 7    |
-| GP14            | —        | COL 8    |
-| GP15            | TRRS 시리얼 | TRRS 시리얼 |
-| 5V | TRRS VCC | TRRS VCC |
-| GND             | TRRS GND | TRRS GND |
+| RP2040-Zero 핀 | 좌측 보드    | 우측 보드    |
+| :-----------: | :------: | :------: |
+| GP0           | 분할 링크    | 분할 링크    |
+| GP1           | —        | —        |
+| GP2           | ROW 0    | ROW 0    |
+| GP3           | ROW 1    | ROW 1    |
+| GP4           | ROW 2    | ROW 2    |
+| GP5           | ROW 3    | ROW 3    |
+| GP6           | ROW 4    | ROW 4    |
+| GP7           | COL 0    | COL 0    |
+| GP8           | COL 1    | COL 1    |
+| GP9           | COL 2    | COL 2    |
+| GP10          | COL 3    | COL 3    |
+| GP11          | COL 4    | COL 4    |
+| GP12          | COL 5    | COL 5    |
+| GP13          | COL 6    | COL 6    |
+| GP14          | —        | COL 7    |
+| GP15          | —        | COL 8    |
+| 3V3           | 분할 링크    | 분할 링크    |
+| GND           | 분할 링크    | 분할 링크    |
 
 
-- 다이오드 방향: `COL2ROW`
-- USB는 우측 보드에 연결합니다(`MASTER_RIGHT`). 좌측은 TRRS로만 연결됩니다.
-- 펌웨어 정의: `gkey/config.h`의 `MATRIX_ROW_PINS` / `MATRIX_COL_PINS` / `SERIAL_USART_TX_PIN`
+- 다이오드 방향: `COL2ROW`. 다이오드는 SMD(SOD-323)로 메인 PCB **하면**에 붙습니다.
+- 스위치는 스루홀 **납땜**입니다(핫스왑 소켓이 아닙니다). 플레이트를 먼저 끼운 뒤 납땜해야 합니다.
+- **USB 는 좌측 보드에 연결합니다**(`MASTER_LEFT`). 우측 보드의 USB-C 는 케이스 뒷벽에서 16.3mm 안쪽에 있어 조립 상태로는 닿지 않습니다 — 플래싱할 때만 플레이트 조립체를 떼고 씁니다. 근거: `.forge/adr/260824-003937-usb-host-is-the-left-half.md`
+- 펌웨어 정의: `gkey/config.h` 의 `MATRIX_ROW_PINS` / `MATRIX_COL_PINS` / `SERIAL_USART_TX_PIN`
 
+### 분할 링크
 
+좌우 반쪽은 **USB-C 커넥터를 쓰지만 USB 가 아닙니다.** 브레이크아웃 보드의 4패드 중
+3개만 씁니다 — `V`→`3V3`, `G`→`GND`, `D+`→`GP0`. `D-` 는 미사용입니다.
 
-&nbsp;
+`GP0` 한 가닥으로 양방향 통신하는 **half-duplex** 입니다. 좌우 커넥터 배선이 완전히
+동일하기 때문에 스트레이트 케이블은 `TX`↔`TX` 를 잇게 되고, 따라서 full-duplex 는
+펌웨어를 어떻게 설정해도 이 하드웨어에서 성립하지 않습니다.
 
-### 좌측
+> ⚠ **케이스 뒷면에 USB-C 포트가 두 개 있고 모양이 같습니다.** 좌측은 호스트(PC)용과
+> 분할 링크용이 나란히 있습니다. **분할 링크 포트에 PC 케이블을 꽂으면 VBUS 5V 가
+> 3V3 레일로 들어가 RP2040 이 망가질 수 있습니다.** `V` 라인에 직렬 쇼트키 다이오드를
+> 하나 넣으면 이 사고를 막을 수 있습니다.
 
-![Left wiring](image/wiring-left.png?raw=true)
+### 키 ↔ 매트릭스
 
-### 우측
+<!-- BEGIN GENERATED: matrix-table -->
 
+라벨은 PCB 실크스크린이고, `—` 는 그 자리에 스위치가 없다는 뜻입니다.
+행 핀은 ROW0=`GP2`, ROW1=`GP3`, ROW2=`GP4`, ROW3=`GP5`, ROW4=`GP6` 이고, 열 핀은 COL0~COL8 = `GP7`~`GP15` 입니다.
 
-![Right wiring](image/wiring-right.png?raw=true)
+**좌측 (30키)**
 
-핀 배선은 [kbfirmware.com](https://kbfirmware.com/) 에서 만들었습니다.
+|      | COL0 | COL1 | COL2 | COL3 | COL4 | COL5 | COL6 |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| ROW0 | ESC | 1 | 2 | 3 | 4 | 5 | 6 |
+| ROW1 | TAB | Q | W | E | R | T | — |
+| ROW2 | FN1 | A | S | D | F | G | — |
+| ROW3 | SHIFT | Z | X | C | V | B | — |
+| ROW4 | CTRL | WIN | ALT | FN.2 | SPACE | — | — |
 
-# 스트레오 컨넥트 연결 핀
+**우측 (43키)**
 
-![핀](https://github.com/gyuha/my-keyboard/blob/main/image/stero%20connect%20ping.png?raw=true)
+|      | COL0 | COL1 | COL2 | COL3 | COL4 | COL5 | COL6 | COL7 | COL8 |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| ROW0 | 6 | 7 | 8 | 9 | 0 | - | = | Backspace | Home |
+| ROW1 | Y | U | I | O | P | [ | ] | \ | End |
+| ROW2 | H | J | K | L | ; | ' | Enter | — | PaUp |
+| ROW3 | B | N | M | , | . | / | Shift | Up | PgDn |
+| ROW4 | R.ALT | Space | — | FN1 | Ins | Del | Left | Down | Right |
+
+<!-- END GENERATED: matrix-table -->
 
 # 케이스 3D 출력
 
@@ -156,7 +185,42 @@ TRRS 케이블은 GP15(시리얼) · 5V · GND 3선을 사용합니다.
 
 ![FreeCAD 아이소메트릭](./image/freecad-iso.png?raw=true)
 
-파라메트릭 모델(`freecad/keyboard_parametric.FCStd`) 전체입니다. 노란색이 좌측, 파란색이 우측 스위치 플레이트이고 앞쪽 검은색이 팜레스트입니다. 우측 플레이트 구멍으로 RP2040-Zero(노랑)와 3.5mm 잭(초록) 참조 부품이 비칩니다. 좌우 반쪽은 화면에서 보기 좋게 벌려 놓은 것이라 실제 배치 간격과는 다릅니다.
+파라메트릭 모델(`freecad/keyboard_parametric.FCStd`) 전체입니다. 노란색이 좌측, 파란색이 우측 스위치 플레이트이고 앞쪽 검은색이 팜레스트입니다. 플레이트 구멍으로 **초록색 메인 PCB 참조**가 비치고, 그 아래 파란 판이 **aux 보드 참조**입니다(둘 다 표시 전용이라 STL 로 나가지 않습니다). 좌우 반쪽은 화면에서 보기 좋게 벌려 놓은 것이라 실제 배치 간격과는 다릅니다.
+
+### 케이스 치수
+
+| | 폭 × 깊이 × 높이 |
+| --- | --- |
+| 좌측 | 156.06 × 113.95 × 14.00 mm |
+| 우측 | 208.45 × 113.95 × 14.00 mm |
+
+바디 높이는 고른 값이 아니라 조립 스택에서 도출된 값입니다 — `BodyHeight = 7.7 + AuxStack` 이고, aux 보드 위에 선 RP2040-Zero(3.6mm)가 PCB 아래로 나온 스위치 핀 끝을 피해야 하므로 `AuxStack` 의 하한이 6.1mm 입니다. 즉 **14mm 가 이 하드웨어의 물리적 하한**입니다.
+
+### 조립 스택
+
+```
+z = +4.0  플레이트 상면 (스위치 상부 하우징이 얹힘)
+z =  0.0  플레이트 하면 / 바디 상단 rim
+z = -1.0  메인 PCB 상면   (MX 표준: 플레이트 상면에서 5.0mm)
+z = -2.6  메인 PCB 하면 / 나사 보스 상면 (인서트가 여기 들어감)
+z = -4.6  스위치 핀 끝 + 솔더 (다이오드 하단은 -3.7)
+z = -8.7  aux 보드 상면   (16핀 헤더 결합 높이 6.1mm)
+z =-10.3  aux 보드 하면
+z =-11.0  캐비티 바닥
+z =-14.0  바디 바닥
+```
+
+나사 하나가 **플레이트 → 칼라 → PCB → 보스의 인서트**를 관통해 셋을 함께 조입니다. 플레이트 하면과 PCB 상면 사이에 1mm 공간이 남기 때문에, 플레이트 하면의 나사 자리마다 ⌀6 × 1mm 칼라가 그 틈을 메웁니다. 칼라가 없으면 나사가 플레이트만 벽 rim 에 붙이고 PCB 는 헐거워집니다.
+
+> ⚠ **플레이트는 상면을 바닥에 붙여 출력하십시오.** 하면에 칼라 4개가 1mm 튀어나와 있어서, 하면을 바닥에 놓으면 판 전체가 네 점으로만 지지됩니다.
+
+### 조립 순서
+
+1. 바디의 인서트 자리 4곳에 SPREDSERT 인서트를 넣습니다.
+2. 스위치를 **플레이트에 먼저 끼웁니다.** 스위치는 PCB 에 납땜되므로(핫스왑이 아닙니다) 나중에 플레이트만 빼낼 수 없습니다.
+3. 플레이트에 끼운 스위치 핀을 메인 PCB 에 납땜합니다. 2U 키의 스테빌라이저 철사는 플레이트 **아래쪽**을 지나야 합니다.
+4. aux 보드를 메인 PCB 하면의 16핀 헤더에 꽂습니다.
+5. 조립체를 바디에 얹고 M3×12 나사 4개로 조입니다.
 
 ![FreeCAD 평면도](./image/freecad-top.png?raw=true)
 
