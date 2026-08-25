@@ -145,30 +145,9 @@ for side, n in (("left", 30), ("right", 43)):
     check(f"{side} 다이오드 수", len(diodes) == n, f"{len(diodes)} (기대 {n})")
     check(f"{side} 다이오드 하면", all(d.layer == "bottom" for d in diodes))
 
-# ---- S6. aux 보드 배치 --------------------------------------------------------
-# 16핀 헤더의 mate 로 aux 보드를 메인 PCB 좌표계에 놓는다. 메인 쪽 헤더는 하면
-# (layer 2)이라 풋프린트가 미러되며, 그 결과 두 보드는 순수 평행이동으로 맞물린다.
-for side in ("left", "right"):
-    place = project.aux_placement(side)
-    o = project.main(side).outline
-    check(f"{side} aux 폭 보존", near(place.x_max - place.x_min, 40.0),
-          f"{place.x_max - place.x_min:.2f}")
-    check(f"{side} aux 깊이 보존", near(place.y_max - place.y_min, 55.0),
-          f"{place.y_max - place.y_min:.2f}")
-    # X 는 양쪽 모두 메인 PCB 안에 들어가야 한다(안 그러면 미러 방향을 잘못 잡은 것).
-    check(f"{side} aux X 가 보드 안", place.x_min >= o.x_min - TOL and place.x_max <= o.x_max + TOL,
-          f"{place.x_min:.2f}..{place.x_max:.2f} (보드 {o.x_min:.2f}..{o.x_max:.2f})")
-    # 헤더 열이 aux 오른쪽 가장자리에서 약 3.3mm 안쪽이라는 관계가 보존돼야 한다.
-    check(f"{side} 헤더-aux 우변 관계", place.x_max > place.x_min)
-
-# 좌측 aux 는 후면을 1.66mm 넘어선다 — 3of4 의 OuterMargin 11.5 근거.
-left_place = project.aux_placement("left")
-left_overhang = left_place.y_max - project.main("left").outline.y_max
-check("좌 aux 후면 오버행", near(left_overhang, 1.66, 0.1), f"{left_overhang:.2f} (기대 1.66)")
-
 if failures:
     print(f"실패 {len(failures)}건")
     for f in failures:
         print("  -", f)
     sys.exit(1)
-print(f"통과 — 보드 4장, 좌 30키 / 우 43키, 핀맵·마운팅 홀·aux 배치 확인")
+print(f"통과 — 보드 4장, 좌 30키 / 우 43키, 핀맵·마운팅 홀 확인")

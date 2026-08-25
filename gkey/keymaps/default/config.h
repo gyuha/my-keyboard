@@ -22,13 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #define USE_I2C
 
 /* Select hand configuration */
-// USB goes to the LEFT half. The two halves' aux boards do not sit in the same
-// place relative to their main PCBs -- the left board's USB-C lands flush with
-// the rear edge, the right one is stranded 16.3mm inside the wall, so the right
-// port cannot be reached with the case closed. See
+// USB goes to the RIGHT half. The aux board is gone -- the RP2040-Zero and the
+// USB-C breakout are now cradled on the body floor and hand-wired to the main
+// PCB's 16-pin header pads, so the right module is no longer stranded inside
+// the wall and its host port reaches the rear opening. The left module sits
+// beside its header with no wall opening at all. See
+// adr/260824-224604-drop-aux-board-and-floor-mount-modules.md, which retires
 // adr/260824-003937-usb-host-is-the-left-half.md.
-#define MASTER_LEFT
-// #define MASTER_RIGHT
+// #define MASTER_LEFT
+#define MASTER_RIGHT
 
 // #define EE_HANDS
 // #undef RGBLED_NUM
