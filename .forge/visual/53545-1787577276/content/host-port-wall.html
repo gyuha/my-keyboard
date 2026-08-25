@@ -1,0 +1,128 @@
+<h2>우측 반쪽: 호스트 USB-C를 어느 벽으로 뺍니까?</h2>
+<p class="subtitle">우측 반쪽 평면도(위에서 본 X–Y). 실제 좌표입니다 — 바디 208.45 × 113.95, 캐비티 안쪽 x −5.88..196.57 / y −6.29..101.66.
+<span style="color:#8b6914">■</span> 나사 보스 4개 · <span style="color:#1e5c33">●</span> 16핀 헤더(4.46, 56.56) · <span style="color:#3d6ba8">■</span> 분할 링크 포트(x=11.95, 뒷벽) · <span style="color:#d4372a">■</span> RP2040-Zero 18×23.5.
+<b>왼쪽이 좌측 반쪽과 맞닿는 안쪽입니다.</b></p>
+
+<div class="cards">
+
+  <!-- ================= A ================= -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 410 235" width="100%" style="background:#fbfbfd">
+        <rect x="10" y="10" width="385.6" height="210.8" rx="9" fill="#eceef2" stroke="#8b8f9a"/>
+        <rect x="15.5" y="15.5" width="374.5" height="199.8" rx="5" fill="#fdfdff" stroke="#b6bac3"/>
+        <circle cx="24.6" cy="24.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <circle cx="380.9" cy="24.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <circle cx="24.6" cy="204.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <circle cx="380.9" cy="204.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <!-- split port on rear wall -->
+        <rect x="39" y="10" width="19" height="6" fill="#3d6ba8"/>
+        <text x="48" y="30" font-size="8" text-anchor="middle" fill="#3d6ba8">분할</text>
+        <!-- module against rear wall next to split -->
+        <rect x="58.6" y="15.5" width="33.3" height="43.5" fill="#f2c9c4" stroke="#d4372a" stroke-width="1.6"/>
+        <rect x="62" y="10" width="26" height="6" fill="#d4372a"/>
+        <text x="75" y="40" font-size="9" text-anchor="middle" fill="#8a241a">Zero</text>
+        <!-- header + wire -->
+        <circle cx="34.6" cy="99.1" r="4" fill="#1e5c33"/>
+        <text x="34.6" y="113" font-size="8" text-anchor="middle" fill="#1e5c33">헤더</text>
+        <path d="M34.6 95 C 34.6 70, 62 72, 68 59" stroke="#1e5c33" stroke-width="2.5" fill="none"/>
+        <text x="120" y="80" font-size="10" fill="#1e5c33">배선 ≈ 45mm</text>
+        <text x="205" y="200" font-size="11" text-anchor="middle" fill="#999">두 포트가 뒷벽에 47mm 간격으로 나란히</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A. 후면벽 · 분할 포트 옆 (x≈26)</h3>
+      <p>지금 형상이 전제하던 자리 그대로. 헤더까지 <b>배선 ≈45mm</b> — 3안 중 최단이고 캐비티 안이 가장 깔끔합니다.</p>
+      <p><b>대가:</b> ADR 001950의 위험을 <b>그대로 유지</b>합니다. 뒷벽에 똑같은 USB-C 두 개가 47mm 간격으로 나란히 놓입니다. 분할 포트에 PC 케이블을 꽂으면 VBUS 5V가 3V3 레일로 들어갑니다.</p>
+    </div>
+  </div>
+
+  <!-- ================= B ================= -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 410 235" width="100%" style="background:#fbfbfd">
+        <rect x="10" y="10" width="385.6" height="210.8" rx="9" fill="#eceef2" stroke="#8b8f9a"/>
+        <rect x="15.5" y="15.5" width="374.5" height="199.8" rx="5" fill="#fdfdff" stroke="#b6bac3"/>
+        <circle cx="24.6" cy="24.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <circle cx="380.9" cy="24.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <circle cx="24.6" cy="204.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <circle cx="380.9" cy="204.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <rect x="39" y="10" width="19" height="6" fill="#3d6ba8"/>
+        <text x="48" y="30" font-size="8" text-anchor="middle" fill="#3d6ba8">분할</text>
+        <!-- module against RIGHT side wall -->
+        <rect x="345.3" y="76" width="44.7" height="33.3" fill="#f2c9c4" stroke="#d4372a" stroke-width="1.6"/>
+        <rect x="390" y="82" width="6" height="21" fill="#d4372a"/>
+        <text x="367" y="97" font-size="9" text-anchor="middle" fill="#8a241a">Zero</text>
+        <text x="368" y="127" font-size="9" text-anchor="middle" fill="#d4372a">호스트 →</text>
+        <circle cx="34.6" cy="99.1" r="4" fill="#1e5c33"/>
+        <text x="34.6" y="113" font-size="8" text-anchor="middle" fill="#1e5c33">헤더</text>
+        <path d="M38 99 L 344 92" stroke="#1e5c33" stroke-width="2.5" fill="none" stroke-dasharray="6 3"/>
+        <text x="190" y="86" font-size="10" text-anchor="middle" fill="#1e5c33">배선 ≈ 190mm × 14가닥</text>
+        <text x="205" y="200" font-size="11" text-anchor="middle" fill="#2f8f4e">다른 벽 → 혼동이 물리적으로 불가능</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B. 우측 측벽 (x=196.57)</h3>
+      <p>케이블이 키보드 <b>오른쪽 옆으로</b> 나갑니다. 분할 포트는 뒷벽, 호스트는 측벽 — <b>ADR 001950의 위험이 형상 차원에서 사라집니다.</b> 라벨이나 주의 문구가 필요 없습니다.</p>
+      <p><b>대가:</b> 헤더가 반대쪽 끝(x=4.46)에 있어 <b>14가닥 × 190mm</b>. 캐비티 깊이 8.4mm라 물리적으로는 들어가지만 다발이 케이스를 횡단합니다.</p>
+    </div>
+  </div>
+
+  <!-- ================= C ================= -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 410 235" width="100%" style="background:#fbfbfd">
+        <rect x="10" y="10" width="385.6" height="210.8" rx="9" fill="#eceef2" stroke="#8b8f9a"/>
+        <rect x="15.5" y="15.5" width="374.5" height="199.8" rx="5" fill="#fdfdff" stroke="#b6bac3"/>
+        <circle cx="24.6" cy="24.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <circle cx="380.9" cy="24.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <circle cx="24.6" cy="204.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <circle cx="380.9" cy="204.6" r="7.4" fill="#e0cf9a" stroke="#8b6914"/>
+        <rect x="39" y="10" width="19" height="6" fill="#3d6ba8"/>
+        <text x="48" y="30" font-size="8" text-anchor="middle" fill="#3d6ba8">분할</text>
+        <!-- module at far end of rear wall -->
+        <rect x="335.1" y="15.5" width="33.3" height="43.5" fill="#f2c9c4" stroke="#d4372a" stroke-width="1.6"/>
+        <rect x="338" y="10" width="27" height="6" fill="#d4372a"/>
+        <text x="351" y="40" font-size="9" text-anchor="middle" fill="#8a241a">Zero</text>
+        <circle cx="34.6" cy="99.1" r="4" fill="#1e5c33"/>
+        <text x="34.6" y="113" font-size="8" text-anchor="middle" fill="#1e5c33">헤더</text>
+        <path d="M38 96 C 150 88, 250 80, 334 60" stroke="#1e5c33" stroke-width="2.5" fill="none" stroke-dasharray="6 3"/>
+        <text x="190" y="78" font-size="10" text-anchor="middle" fill="#1e5c33">배선 ≈ 180mm × 14가닥</text>
+        <!-- separation dimension -->
+        <path d="M48 68 L 351 68" stroke="#999" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="205" y="200" font-size="11" text-anchor="middle" fill="#b07c14">같은 벽, 168mm 이격 — 구별은 되지만 같은 면</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C. 후면벽 · 반대쪽 끝 (x≈176)</h3>
+      <p>뒷벽을 유지하되 분할 포트에서 <b>168mm 떨어뜨립니다.</b> 케이스 뒷면 오른쪽 끝에 하나, 왼쪽 끝에 하나 — 실사용에서 헷갈릴 거리가 아닙니다.</p>
+      <p><b>대가:</b> 배선은 B와 거의 같은 <b>180mm</b>인데(헤더가 반대쪽 끝이므로), 위험은 B만큼 확실하게 없애지 못합니다. <b>배선 비용은 B와 같고 안전성은 B보다 낮습니다</b> — 즉 B에 지배됩니다.</p>
+      <p style="color:#8b6914"><b>주의:</b> 우측 후면 나사 보스(191.6, 96.7)와 x=187.6에서 겹치기 시작하므로 모듈은 x≤185까지만 갈 수 있습니다.</p>
+    </div>
+  </div>
+
+</div>
+
+<h3 style="margin-top:26px">실측 하나 더 필요합니다</h3>
+<div class="ask-input" style="max-width:640px">
+  <label style="font-size:13px">RP2040-Zero: USB-C 커넥터가 <b>모듈 보드 가장자리 밖으로 튀어나온 길이</b> (mm) — 브레이크아웃의 1mm에 해당하는 값입니다. 벽을 몇 mm까지 얇게 팔지가 여기서 나옵니다.
+    <input class="mock-input" id="m3" style="width:100%;margin-top:6px" placeholder="예: 1.5">
+  </label>
+  <button class="mock-button" style="margin-top:10px" onclick="
+    window.brainstorm.send({type:'text', choice:'text:zero-overhang', field:'zero-overhang',
+      value:'zero_usb_overhang=' + document.getElementById('m3').value});
+    this.textContent='보냄';
+  ">보내기</button>
+</div>
+
+<div style="margin-top:26px">
+<button class="mock-button" onclick="
+  var sel = Array.from(document.querySelectorAll('.option.selected, .card.selected'))
+                 .map(function(e){ return e.dataset.choice; });
+  var key = sel.join(',') || 'none';
+  if (this.dataset.sent === key) return;
+  this.dataset.sent = key;
+  window.brainstorm.send({type:'confirm', choice:'confirm:'+key, value:sel});
+  this.textContent='확정됨';
+">이걸로 확정</button>
+</div>

@@ -1,0 +1,143 @@
+<h2>USB-C 브레이크아웃을 무엇이 붙잡습니까?</h2>
+<p class="subtitle">뒷벽 단면(측면에서 본 Y–Z 평면). 회색 = 케이스, 초록 = 브레이크아웃 PCB 1.6t, 은색 = USB-C 리셉터클 셸, 파랑 = 꽂히는 플러그.
+<b>빨간 화살표 = 삽입력이 최종적으로 어디에 실리는가.</b> 그게 이 질문의 전부입니다.</p>
+
+<div class="cards">
+
+  <!-- ============ A ============ -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 440 210" width="100%" style="background:#fbfbfd">
+        <!-- floor -->
+        <rect x="40" y="150" width="300" height="34" fill="#c9ccd4" stroke="#8b8f9a"/>
+        <!-- rear wall: above and below the through opening -->
+        <rect x="340" y="30" width="26" height="82" fill="#c9ccd4" stroke="#8b8f9a"/>
+        <rect x="340" y="146" width="26" height="38" fill="#c9ccd4" stroke="#8b8f9a"/>
+        <!-- front stop rib -->
+        <rect x="150" y="104" width="14" height="46" fill="#b0b4bd" stroke="#8b8f9a"/>
+        <text x="157" y="98" font-size="10" text-anchor="middle" fill="#444">전면 리브</text>
+        <!-- side lip (shown as a small hook over the board) -->
+        <rect x="176" y="128" width="30" height="7" fill="#b0b4bd" stroke="#8b8f9a"/>
+        <text x="191" y="123" font-size="9" text-anchor="middle" fill="#444">상부 립 0.8</text>
+        <!-- board -->
+        <rect x="164" y="137" width="176" height="13" fill="#2f8f4e" stroke="#1e5c33"/>
+        <!-- connector shell -->
+        <rect x="228" y="112" width="112" height="25" fill="#d8dbe2" stroke="#6f7480"/>
+        <text x="284" y="129" font-size="10" text-anchor="middle" fill="#333">리셉터클</text>
+        <!-- plug -->
+        <rect x="366" y="116" width="52" height="17" fill="#7aa7e0" stroke="#3d6ba8"/>
+        <path d="M418 124 L392 124" stroke="#3d6ba8" stroke-width="0" />
+        <text x="392" y="112" font-size="10" text-anchor="middle" fill="#3d6ba8">플러그</text>
+        <!-- force path arrow: plug -> shell -> solder -> board -> front rib -->
+        <path d="M360 143 L176 143" stroke="#d4372a" stroke-width="2.5" marker-end="url(#ar)"/>
+        <defs><marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 z" fill="#d4372a"/></marker></defs>
+        <text x="268" y="160" font-size="10" text-anchor="middle" fill="#d4372a">셸 → 납땜 → PCB → 전면 리브</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A. 관통 홀 + 3면 포켓 + 상부 립</h3>
+      <p>뒷벽은 지금처럼 플러그가 지나가는 관통 홀. 바닥에 좌·우·전면 3면 포켓을 세우고 좌우 벽 위에 0.8mm 립을 걸어 보드를 위에서 눌러 끼웁니다.</p>
+      <p><b>하중 경로:</b> 삽입력이 <b>납땜 조인트를 통과</b>해 PCB로, PCB가 전면 리브를 밉니다. 나사·접착 없음.</p>
+      <p><b>약점:</b> 리셉터클 4개 납땜 패드가 삽입력을 반복해서 받습니다. 브레이크아웃 보드는 셸 고정 홀이 있으니 완전 무보강은 아니지만, 뜯기는 건 이 패드입니다.</p>
+    </div>
+  </div>
+
+  <!-- ============ B ============ -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 440 210" width="100%" style="background:#fbfbfd">
+        <rect x="40" y="150" width="300" height="34" fill="#c9ccd4" stroke="#8b8f9a"/>
+        <!-- wall with stepped bore: outer part large (shell), inner part small (plug tongue) -->
+        <rect x="340" y="30" width="26" height="82" fill="#c9ccd4" stroke="#8b8f9a"/>
+        <rect x="340" y="146" width="26" height="38" fill="#c9ccd4" stroke="#8b8f9a"/>
+        <!-- the step: inner lip of the wall that the shell butts against -->
+        <rect x="340" y="112" width="9" height="9" fill="#8b8f9a" stroke="#6f7480"/>
+        <rect x="340" y="130" width="9" height="16" fill="#8b8f9a" stroke="#6f7480"/>
+        <text x="326" y="196" font-size="10" text-anchor="middle" fill="#d4372a">벽 단차</text>
+        <path d="M330 188 L344 128" stroke="#d4372a" stroke-width="1" fill="none"/>
+        <!-- seat pad under board -->
+        <rect x="176" y="142" width="164" height="8" fill="#b0b4bd" stroke="#8b8f9a"/>
+        <text x="210" y="167" font-size="10" fill="#444">안착 패드</text>
+        <!-- board -->
+        <rect x="176" y="129" width="164" height="13" fill="#2f8f4e" stroke="#1e5c33"/>
+        <!-- shell: goes INTO the counterbore, butting the step -->
+        <rect x="240" y="104" width="109" height="25" fill="#d8dbe2" stroke="#6f7480"/>
+        <text x="290" y="121" font-size="10" text-anchor="middle" fill="#333">리셉터클</text>
+        <!-- plug -->
+        <rect x="366" y="108" width="52" height="17" fill="#7aa7e0" stroke="#3d6ba8"/>
+        <text x="392" y="104" font-size="10" text-anchor="middle" fill="#3d6ba8">플러그</text>
+        <!-- force arrow: plug -> shell -> wall step. short. -->
+        <path d="M380 96 L352 96" stroke="#d4372a" stroke-width="2.5" marker-end="url(#ar2)"/>
+        <defs><marker id="ar2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 z" fill="#d4372a"/></marker></defs>
+        <text x="300" y="92" font-size="10" text-anchor="end" fill="#d4372a">셸 → 벽. 끝.</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B. 벽에 단차 보어 + 바닥 안착 패드 <span style="color:#2f8f4e">(추천)</span></h3>
+      <p>뒷벽을 <b>2단</b>으로 팝니다 — 바깥쪽은 리셉터클 셸이 딱 들어가는 크기로 셸 돌출길이만큼, 안쪽은 플러그 혀만 지나가는 작은 홀. 셸을 벽 속에 밀어 넣으면 <b>셸 앞면이 벽 단차에 닿아 멈춥니다.</b></p>
+      <p><b>하중 경로:</b> 삽입력이 셸에서 바로 벽으로 갑니다. <b>납땜 조인트에 하중 0.</b> 뽑는 힘은 보드 뒷변이 벽 안쪽면에 닿아 받습니다.</p>
+      <p><b>대가:</b> 셸 돌출길이(≈1.8mm?)를 <b>실측해야</b> 성립합니다. 그 값이 틀리면 단차가 헛돌거나 리셉터클 입이 너무 깊이 들어갑니다.</p>
+    </div>
+  </div>
+
+  <!-- ============ C ============ -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 440 210" width="100%" style="background:#fbfbfd">
+        <rect x="40" y="150" width="300" height="34" fill="#c9ccd4" stroke="#8b8f9a"/>
+        <rect x="340" y="30" width="26" height="82" fill="#c9ccd4" stroke="#8b8f9a"/>
+        <rect x="340" y="146" width="26" height="38" fill="#c9ccd4" stroke="#8b8f9a"/>
+        <!-- pocket walls -->
+        <rect x="150" y="104" width="14" height="46" fill="#b0b4bd" stroke="#8b8f9a"/>
+        <!-- glue fillet -->
+        <path d="M164 137 L164 122 L182 137 z" fill="#e8b13a" stroke="#b07c14"/>
+        <path d="M340 137 L340 122 L322 137 z" fill="#e8b13a" stroke="#b07c14"/>
+        <text x="252" y="176" font-size="10" text-anchor="middle" fill="#b07c14">에폭시 / 핫멜트</text>
+        <rect x="164" y="137" width="176" height="13" fill="#2f8f4e" stroke="#1e5c33"/>
+        <rect x="228" y="112" width="112" height="25" fill="#d8dbe2" stroke="#6f7480"/>
+        <rect x="366" y="116" width="52" height="17" fill="#7aa7e0" stroke="#3d6ba8"/>
+        <path d="M360 160 L176 160" stroke="#d4372a" stroke-width="2.5" marker-end="url(#ar3)"/>
+        <defs><marker id="ar3" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 z" fill="#d4372a"/></marker></defs>
+        <text x="268" y="196" font-size="10" text-anchor="middle" fill="#d4372a">셸 → 납땜 → PCB → 접착층 + 리브</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C. 3면 포켓 + 접착</h3>
+      <p>형상은 최소 — 바닥에 얕은 좌면과 전면 리브만. 나머지는 에폭시나 핫멜트가 잡습니다.</p>
+      <p><b>하중 경로:</b> A와 같지만 립 대신 접착층. 형상 리스크가 가장 낮고 공차에 관대합니다.</p>
+      <p><b>대가:</b> 비가역. 커넥터가 망가지면 케이스에서 떼기 어렵습니다. 지난 틸트 웨지 회고의 교훈 4번("접착은 비가역") 과 같은 계열의 대가입니다.</p>
+    </div>
+  </div>
+
+</div>
+
+<h3 style="margin-top:28px">그리고 실측 두 개가 필요합니다</h3>
+<p class="subtitle">B를 고르면 <b>필수</b>고, A·C를 골라도 개구부 높이와 안착 패드 높이를 정하는 데 씁니다. 캘리퍼로 재서 적어 주십시오. 없으면 비워 두시면 보수적인 값(1.8 / 4.3)으로 가정합니다.</p>
+<div class="ask-input" style="display:flex;flex-direction:column;gap:10px;max-width:640px">
+  <label style="font-size:13px">① USB-C 브레이크아웃: 리셉터클 셸이 <b>보드 가장자리 밖으로 튀어나온 길이</b> (mm)
+    <input class="mock-input" id="m1" style="width:100%;margin-top:4px" placeholder="예: 1.8">
+  </label>
+  <label style="font-size:13px">② RP2040-Zero: <b>보드 하면 → USB-C 커넥터 상면</b> 총 두께 (mm)
+    <input class="mock-input" id="m2" style="width:100%;margin-top:4px" placeholder="예: 4.3  (README는 3.6, PARAMS는 4.3 — 모순)">
+  </label>
+  <button class="mock-button" style="align-self:flex-start" onclick="
+    window.brainstorm.send({type:'text', choice:'text:measurements', field:'measurements',
+      value:'shell_protrusion=' + document.getElementById('m1').value + '; module_thickness=' + document.getElementById('m2').value});
+    this.textContent='보냄';
+  ">실측값 보내기</button>
+</div>
+
+<div style="margin-top:26px">
+<button class="mock-button" onclick="
+  var sel = Array.from(document.querySelectorAll('.option.selected, .card.selected'))
+                 .map(function(e){ return e.dataset.choice; });
+  var key = sel.join(',') || 'none';
+  if (this.dataset.sent === key) return;
+  this.dataset.sent = key;
+  window.brainstorm.send({type:'confirm', choice:'confirm:'+key, value:sel});
+  this.textContent='확정됨';
+">이걸로 확정</button>
+</div>
