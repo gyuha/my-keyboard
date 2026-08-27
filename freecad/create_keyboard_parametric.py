@@ -29,7 +29,7 @@ PARAMS = {
     "OuterMargin": 11.5,
     "CornerRadius": 5.0,
     "BodyWallThickness": 3.0,
-    "BodyHeight": 14.0,
+    "BodyHeight": 13.2,
     "RestSideMargin": 6.0,
     "RestRearMargin": 6.0,
     "RestSlantWidth": 10.0,
@@ -65,8 +65,8 @@ PARAMS = {
     "PalmRestTaperAngleDeg": 10.0,
     # Round neodymium discs (8mm diameter, 2mm thick) hold the palm rest to the
     # body, glued into their pockets. 8mm rather than 10mm because the wall is
-    # only BodyHeight tall now: a 10.3mm bore centred in a 14mm wall would leave
-    # a 1.85mm rib above and below it, and 8.3mm restores that to 2.85mm.
+    # only BodyHeight tall now. With the 13.2mm body, an 8.3mm bore leaves at least
+    # 2.05mm of shell above and 2.85mm below its centred pocket.
     # A 2mm disc holds the palm rest fine at 8mm across. The pocket is 2.2mm deep: ~0.1mm of glue
     # plus the 2mm disc leaves it 0.1mm shy of the mating surface, so the two
     # magnets sit 0.2mm apart once the faces close. A 2mm disc loses pull fast
@@ -78,31 +78,66 @@ PARAMS = {
     "MagnetCentreHeight": 7.0,
     "MagnetBossThickness": 3.0,
     # --- PCB assembly stack -----------------------------------------------------
-    # The controller is no longer a bare module lying on the cavity floor: it is
-    # soldered to a 40x55 aux board that hangs off the main PCB's 16-pin header.
-    # So the Z stack is driven from the plate down, and BodyHeight follows from it:
-    #   plate top +PlateThickness / plate bottom 0
-    #   PCB top   PlateThickness - PlateToPcb        (MX standard, 5.0 from the top)
-    #   PCB bottom  - PcbThickness
-    #   aux top     - AuxStackHeight                 (the mated header height)
-    #   aux bottom  - AuxBoardThickness
-    #   cavity floor- AuxBayClearance
-    # AuxStackHeight cannot go below 6.1: the RP2040-Zero standing on the aux board
-    # is 3.6mm tall and has to clear the switch pin tips 1.9mm under the PCB.
+    # Two independent Z chains meet in the cavity, and neither is measured from the
+    # other's end:
+    #   from the plate down -- plate top +PlateThickness / plate bottom 0 /
+    #     PCB top PlateThickness - PlateToPcb (MX standard, 5.0 below the plate top) /
+    #     PCB bottom -2.6 / switch pin tips + solder -4.6
+    #   from the cavity floor up -- floor -(BodyHeight - BodyWallThickness) = -10.2,
+    #     and both loose boards stand on it in their own cradle.
+    # The boards' seats are NOT constants: they are back-solved from PortAxisZ so the
+    # RP2040-Zero (1.0mm PCB) and the USB-C breakout (1.6mm PCB) put their
+    # receptacles on one axis and one rear-wall opening height serves both. See
+    # .forge/adr/260824-224604-drop-aux-board-and-floor-mount-modules.md: the aux
+    # board this replaces was 1.0mm short of clearing the switch pins.
     "PcbThickness": 1.6,
     "PlateToPcb": 5.0,
     "PcbSeatClearance": 0.3,
-    "AuxStackHeight": 6.1,
-    "AuxBoardThickness": 1.6,
-    "AuxModuleThickness": 1.0,
-    "AuxBayClearance": 0.5,
-    "AuxGuideHeight": 1.5,
-    "AuxGuideSize": 4.0,
     "PlateCollarDiameter": 6.0,
+    # --- rear-wall ports --------------------------------------------------------
+    # PortAxisZ is the one number the whole port stack hangs off: -6.45 puts the
+    # RP2040-Zero's top at -4.90, which clears the switch pin tips at -4.60 by
+    # 0.30mm, and keeps its 1.2mm floor rail clear of its own 1.0mm bottom chip.
+    # PortWallThickness == ConnectorOverhang is not a coincidence: the receptacle
+    # shell stands only 1.0mm proud of its board, so the wall the plug crosses has
+    # to be thinned to that, or the receptacle mouth sits recessed and the plug
+    # bottoms out on the case before it seats.
+    "PortAxisZ": -6.45,
+    "PortWallThickness": 1.0,
+    "ConnectorOverhang": 1.0,
     "UsbOpeningWidth": 10.0,
     "UsbOpeningHeight": 4.5,
     "UsbOpeningRadius": 1.5,
-    "UsbCBodyHeight": 3.3,
+    # --- the two loose boards ---------------------------------------------------
+    "ModuleWidth": 18.0,
+    "ModuleDepth": 23.5,
+    "ModulePcbThickness": 1.0,
+    "ModuleUsbHeight": 3.1,
+    "ModuleBottomChip": 1.0,
+    "BreakoutWidth": 12.0,
+    "BreakoutDepth": 15.0,
+    "BreakoutThickness": 1.6,
+    # --- cradles ----------------------------------------------------------------
+    # CradleRailWidth is the module's two floor rails; the 1.0mm bottom chip hangs
+    # between them. CradleWallThickness now applies only to the single end stop;
+    # there are intentionally no side walls or retaining lips.
+    "CradleWallThickness": 1.5,
+    "CradleClearance": 0.3,
+    "CradleRailWidth": 2.5,
+    # --- where the ports and cradles sit ----------------------------------------
+    # All measured from the *inboard* cavity wall's inner face -- the side that
+    # faces the other half -- so shrinking OuterMargin later moves the whole port
+    # group with the wall instead of stranding it. ADR 260824-224604: these are the
+    # case's own choice now, not something read off a board that will never be made.
+    # SplitPortInboardOffset is shared by both halves (the PCB's own jack positions
+    # were not mirror-symmetric; that asymmetry is dropped).
+    # The host-side module is rear-flush and only the right half has one. The other
+    # half's module is wired, not plugged, so it hugs the inboard wall beside the
+    # 16-pin header and needs a rear offset as well as an inboard one.
+    "SplitPortInboardOffset": 17.83,
+    "ModuleInboardOffset": 35.88,
+    "ModuleInboardOffsetWired": 9.30,
+    "ModuleRearOffset": 18.0,
     "DisplayGap": 25.0,
 }
 
@@ -237,10 +272,16 @@ def pcb_offset(side, key_loops):
 def compute_layout(dxf_filename, side):
     """Plate/body footprint from the DXF key cutouts (first loop is the perimeter).
 
-    Also carries everything the case needs from the PCB, mapped into this frame:
-    the screw datum (the PCB's own mounting holes), the PCB outline, and where the
-    aux board and its connectors land. ADR 260824-001947 makes the epro the source
-    of those numbers, so nothing here is a literal."""
+    Also carries what the case needs from the PCB, mapped into this frame: the screw
+    datum (the PCB's own mounting holes) and the PCB outline. ADR 260824-001947 makes
+    the epro the source of those numbers, so nothing here is a literal.
+
+    The rear-wall ports are *not* among them any more. They used to be read off the
+    aux board's connectors, and reading coordinates off a board that will never be
+    made is exactly the silently-drifting derivative 001947 warned about -- so they
+    are the case's own parameters now (ADR 260824-224604), measured from the inboard
+    cavity wall. `inboard_x`/`inboard_dir` are that datum: the half's inner face on
+    the side that faces the other half, and the direction that runs away from it."""
     loops = dxf_line_loops(os.path.join(BASE_DIR, dxf_filename))
     key_loops = loops[1:]
     # Outer footprint is derived from the original cutouts so the stab-height
@@ -248,40 +289,53 @@ def compute_layout(dxf_filename, side):
     xs = [p[0] for loop in key_loops for p in loop]
     ys = [p[1] for loop in key_loops for p in loop]
     margin = PARAMS["OuterMargin"]
+    wall = PARAMS["BodyWallThickness"]
+    x_min, x_max = min(xs) - margin, max(xs) + margin
     ox, oy, worst = pcb_offset(side, key_loops)
     board = PCB.main(side)
     outline = board.outline
-    aux = PCB.aux_placement(side)
-    conn = PCB.aux_connectors(side)
     print("  %s PCB offset (%.2f, %.2f), worst key deviation %.3fmm" % (side, ox, oy, worst))
     return {
-        "x_min": min(xs) - margin,
+        "x_min": x_min,
         "y_min": min(ys) - margin,
-        "x_max": max(xs) + margin,
+        "x_max": x_max,
         "y_max": max(ys) + margin,
         "key_loops": resize_keyholes(shrink_stab_slots(key_loops)),
+        # The right half's inboard edge is its x minimum, the left half's its
+        # maximum -- they meet in the middle of the desk.
+        "inboard_x": (x_min + wall) if side == "right" else (x_max - wall),
+        "inboard_dir": 1.0 if side == "right" else -1.0,
         # --- PCB-derived, already in this frame ---
         "screw_xy": [(h.x + ox, h.y + oy) for h in board.mounting_holes],
         "screw_diameter": board.mounting_holes[0].diameter,
         "pcb_rect": (outline.x_min + ox, outline.y_min + oy,
                      outline.x_max + ox, outline.y_max + oy, outline.radius),
-        "aux_rect": (aux.x_min + ox, aux.y_min + oy, aux.x_max + ox, aux.y_max + oy),
-        "aux_overhang": aux.y_max - outline.y_max,
-        "usb_host_x": conn["host"] + ox,
-        "usb_split_x": conn["split"] + ox,
     }
 
 
 def stack_z():
-    """The assembly Z levels, all derived from PlateThickness downwards."""
+    """The assembly Z levels.
+
+    Two chains, meeting in the cavity. The plate chain runs down from
+    PlateThickness; the port chain runs *outwards* from PortAxisZ, because the two
+    receptacles have to share one height even though the boards under them are
+    1.0mm and 1.6mm thick. Both receptacles sit directly on their board, so the
+    board's top face is the connector's underside -- one level for both cradles --
+    and each seat is that minus its own board thickness. Nothing here is a literal:
+    change PortAxisZ and both cradles follow it."""
     plate = PARAMS["PlateThickness"]
     pcb_top = plate - PARAMS["PlateToPcb"]
     pcb_bottom = pcb_top - PARAMS["PcbThickness"]
-    aux_top = pcb_bottom - PARAMS["AuxStackHeight"]
-    aux_bottom = aux_top - PARAMS["AuxBoardThickness"]
-    usb_axis = aux_top + PARAMS["AuxModuleThickness"] + PARAMS["UsbCBodyHeight"] / 2.0
-    return {"pcb_top": pcb_top, "pcb_bottom": pcb_bottom,
-            "aux_top": aux_top, "aux_bottom": aux_bottom, "usb_axis": usb_axis}
+    port_axis = PARAMS["PortAxisZ"]
+    board_top = port_axis - PARAMS["ModuleUsbHeight"] / 2.0
+    return {"pcb_top": pcb_top,
+            "pcb_bottom": pcb_bottom,
+            "floor_z": -(PARAMS["BodyHeight"] - PARAMS["BodyWallThickness"]),
+            "port_axis": port_axis,
+            "board_top": board_top,
+            "module_seat": board_top - PARAMS["ModulePcbThickness"],
+            "breakout_seat": board_top - PARAMS["BreakoutThickness"],
+            "module_top": board_top + PARAMS["ModuleUsbHeight"]}
 
 
 # ---- Sketcher helpers ----------------------------------------------------------
@@ -680,12 +734,114 @@ def build_plate(document, side, layout, color):
     return body
 
 
+# ---- Floor-mounted board cradles and the rear-wall ports ------------------------
+def add_port_seat(document, body, name, centre_x, half_width, y_inner, y_outer,
+                  floor_z, roof_low, roof_slope):
+    """Thin the rear wall locally so a plug can reach the receptacle.
+
+    The wall is BodyWallThickness; the receptacle shell stands only ConnectorOverhang
+    (1.0mm) proud of its board. Drill straight through 3mm and the receptacle mouth
+    ends up 2mm inside the case, where the plug's 6.5mm of exposed metal bottoms out
+    on the case before it seats. So the inner face is cut back to PortWallThickness
+    over the width the board needs -- that is the whole reason this feature exists,
+    and it is why the cradle behind it is dimensioned to the seat face and not to
+    the cavity wall.
+
+    The roof is a ramp, not a ceiling. A flat roof would be a ~20mm-wide downward
+    face with material within reach on only one of its four sides (the outer skin),
+    which is precisely what verify_no_support.py fails: it cannot be bridged, only
+    drooped. Climbing `roof_slope` mm for every mm it runs outward puts it at 51 deg
+    off horizontal, inside the 45 deg a slicer carries unsupported, so the check
+    never has to judge it at all. `roof_low` has to clear both the connector and the
+    top of the opening -- if the roof dipped into the opening's height the plug would
+    be crossing 3mm of wall again at its top corners."""
+    run = y_outer - y_inner
+    over = 0.6                     # start inside the cavity void, so the cut
+                                   # overlaps the wall instead of meeting its face
+    sketch = body.newObject("Sketcher::SketchObject", name)
+    sketch.Placement = App.Placement(App.Vector(centre_x + half_width, 0, 0),
+                                     YZ_ROTATION)
+    add_polygon(sketch, [(y_inner - over, floor_z),
+                         (y_outer, floor_z),
+                         (y_outer, roof_low + run * roof_slope),
+                         (y_inner - over, roof_low - over * roof_slope)])
+    pocket = body.newObject("PartDesign::Pocket", name + "_Pocket")
+    pocket.Profile = sketch
+    pocket.Length = 2 * half_width
+    document.recompute()
+    return pocket
+
+
+def cradle_pocket(centre_x, width, depth, y_far):
+    """The hole a board drops into: board plus CradleClearance on every side.
+
+    `y_far` is the pocket's rear face -- the port seat for a rear-flush cradle, so
+    the board's own rear edge is what stops it and the receptacle lands in the
+    opening."""
+    clear = PARAMS["CradleClearance"]
+    half = width / 2.0 + clear
+    return (centre_x - half, centre_x + half, y_far - depth - 2 * clear, y_far)
+
+
+def add_cradle(document, body, name, pocket, seat_z, open_axis, open_sign,
+               rail_width=0.0):
+    """One board support standing on the cavity floor: seat and end stop.
+
+    `open_axis`/`open_sign` point toward the connector or wiring side. The opposite
+    edge gets a stop, while both long side guides are deliberately left open for
+    easier board insertion and wiring access. `rail_width` 0 lays a solid seat pad;
+    anything else lays two rails, leaving the module's ModuleBottomChip hanging
+    clear between them."""
+    stack = stack_z()
+    floor_z, board_top = stack["floor_z"], stack["board_top"]
+    w = PARAMS["CradleWallThickness"]
+    x0, x1, y0, y1 = pocket
+
+    # 1. Seat. Solid pad, or two rails at the pocket's X extremes.
+    seat_sk = body.newObject("Sketcher::SketchObject", name + "_Seat")
+    seat_sk.Placement = App.Placement(App.Vector(0, 0, floor_z), App.Rotation())
+    if rail_width > 0:
+        add_polygon(seat_sk, [(x0, y0), (x0 + rail_width, y0),
+                              (x0 + rail_width, y1), (x0, y1)])
+        add_polygon(seat_sk, [(x1 - rail_width, y0), (x1, y0),
+                              (x1, y1), (x1 - rail_width, y1)])
+    else:
+        add_polygon(seat_sk, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+    seat_pad = body.newObject("PartDesign::Pad", name + "_Seat_Pad")
+    seat_pad.Profile = seat_sk
+    seat_pad.Length = seat_z - floor_z
+    document.recompute()
+
+    # 2. End stop only. The former long side walls and their retaining lips were
+    # removed intentionally; these are the side guides visible beside both boards.
+    if open_axis == "y":
+        yb = y0 if open_sign > 0 else y1
+        yo = yb - open_sign * w
+        points = [(x0 - w, min(yb, yo)), (x1 + w, min(yb, yo)),
+                  (x1 + w, max(yb, yo)), (x0 - w, max(yb, yo))]
+    else:
+        _, xb = (x1, x0) if open_sign > 0 else (x0, x1)
+        xo = xb - open_sign * w
+        points = [(min(xb, xo), y0 - w), (max(xb, xo), y0 - w),
+                  (max(xb, xo), y1 + w), (min(xb, xo), y1 + w)]
+    stop_sk = body.newObject("Sketcher::SketchObject", name + "_End_Stop")
+    stop_sk.Placement = App.Placement(App.Vector(0, 0, floor_z), App.Rotation())
+    add_polygon(stop_sk, points)
+    stop_pad = body.newObject("PartDesign::Pad", name + "_End_Stop_Pad")
+    stop_pad.Profile = stop_sk
+    stop_pad.Length = board_top - floor_z
+    document.recompute()
+    return pocket
+
+
 # ---- Keyboard body (core: shell + cavity + insert bosses/pockets) --------------
 def build_body(document, side, layout, color, host_usb=False):
-    """The case body. `host_usb` opens a second rear-wall port for the RP2040-Zero's
-    own USB-C -- only true for the half whose aux board actually reaches the wall
-    (ADR 260824-003937; the other half's module port is 16.3mm inboard and a hole
-    there would be unreachable, so it gets none)."""
+    """The case body. `host_usb` says this half carries the host port, which decides
+    both openings and where its controller module sits: rear-flush behind a port seat
+    when true, hugging the inboard wall beside the 16-pin header when false. It is a
+    plain choice of half now -- with the module hand-wired instead of plugged into an
+    aux board, nothing in the PCB constrains it (ADR 260824-224604 retires the
+    260824-003937 reasoning that forced MASTER_LEFT)."""
     x0, y0 = layout["x_min"], layout["y_min"]
     x1, y1 = layout["x_max"], layout["y_max"]
     height = PARAMS["BodyHeight"]
@@ -794,54 +950,88 @@ def build_body(document, side, layout, color, host_usb=False):
         App.Placement(App.Vector(0, y0, 0), XZ_ROTATION),
         [(x, z_base + PARAMS["MagnetCentreHeight"]) for x in magnet_x])
 
-    # 7. Rear-wall connectors and the aux-board bay. y_max (y1) is the rear wall.
+    # 7. Rear-wall ports and the two floor-mounted board cradles. y_max (y1) is the
+    # rear wall.
     #
-    # The controller and the split-link connector both live on the aux board that
-    # hangs under the main PCB, so there is nothing to seat on the cavity floor any
-    # more -- the old RP2040 seat, its stop and the TRS jack barrel are gone. What
-    # is left is: openings at the height the aux board puts the connectors at, and
-    # guides that stop the board swinging on its header.
-    floor_z = -cavity_h
+    # There is no aux board any more: the RP2040-Zero and the USB-C breakout are
+    # loose boards standing on the cavity floor, hand-wired to the main PCB's 16-pin
+    # header pads (ADR 260824-224604). So this section builds, per half, the port
+    # seats that thin the rear wall to PortWallThickness, the cradles that hold each
+    # board at the height PortAxisZ demands, and the openings through the thinned
+    # wall.
+    floor_z = stack["floor_z"]
     y_rear = y1
-    ax0, ay0, ax1, ay1 = layout["aux_rect"]
+    y_cav = y1 - wall                                # cavity's rear inner face
+    y_seat = y1 - PARAMS["PortWallThickness"]         # what a rear-flush board bears on
+    inboard = layout["inboard_x"]
+    step = layout["inboard_dir"]
+    seat_margin = 0.5          # port seat runs this far past each cradle wall face,
+                               # so the board bears on 1.0mm of wall across its whole
+                               # width -- a patch narrower than the board leaves its
+                               # rear corners on the untouched 3.0mm and holds the
+                               # receptacle 2mm short of the opening
+    roof_slope = 1.25          # >1.0 is what makes the port seat roof self-supporting
+    open_top = stack["port_axis"] + PARAMS["UsbOpeningHeight"] / 2.0
+    roof_low = open_top + 0.3  # the roof must start above the opening, or the plug
+                               # crosses 3mm of wall at the opening's top corners
 
-    # 7a. Aux-board guide posts. The board's Z is set by the mated header, so these
-    # only fence its X/Y. They stand on the cavity floor just outside the board
-    # outline and stop below it, so they are plain vertical prisms with nothing
-    # overhanging.
-    guide = PARAMS["AuxGuideSize"]
-    gap = PARAMS["AuxBayClearance"]
-    guide_top = stack["aux_top"] - 0.5
-    posts = []
-    for gx, gy in ((ax0, ay0), (ax1, ay0), (ax0, ay1), (ax1, ay1)):
-        sx = gx - guide - gap if gx == ax0 else gx + gap
-        sy = gy - guide - gap if gy == ay0 else gy + gap
-        # A post that would land in or past the wall is dropped rather than clipped.
-        if (sx < x0 + wall or sx + guide > x1 - wall
-                or sy < y0 + wall or sy + guide > y1 - wall):
-            continue
-        posts.append((sx, sy))
-    if posts:
-        gsk = body.newObject("Sketcher::SketchObject", side + "_Aux_Guides")
-        gsk.Placement = App.Placement(App.Vector(0, 0, floor_z), App.Rotation())
-        for sx, sy in posts:
-            add_polygon(gsk, [(sx, sy), (sx + guide, sy),
-                              (sx + guide, sy + guide), (sx, sy + guide)])
-        gpad = body.newObject("PartDesign::Pad", side + "_Aux_Guide_Pad")
-        gpad.Profile = gsk
-        gpad.Length = guide_top - floor_z
-        document.recompute()
-    print("  %s aux guide posts: %d of 4 (bay %.1f x %.1f, rear overhang %+.2f)"
-          % (side, len(posts), ax1 - ax0, ay1 - ay0, layout["aux_overhang"]))
+    # The two things the stack silently gets wrong if a parameter drifts, both of
+    # which look fine in the model and fail in the hand: a rail too short to keep
+    # the module's bottom chip off the floor, and a port seat thicker than the
+    # receptacle stands proud, which leaves the plug bottoming out on the case.
+    rail_clear = (stack["module_seat"] - floor_z) - PARAMS["ModuleBottomChip"]
+    if rail_clear <= 0:
+        raise ValueError("module rail %.2f does not clear its %.2fmm bottom chip"
+                         % (stack["module_seat"] - floor_z, PARAMS["ModuleBottomChip"]))
+    if PARAMS["PortWallThickness"] > PARAMS["ConnectorOverhang"]:
+        raise ValueError("port seat wall %.2f exceeds the %.2fmm the receptacle "
+                         "stands proud of its board"
+                         % (PARAMS["PortWallThickness"], PARAMS["ConnectorOverhang"]))
 
-    # 7b. USB-C openings, centred on the connector axis the aux stack produces.
-    # Every half gets the split-link port (its breakout is wired with three flying
-    # leads, so it can be put where the wall is); only `host_usb` gets the module's
-    # own port -- see the docstring.
-    usb_z = stack["usb_axis"]
-    ports = [("Split", layout["usb_split_x"])]
+    # 7a. Split-link breakout: same inboard offset on both halves, rear-flush.
+    split_x = inboard + step * PARAMS["SplitPortInboardOffset"]
+    split_pocket = cradle_pocket(split_x, PARAMS["BreakoutWidth"],
+                                 PARAMS["BreakoutDepth"], y_seat)
+    add_port_seat(document, body, side + "_Port_Seat_Split", split_x,
+                  (split_pocket[1] - split_pocket[0]) / 2.0 + seat_margin,
+                  y_cav, y_seat, floor_z, roof_low, roof_slope)
+
+    # 7b. The controller module. On the half that carries the host port it is
+    # rear-flush like the breakout; on the other half nothing plugs into it, so it
+    # hugs the inboard cavity wall next to the 16-pin header and gets no opening --
+    # which is what lets the host port go back to the right half (ADR 260824-224604
+    # retires 260824-003937).
     if host_usb:
-        ports.append(("Host", layout["usb_host_x"]))
+        module_x = inboard + step * PARAMS["ModuleInboardOffset"]
+        module_pocket = cradle_pocket(module_x, PARAMS["ModuleWidth"],
+                                      PARAMS["ModuleDepth"], y_seat)
+        add_port_seat(document, body, side + "_Port_Seat_Host", module_x,
+                      (module_pocket[1] - module_pocket[0]) / 2.0 + seat_margin,
+                      y_cav, y_seat, floor_z, roof_low, roof_slope)
+    else:
+        module_x = inboard + step * PARAMS["ModuleInboardOffsetWired"]
+        module_pocket = cradle_pocket(module_x, PARAMS["ModuleWidth"],
+                                      PARAMS["ModuleDepth"],
+                                      y_cav - PARAMS["ModuleRearOffset"])
+
+    add_cradle(document, body, side + "_Cradle_Split", split_pocket,
+               stack["breakout_seat"], "y", 1.0)
+    if host_usb:
+        add_cradle(document, body, side + "_Cradle_Module", module_pocket,
+                   stack["module_seat"], "y", 1.0,
+                   rail_width=PARAMS["CradleRailWidth"])
+    else:
+        add_cradle(document, body, side + "_Cradle_Module", module_pocket,
+                   stack["module_seat"], "x", -step,
+                   rail_width=PARAMS["CradleRailWidth"])
+
+    # 7c. USB-C openings through the thinned wall, on the shared port axis. Every
+    # half gets the split-link port; only the host half gets the module's own,
+    # centred on its cradle because the receptacle is centred on the board.
+    usb_z = stack["port_axis"]
+    ports = [("Split", split_x)]
+    if host_usb:
+        ports.append(("Host", module_x))
     for name, cx in ports:
         sk = body.newObject("Sketcher::SketchObject", side + "_Usb_" + name)
         sk.Placement = App.Placement(App.Vector(0, y_rear, 0), XZ_ROTATION)
@@ -855,8 +1045,17 @@ def build_body(document, side, layout, color, host_usb=False):
         pk.Length = wall + 0.2
         pk.Reversed = True
         document.recompute()
-    print("  %s rear USB-C openings: %s (axis z=%.2f)"
-          % (side, ", ".join(n for n, _ in ports), usb_z))
+    print("  %s cavity inner x %.2f..%.2f y %.2f..%.2f (inboard face x=%.2f)"
+          % (side, x0 + wall, x1 - wall, y0 + wall, y_cav, inboard))
+    print("  %s split cradle x %.2f..%.2f y %.2f..%.2f seat z=%.2f"
+          % ((side,) + split_pocket + (stack["breakout_seat"],)))
+    print("  %s module cradle x %.2f..%.2f y %.2f..%.2f seat z=%.2f%s"
+          % ((side,) + module_pocket + (stack["module_seat"],
+             " (rear-flush)" if host_usb else " (wired, inboard)")))
+    print("  %s rear USB-C openings: %s (axis z=%.2f, port seat wall %.2f, "
+          "module rail clears its bottom chip by %.2f)"
+          % (side, ", ".join("%s@x=%.2f" % (n, cx) for n, cx in ports), usb_z,
+             PARAMS["PortWallThickness"], rail_clear))
 
     if body.ViewObject:
         body.ViewObject.ShapeColor = color
@@ -879,15 +1078,6 @@ def build_body(document, side, layout, color, host_usb=False):
     ref.Shape = board
     if ref.ViewObject:
         ref.ViewObject.ShapeColor = (0.10, 0.45, 0.20)
-
-    # The aux board too -- it is what forced BodyHeight and the opening height, and
-    # on one half it overhangs the main PCB's rear edge.
-    aux = Part.makeBox(ax1 - ax0, ay1 - ay0, PARAMS["AuxBoardThickness"],
-                       App.Vector(ax0, ay0, stack["aux_bottom"]))
-    aux_ref = document.addObject("Part::Feature", side + "_Aux_Board_Reference")
-    aux_ref.Shape = aux
-    if aux_ref.ViewObject:
-        aux_ref.ViewObject.ShapeColor = (0.20, 0.35, 0.55)
 
     document.recompute()
     return body
@@ -977,14 +1167,13 @@ def main():
 
     build_plate(document, "Left", left_layout, (0.86, 0.70, 0.20))
     build_plate(document, "Right", right_layout, (0.25, 0.65, 0.85))
-    # Only the half whose aux board reaches the rear wall gets a host USB-C
-    # opening; the other one's module port is inboard of the wall and a hole there
-    # would be unreachable (ADR 260824-003937). Which half that is comes from the
-    # PCB, not from a constant here.
+    # The right half is the host: its module sits rear-flush behind a port seat and
+    # gets the second opening. The left half's module is hand-wired and inboard, so
+    # it gets no opening at all and the left half is flashed with the case open
+    # (ADR 260824-224604, which also puts the firmware back to MASTER_RIGHT).
     for side, layout, color in (("Left", left_layout, (0.60, 0.35, 0.12)),
                                 ("Right", right_layout, (0.12, 0.38, 0.60))):
-        build_body(document, side, layout, color,
-                   host_usb=layout["aux_overhang"] > -PARAMS["BodyWallThickness"])
+        build_body(document, side, layout, color, host_usb=(side == "Right"))
     build_tilt_wedge(document, "Left", left_layout, (0.50, 0.30, 0.55))
     build_tilt_wedge(document, "Right", right_layout, (0.30, 0.35, 0.55))
     build_palm_rest(document, "Left", left_layout)

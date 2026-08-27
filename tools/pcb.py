@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """pcb/split-keyboard.epro 에서 케이스·펌웨어가 쓰는 수치를 읽는다.
 
-PCB 정합 수치(외곽·마운팅 홀·헤더·aux 보드 배치)와 매트릭스 배선의 **원천은 이
-epro 파일 하나**다. DXF 로 뽑아 커밋하거나 수치를 상수로 박는 대안을 버린 이유는
+PCB 정합 수치(외곽·마운팅 홀·헤더)와 매트릭스 배선의 **원천은 이 epro 파일
+하나**다. DXF 로 뽑아 커밋하거나 수치를 상수로 박는 대안을 버린 이유는
 adr/260824-001947-epro-is-the-source-of-pcb-geometry.md 에 있다.
+
+aux 보드는 제작하지 않는다 — 핀맵(넷 -> GPIO)의 원천으로만 존재한다.
+근거: adr/260824-224604.
 
 epro 는 zip 이고, 안의 `.epcb`/`.esym`/`.efoo` 는 한 줄에 JSON 배열 하나가 오는
 포맷이다. 좌표 단위는 mil 이라 mm 로 쓸 때마다 MIL 을 곱한다.
@@ -11,7 +14,6 @@ epro 는 zip 이고, 안의 `.epcb`/`.esym`/`.efoo` 는 한 줄에 JSON 배열 �
     python3 tools/pcb.py --outline      # 외곽과 마운팅 홀
     python3 tools/pcb.py --pins         # RP2040-Zero 핀 배치
     python3 tools/pcb.py --matrix       # 키별 ROW/COL
-    python3 tools/pcb.py --aux          # aux 보드 배치 (메인 PCB 좌표계)
 """
 import json
 import sys
@@ -83,14 +85,6 @@ class Key:
     x: float
     y: float
     label: str
-
-
-@dataclass
-class Placement:
-    x_min: float
-    y_min: float
-    x_max: float
-    y_max: float
 
 
 @dataclass
@@ -296,64 +290,6 @@ class Project:
                             x=sw.x, y=sw.y, label=sw.designator))
         return sorted(keys, key=lambda k: (k.row, k.col))
 
-    # -- S6. aux 보드 배치 --
-    def _header_pad1(self, board):
-        """16핀 헤더 1번 패드의 보드 좌표.
-
-        하면(layer 2) 부품은 상면 뷰에서 풋프린트가 X 축 기준으로 미러된다(y -> -y).
-        회전은 CCW 도 단위. 이 조합에서만 좌우 양쪽 모두 pad1 이 자기가 담당하는
-        ROW0 쪽(보드 상단)에 놓여 배선이 성립한다."""
-        header = next(c for c in board.components if c.footprint == HEADER_FOOTPRINT)
-        pads = board._footprint_pads[HEADER_FOOTPRINT]
-        pad1 = next(p for p in pads if p["number"] == "1")
-        lx, ly = pad1["x"], pad1["y"]
-        if header.layer == "bottom":
-            ly = -ly
-        import math
-        t = math.radians(header.rotation)
-        rx = lx * math.cos(t) - ly * math.sin(t)
-        ry = lx * math.sin(t) + ly * math.cos(t)
-        return header.x + rx, header.y + ry
-
-    def aux_placement(self, side):
-        """aux 보드 외곽을 메인 PCB 좌표계로 옮긴 bbox.
-
-        두 보드의 1번 패드가 겹치도록 놓는다. 위 미러 규약에서 두 헤더의
-        pad1 -> pad16 방향이 같아지므로 회전·반사 없는 순수 평행이동이 된다."""
-        main_x, main_y = self._header_pad1(self.main(side))
-        aux_x, aux_y = self._header_pad1(self.aux(side))
-        dx, dy = main_x - aux_x, main_y - aux_y
-        o = self.aux(side).outline
-        return Placement(x_min=o.x_min + dx, y_min=o.y_min + dy,
-                         x_max=o.x_max + dx, y_max=o.y_max + dy)
-
-
-    def aux_connectors(self, side):
-        """케이스 뒷벽 개구부를 낼 X 좌표(메인 PCB 좌표계).
-
-        `host` 는 RP2040-Zero 의 USB-C — 모듈 풋프린트의 패드 bbox 중심을 쓴다
-        (패드가 좌·우·하 3면에만 있고 USB-C 는 패드 없는 끝면에 있으므로 X 중심은
-        패드 bbox 중심과 같다). `split` 은 분할 링크 브레이크아웃 자리로, 원래
-        3.5mm 잭이 있던 X 를 그대로 쓴다 — 손배선 3가닥이라 위치가 자유롭지만
-        기존 설계 위치를 유지하기로 했다(ADR 260824-001950).
-
-        `host` 가 뒷벽에 닿는지는 반쪽마다 다르다 — aux_placement() 의 후면
-        오버행을 보고 판단해야 한다(ADR 260824-003937)."""
-        aux = self.aux(side)
-        main_x, main_y = self._header_pad1(self.main(side))
-        aux_x, aux_y = self._header_pad1(aux)
-        dx = main_x - aux_x
-        module = next(c for c in aux.components if c.footprint == RP2040_SYMBOL_TITLE)
-        pads = self._footprint_pads_of(RP2040_SYMBOL_TITLE)
-        host = module.x + (min(p["x"] for p in pads) + max(p["x"] for p in pads)) / 2
-        jack = next(c for c in aux.components if c.footprint.startswith("AUDIO-TH_"))
-        return {"host": host + dx, "split": jack.x + dx}
-
-    def _footprint_pads_of(self, title):
-        uuid = next((k for k, v in self._footprint_titles.items() if v == title), None)
-        key = f"FOOTPRINT/{uuid}.efoo" if uuid else None
-        return _pads_of_footprint(self._raw[key]) if key and key in self._raw else []
-
 
 def load(path=EPRO):
     return Project(path)
@@ -391,18 +327,8 @@ def _print_matrix(p):
                   "  ".join(f"C{k.col}:{k.label}" for k in row))
 
 
-def _print_aux(p):
-    for side in ("left", "right"):
-        place = p.aux_placement(side)
-        o = p.main(side).outline
-        print(f"{side} aux  x {place.x_min:.2f}..{place.x_max:.2f}  "
-              f"y {place.y_min:.2f}..{place.y_max:.2f}")
-        print(f"    후면 오버행 {place.y_max - o.y_max:+.2f}   "
-              f"안쪽 가장자리까지 {min(abs(place.x_min - o.x_min), abs(o.x_max - place.x_max)):.2f}")
-
-
 if __name__ == "__main__":
     project = load()
     what = sys.argv[1] if len(sys.argv) > 1 else "--outline"
     {"--outline": _print_outline, "--pins": _print_pins,
-     "--matrix": _print_matrix, "--aux": _print_aux}[what](project)
+     "--matrix": _print_matrix}[what](project)
