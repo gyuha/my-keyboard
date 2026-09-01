@@ -76,7 +76,7 @@ PARAMS = {
     "MagnetHoleDepth": 2.2,
     "MagnetHoleClearance": 0.3,
     "MagnetCentreHeight": 7.0,
-    "MagnetBossThickness": 3.0,
+    "MagnetBossThickness": 1.5,
     # --- PCB assembly stack -----------------------------------------------------
     # Two independent Z chains meet in the cavity, and neither is measured from the
     # other's end:
@@ -105,9 +105,17 @@ PARAMS = {
     "PortAxisZ": -6.45,
     "PortWallThickness": 1.0,
     "ConnectorOverhang": 1.0,
-    "UsbOpeningWidth": 10.0,
-    "UsbOpeningHeight": 4.5,
-    "UsbOpeningRadius": 1.5,
+    # The opening clears the receptacle SHELL, not the plug. The spec's 8.34 x 2.56
+    # is the plug's metal shell -- the cavity inside the receptacle -- and sizing the
+    # hole to it would leave the receptacle unable to pass at all. Because
+    # ConnectorOverhang == PortWallThickness the receptacle's face sits flush with the
+    # outer skin, so its own ~8.94 x 3.26 body occupies the hole; these are that plus
+    # ~0.3mm a side. UsbOpeningRadius 1.9 is UsbOpeningHeight / 2 - 0.05, the most
+    # add_rounded_rect allows, which makes the ends full semicircles like the
+    # receptacle's own outline instead of a slot with square-ish corners.
+    "UsbOpeningWidth": 9.5,
+    "UsbOpeningHeight": 3.9,
+    "UsbOpeningRadius": 1.9,
     # --- the two loose boards ---------------------------------------------------
     "ModuleWidth": 18.0,
     "ModuleDepth": 23.5,
@@ -115,7 +123,7 @@ PARAMS = {
     "ModuleUsbHeight": 3.1,
     "ModuleBottomChip": 1.0,
     "BreakoutWidth": 12.0,
-    "BreakoutDepth": 15.0,
+    "BreakoutDepth": 13.5,
     "BreakoutThickness": 1.6,
     # --- cradles ----------------------------------------------------------------
     # CradleRailWidth is the module's two floor rails; the 1.0mm bottom chip hangs
@@ -923,8 +931,10 @@ def build_body(document, side, layout, color, host_usb=False):
     # 6. Magnet seats in the front wall, facing the palm rest. A 2.2mm pocket stops
     # short of breaching the BodyWallThickness wall, but only by 0.8mm — too thin to
     # survive the palm rest being pulled off — so pad a local backing block onto the
-    # inside of the wall, leaving 3.8mm behind each magnet. It sits well forward of
-    # the front switch row, so it never fouls the switch pins.
+    # inside of the wall, leaving 2.3mm behind each magnet. Clearing the switch pins
+    # is not what bounds the pad: the PCB outline reaches further forward than the
+    # front switch row, and at MagnetBossThickness 3.0 the block ran 0.32mm into it.
+    # 1.5 puts its inner face 1.18mm clear of the PCB's front edge.
     magnet_x = magnet_centres_x(layout)
     hole_r = (PARAMS["MagnetDiameter"] + PARAMS["MagnetHoleClearance"]) / 2
     pad_half = hole_r + 3.0

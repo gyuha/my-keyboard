@@ -60,10 +60,10 @@ MODULE_SEAT_Z = -9.00          # RP2040-Zero rail top (1.2mm rail clears the 1.0
                                # bottom chip)
 BREAKOUT_SEAT_Z = -9.60        # USB-C breakout pad top (0.6mm pad)
 MODULE_INNER = (18.6, 24.1)    # 18.0 x 23.5 board + 2 x CradleClearance 0.3
-BREAKOUT_INNER = (12.6, 15.6)  # 12.0 x 15.0 board + 2 x CradleClearance 0.3
+BREAKOUT_INNER = (12.6, 14.1)  # 12.0 x 13.5 board + 2 x CradleClearance 0.3
 MIN_CRADLE_WEB = 1.5           # solid left between the two cradle pockets
-OPENING_RADIUS = 1.5           # UsbOpeningRadius, the corner arcs we hunt for
-OPENING_HEIGHT = 4.5           # UsbOpeningHeight; only used to place the ray probe
+OPENING_RADIUS = 1.9           # UsbOpeningRadius, the corner arcs we hunt for
+OPENING_HEIGHT = 3.9           # UsbOpeningHeight; only used to place the ray probe
 
 # Right carries the host port + the split-link port; left carries the split-link
 # port only (its module sits inboard by the header and gets no opening at all).
@@ -71,7 +71,7 @@ BODIES = [("Left_Keyboard_Body", 1), ("Right_Keyboard_Body", 2)]
 
 TOL = 0.05
 # 0.15mm above the seat: inside the board slot for both boards (1.0t and 1.6t) and
-# below the opening's lower edge (PORT_AXIS_Z - OPENING_HEIGHT/2 = -9.50), so a ray
+# below the opening's lower edge (PORT_AXIS_Z - OPENING_HEIGHT/2 = -8.40), so a ray
 # fired at the rear wall hits the port seat instead of escaping through the hole.
 PROBE_LIFT = 0.15
 # Wide enough to keep the module's two floor rails in one group (they sit at the
@@ -82,7 +82,7 @@ ITEMS = [
     "1. opening count (right 2, left 1)",
     "2. opening axis z == -7.25",
     "3. port seat wall == 1.0, flush with the outer face",
-    "4. breakout cradle 12.6 x 15.6, bearing 1.0 inside the outer face",
+    "4. breakout cradle 12.6 x 14.1, bearing 1.0 inside the outer face",
     "5. module cradle 18.6 x 24.1, bearing 1.0 inside the outer face",
     "6. web between the two cradles >= 1.5",
     "7. seat heights: module -9.80, breakout -10.40",

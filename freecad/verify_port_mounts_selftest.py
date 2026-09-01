@@ -44,8 +44,8 @@ def box(x0, x1, y0, y1, z0, z1):
 
 
 def opening(cx):
-    """Rounded-rect prism through the port seat, r=1.5, axis Y."""
-    w, h, r = V.OPENING_RADIUS * 0 + 10.0, V.OPENING_HEIGHT, V.OPENING_RADIUS
+    """Rounded-rect prism through the port seat, r=1.9, axis Y."""
+    w, h, r = V.OPENING_RADIUS * 0 + 9.5, V.OPENING_HEIGHT, V.OPENING_RADIUS
     z = V.PORT_AXIS_Z
     prism = box(cx - w / 2, cx + w / 2, SEAT_Y - 0.66, Y_REAR + 0.2, z - h / 2, z + h / 2)
     along_y = [e for e in prism.Edges
