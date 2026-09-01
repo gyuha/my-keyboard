@@ -63,16 +63,19 @@ PARAMS = {
     "PalmRestFilletRadius": 3.0,
     "PalmRestCrestRadius": 60.0,
     "PalmRestTaperAngleDeg": 10.0,
-    # Round neodymium discs (8mm diameter, 2mm thick) hold the palm rest to the
-    # body, glued into their pockets. 8mm rather than 10mm because the wall is
-    # only BodyHeight tall now. With the 13.2mm body, an 8.3mm bore leaves at least
-    # 2.05mm of shell above and 2.85mm below its centred pocket.
-    # A 2mm disc holds the palm rest fine at 8mm across. The pocket is 2.2mm deep: ~0.1mm of glue
+    # Round neodymium discs (10mm diameter, 2mm thick) hold the palm rest to the
+    # body, glued into their pockets. The 10.3mm bore is centred at MagnetCentreHeight
+    # in the 13.2mm front wall, which leaves 1.85mm of shell below it and 1.05mm above
+    # — thin, and the reason an earlier revision used 8mm instead. It is tolerable
+    # because the bore is only MagnetHoleDepth deep: the wall is solid behind it, and
+    # the magnet's pull is along Y, taken by the backing block, not by these rims.
+    # The palm rest side is unconstrained (its rear face is PalmRestRearHeight tall).
+    # The pocket is 2.2mm deep: ~0.1mm of glue
     # plus the 2mm disc leaves it 0.1mm shy of the mating surface, so the two
     # magnets sit 0.2mm apart once the faces close. A 2mm disc loses pull fast
     # with the gap, so err shallow — a pocket that prints under depth ends up
     # flush rather than standing the magnet proud and holding the faces open.
-    "MagnetDiameter": 8.0,
+    "MagnetDiameter": 10.0,
     "MagnetHoleDepth": 2.2,
     "MagnetHoleClearance": 0.3,
     "MagnetCentreHeight": 7.0,
