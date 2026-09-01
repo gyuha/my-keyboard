@@ -22,8 +22,9 @@ DOC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "keyboard_paramet
 
 # Glue (~0.1mm) + magnet (2.0mm) + 0.1mm recess, so the disc never stands proud.
 EXPECTED_DEPTH = 2.2
-# Front wall 3.0 + backing pad 3.0 - pocket 2.2.
-EXPECTED_BACKING = 3.8
+# Front wall 3.0 + backing pad 1.5 - pocket 2.2. The pad was 3.0 until it was found
+# to run 0.32mm into the PCB outline, which reaches forward of the front switch row.
+EXPECTED_BACKING = 2.3
 # (MagnetDiameter 8.0 + MagnetHoleClearance 0.3) / 2. Dropped from 10mm when
 # BodyHeight went to 14: a 10.3mm bore centred in a 14mm wall leaves only a
 # 1.85mm rib above and below it.
