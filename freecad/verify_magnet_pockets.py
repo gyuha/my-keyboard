@@ -25,10 +25,11 @@ EXPECTED_DEPTH = 2.2
 # Front wall 3.0 + backing pad 1.5 - pocket 2.2. The pad was 3.0 until it was found
 # to run 0.32mm into the PCB outline, which reaches forward of the front switch row.
 EXPECTED_BACKING = 2.3
-# (MagnetDiameter 8.0 + MagnetHoleClearance 0.3) / 2. Dropped from 10mm when
-# BodyHeight went to 14: a 10.3mm bore centred in a 14mm wall leaves only a
-# 1.85mm rib above and below it.
-HOLE_RADIUS = 4.15
+# (MagnetDiameter 10.0 + MagnetHoleClearance 0.3) / 2. Back to 10mm discs: in the
+# 13.2mm front wall the bore leaves 1.85mm of shell below and 1.05mm above, which
+# stands because the bore is only EXPECTED_DEPTH deep and the pull is taken by the
+# backing block behind it, not by those rims.
+HOLE_RADIUS = 5.15
 
 POCKETS = [
     "Left_Palm_Magnet_Pockets",
