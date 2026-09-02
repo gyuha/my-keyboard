@@ -41,6 +41,12 @@ PARAMS = {
     "WedgeAlignPinClearance": 0.3,
     "WedgeAlignPinHoleDepth": 1.5,
     "WedgeAlignPinInset": 15.0,
+    # Centre hollow of the tilt wedge (task 18): a uniform skin stays on the
+    # slanted underside (the bed side), the opening faces the mating top face.
+    # The X rim is not a parameter -- it is derived from the pin inset so the
+    # pins always stay in solid material (see build_tilt_wedge).
+    "WedgeHollowRimY": 12.0,
+    "WedgeHollowSkin": 2.0,
     "M3ClearanceDiameter": 3.2,
     "M3CountersinkDiameter": 6.0,
     "M3CountersinkDepth": 1.5,
@@ -1149,6 +1155,34 @@ def build_tilt_wedge(document, side, layout, color):
     except Exception as fillet_error:
         print("  wedge fillet skipped (%s): %s" % (side, str(fillet_error)[:40]))
         document.recompute()
+
+    # Hollow the centre (task 18): an inner YZ quad pocketed symmetrically about
+    # the same midplane as the profile. Its bottom edge runs parallel to the
+    # slanted underside, WedgeHollowSkin above it, so a uniform skin stays on
+    # the bed side; its top edge overshoots the mating face by 0.5mm so the
+    # opening cuts cleanly. The X rim is derived from the pins (inset + radius
+    # + 3mm margin) so they always stay embedded in solid material.
+    rim_x = (PARAMS["WedgeAlignPinInset"]
+             + PARAMS["WedgeAlignPinDiameter"] / 2.0 + 3.0)
+    rim_y = PARAMS["WedgeHollowRimY"]
+    skin_dz = PARAMS["WedgeHollowSkin"] / math.cos(tilt)
+    front_bottom_z = z_base - PARAMS["WedgeMinThickness"]
+    slope = (rear_bottom_z - front_bottom_z) / (rear_bottom_y - y_cut)
+    hy0 = y_cut + rim_y
+    hy1 = y_rear - rim_y
+    hollow = body.newObject("Sketcher::SketchObject", side + "_Wedge_Hollow")
+    hollow.Placement = App.Placement(App.Vector((rx0 + rx1) / 2.0, 0, 0), YZ_ROTATION)
+    add_polygon(hollow, [
+        (hy0, z_base + 0.5),
+        (hy1, z_base + 0.5),
+        (hy1, front_bottom_z + (hy1 - y_cut) * slope + skin_dz),
+        (hy0, front_bottom_z + (hy0 - y_cut) * slope + skin_dz),
+    ])
+    hollow_cut = body.newObject("PartDesign::Pocket", side + "_Wedge_Hollow_Cut")
+    hollow_cut.Profile = hollow
+    hollow_cut.Length = (rx1 - rx0) - 2.0 * rim_x
+    hollow_cut.Midplane = True
+    document.recompute()
 
     # Alignment pins standing on the top (mating) face, into the body's holes.
     pins = body.newObject("Sketcher::SketchObject", side + "_Wedge_Pins")
