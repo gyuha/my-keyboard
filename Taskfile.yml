@@ -1,0 +1,19 @@
+version: '3'
+
+vars:
+  QMK_HOME: '{{.QMK_HOME | default (print .HOME "/qmk_firmware")}}'
+  ARM_TOOLCHAIN: '{{.ARM_TOOLCHAIN | default "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/bin"}}'
+
+tasks:
+  verify:
+    desc: 배열·펌웨어·PCB 정합 검사
+    cmds:
+      - python3 tools/verify_keylayout.py
+      - python3 tools/verify_pcb_matrix.py
+
+  build:
+    desc: gkey 펌웨어를 컴파일해 firmware/gkey_default.uf2 로 복사
+    deps: [verify]
+    cmds:
+      - cd "{{.QMK_HOME}}" && PATH="{{.ARM_TOOLCHAIN}}:$PATH" qmk compile -kb gkey -km default
+      - cp "{{.QMK_HOME}}/gkey_default.uf2" firmware/gkey_default.uf2
