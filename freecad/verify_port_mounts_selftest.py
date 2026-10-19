@@ -32,8 +32,8 @@ import Part
 import verify_port_mounts as V
 
 WALL = 3.0
-FLOOR_Z = -11.0
-BODY_Z = -14.0
+FLOOR_Z = -10.2
+BODY_Z = -13.2
 Y_REAR = 104.66
 PATCH_DEPTH = 2.0            # leaves PortWallThickness 1.0 of the 3.0 rear wall
 SEAT_Y = Y_REAR - WALL + PATCH_DEPTH   # 103.66: the port seat's inner face
@@ -59,7 +59,7 @@ def cradle(shape, cx, inner_w, inner_d, seat_z, board_t, rear_y, rails):
     x0, x1 = cx - inner_w / 2.0, cx + inner_w / 2.0
     y1 = rear_y
     y0 = y1 - inner_d
-    top = seat_z + board_t
+    top = (V.MODULE_UNDERSIDE_Z if rails else seat_z) + board_t
     cw, lip = 1.5, 0.8
     closed_rear = abs(rear_y - SEAT_Y) > 1e-6
     outer_y1 = y1 + cw if closed_rear else y1
@@ -69,7 +69,7 @@ def cradle(shape, cx, inner_w, inner_d, seat_z, board_t, rear_y, rails):
     shape = shape.cut(box(x0, x1, y0, y1, FLOOR_Z, top + 1.0))
     if rails:
         for rx in (x0, x1 - cw):
-            shape = shape.fuse(box(rx, rx + cw, y0, y1, FLOOR_Z, seat_z))
+            shape = shape.cut(box(rx, rx + cw, y0, y1, seat_z, FLOOR_Z))
     else:
         shape = shape.fuse(box(x0, x1, y0, y1, FLOOR_Z, seat_z))
     for lx in (x0, x1 - lip):
@@ -85,7 +85,7 @@ def half(x_hi, ports, module):
     for px, patch_w in ports:
         shape = shape.cut(box(px - patch_w / 2, px + patch_w / 2,
                               Y_REAR - WALL, SEAT_Y,
-                              V.PORT_AXIS_Z - 4.0, V.PORT_AXIS_Z + 4.0))
+                              max(V.PORT_AXIS_Z - 4.0, FLOOR_Z), V.PORT_AXIS_Z + 4.0))
         shape = shape.cut(opening(px))
     shape = cradle(shape, ports[0][0], V.BREAKOUT_INNER[0], V.BREAKOUT_INNER[1],
                    V.BREAKOUT_SEAT_Z, 1.6, SEAT_Y, rails=False)

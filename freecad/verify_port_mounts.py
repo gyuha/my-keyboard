@@ -56,8 +56,10 @@ DOC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "keyboard_paramet
 PORT_AXIS_Z = -6.45            # both connectors' centre height, body-local
 PORT_WALL = 1.0                # PortWallThickness: what is left of the 3mm rear
                                # wall after the local relief patch
-MODULE_SEAT_Z = -9.00          # RP2040-Zero rail top (1.2mm rail clears the 1.0mm
-                               # bottom chip)
+MODULE_UNDERSIDE_Z = -9.00     # RP2040-Zero underside; it hangs 1.2mm above the floor
+                               # so the 1.0mm bottom chip clears it by 0.2
+MODULE_SEAT_Z = -10.40         # bottom of the two floor grooves the rails became
+                               # (floor -10.2 less CradleGrooveDepth 0.2)
 BREAKOUT_SEAT_Z = -9.60        # USB-C breakout pad top (0.6mm pad)
 MODULE_INNER = (18.6, 24.1)    # 18.0 x 23.5 board + 2 x CradleClearance 0.3
 BREAKOUT_INNER = (12.6, 14.1)  # 12.0 x 13.5 board + 2 x CradleClearance 0.3
@@ -332,7 +334,9 @@ def report(doc):
                 check(item, "%s cradle inner == %s x %s" % ((name,) + expected), False,
                       "no single seat at z=%s to measure from" % seat_z)
                 continue
-            m = cradle_box(shape, clusters[0], seat_z)
+            # The module's seat is now the groove bottoms, below the floor, so its
+            # probe keeps the height it always had: just above the board underside.
+            m = cradle_box(shape, clusters[0], MODULE_UNDERSIDE_Z if item == MODULE else seat_z)
             boxes[name] = (m["x0"], m["x1"], m["y0"], m["y1"])
             ok = (m["width"] is not None and m["depth"] is not None
                   and abs(m["width"] - expected[0]) <= TOL
