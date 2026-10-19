@@ -141,6 +141,10 @@ PARAMS = {
     "CradleWallThickness": 1.5,
     "CradleClearance": 0.3,
     "CradleRailWidth": 2.5,
+    # The module has no rails any more: the two strips they stood on are grooves cut
+    # this far below the cavity floor. Hand-soldered joints under the module drop
+    # into them and hot glue fills them. The module itself stays where it was.
+    "CradleGrooveDepth": 0.2,
     # --- where the ports and cradles sit ----------------------------------------
     # All measured from the *inboard* cavity wall's inner face -- the side that
     # faces the other half -- so shrinking OuterMargin later moves the whole port
@@ -807,14 +811,15 @@ def add_cradle(document, body, name, pocket, seat_z, open_axis, open_sign,
     `open_axis`/`open_sign` point toward the connector or wiring side. The opposite
     edge gets a stop, while both long side guides are deliberately left open for
     easier board insertion and wiring access. `rail_width` 0 lays a solid seat pad;
-    anything else lays two rails, leaving the module's ModuleBottomChip hanging
-    clear between them."""
+    anything else cuts two grooves into the floor under the board's side edges and
+    leaves the board's ModuleBottomChip hanging clear above the floor between them."""
     stack = stack_z()
     floor_z, board_top = stack["floor_z"], stack["board_top"]
     w = PARAMS["CradleWallThickness"]
     x0, x1, y0, y1 = pocket
 
-    # 1. Seat. Solid pad, or two rails at the pocket's X extremes.
+    # 1. Seat. Solid pad, or -- for the module -- two grooves at the pocket's X
+    # extremes cut into the floor instead of rails standing on it.
     seat_sk = body.newObject("Sketcher::SketchObject", name + "_Seat")
     seat_sk.Placement = App.Placement(App.Vector(0, 0, floor_z), App.Rotation())
     if rail_width > 0:
@@ -822,11 +827,14 @@ def add_cradle(document, body, name, pocket, seat_z, open_axis, open_sign,
                               (x0 + rail_width, y1), (x0, y1)])
         add_polygon(seat_sk, [(x1 - rail_width, y0), (x1, y0),
                               (x1, y1), (x1 - rail_width, y1)])
+        groove = body.newObject("PartDesign::Pocket", name + "_Seat_Groove")
+        groove.Profile = seat_sk
+        groove.Length = PARAMS["CradleGrooveDepth"]
     else:
         add_polygon(seat_sk, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
-    seat_pad = body.newObject("PartDesign::Pad", name + "_Seat_Pad")
-    seat_pad.Profile = seat_sk
-    seat_pad.Length = seat_z - floor_z
+        seat_pad = body.newObject("PartDesign::Pad", name + "_Seat_Pad")
+        seat_pad.Profile = seat_sk
+        seat_pad.Length = seat_z - floor_z
     document.recompute()
 
     # 2. End stop only. The former long side walls and their retaining lips were
