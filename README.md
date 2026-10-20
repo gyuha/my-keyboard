@@ -73,7 +73,7 @@ keylayout-left/right.json 수정
 [{x:0.25,c:"#ffe08d"},"한/영",{c:"#c8c3b8",w:2.75},"Space","Fn.1","Ins","Del",{c:"#ea4221",a:7},"←","↓","→"]
 ```
 
-키 갯수 : 72키
+키 갯수 : 73키
 
 # 준비물
 
@@ -143,6 +143,8 @@ keylayout-left/right.json 수정
 `GP0` 한 가닥으로 양방향 통신하는 **half-duplex** 입니다. 좌우 커넥터 배선이 완전히
 동일하기 때문에 스트레이트 케이블은 `TX`↔`TX` 를 잇게 되고, 따라서 full-duplex 는
 펌웨어를 어떻게 설정해도 이 하드웨어에서 성립하지 않습니다.
+
+> ⚠ **링크의 전원선(`V`)은 반드시 `3V3` 핀에 연결합니다.** `5V` 핀을 `3V3` 핀이나 GPIO 에 잇지 마십시오. RP2040 의 3.3V 레일과 GPIO 는 5V 를 견디지 못합니다.
 
 > ⚠ **우측 케이스 뒷벽에 USB-C 개구부가 두 개 있고 모양이 같습니다.** 호스트 포트(PC용)와
 > 분할 링크 포트가 나란히 있습니다(좌측 뒷벽에는 분할 링크 포트 하나뿐입니다). **분할 링크 포트에 PC 케이블을 꽂으면 VBUS 5V 가
@@ -273,7 +275,7 @@ python3 freecad/verify_no_support.py
 
 `freecad/parametric_stl/split keyboard.3mf` 는 Bambu Studio 프로젝트입니다. **STL을 다시 내보내도 이 파일은 따라서 갱신되지 않습니다** — 슬라이서가 STL을 프로젝트 안으로 복사해 두기 때문입니다. 형상을 바꿨다면 프로젝트를 열어 부품을 다시 불러오세요.
 
-> ⚠ 배열이 5행 72키로 바뀌었으므로 이 프로젝트는 6행 형상을 담고 있습니다. 출력 전에 열어서 부품 8개를 모두 다시 불러오세요.
+> ⚠ 배열이 5행 73키로 바뀌었으므로 이 프로젝트는 6행 형상을 담고 있습니다. 출력 전에 열어서 부품 8개를 모두 다시 불러오세요.
 
 # 스테빌라이저 슬롯 오프셋 조정
 
@@ -410,7 +412,16 @@ ln -snf $HOME/qmk_firmware/keyboards/gkey `pwd`/gkey
 
 ## 컴파일 하기
 
-RP2040은 `.uf2` 파일로 빌드됩니다. ARM 공식 툴체인을 PATH 앞에 두고 컴파일합니다.
+저장소 루트의 `Taskfile.yml` 로 한 번에 빌드할 수 있습니다. [go-task](https://taskfile.dev) 가 필요합니다.
+
+```bash
+task build    # 배열·PCB 정합 검사 → qmk compile → firmware/gkey_default.uf2 로 복사
+task verify   # 정합 검사만
+```
+
+QMK 위치(`~/qmk_firmware`)와 ARM 툴체인 경로는 이 맥 기준이며, 툴체인 버전이 다르면 `task build ARM_TOOLCHAIN=/새/경로` 로 바꿉니다. 저장소의 `firmware/gkey_default.uf2` 는 `task build` 가 갱신하는 파일이므로 설정(`MASTER_RIGHT` 등)을 바꿨다면 다시 빌드해 두십시오. 오래된 파일을 플래시하면 좌우가 뒤바뀝니다.
+
+직접 컴파일하려면 ARM 공식 툴체인을 PATH 앞에 두고 컴파일합니다.
 
 ```bash
 cd $HOME/qmk_firmware
@@ -425,5 +436,12 @@ PATH="/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/bin:$PATH" qmk compi
 2. `gkey_default.uf2` 파일을 `RPI-RP2`에 드래그하면 자동으로 재부팅되며 펌웨어가 적용됩니다.
 3. 좌·우 두 보드를 각각 BOOTSEL로 연결해 같은 `.uf2`를 플래시합니다. 우측은 호스트 포트가 뒷벽 개구부로 나와 있어 조립 상태 그대로 꽂으면 되고, **좌측은 모듈에 개구부가 없으므로 M3 나사 4개를 풀고 플레이트 조립체를 떼어** 모듈에 직접 접근합니다.
 4. 사용 시 USB 는 우측 보드에 연결합니다 — 우측이 호스트입니다(`MASTER_RIGHT`).
+
+## 키맵 메모
+
+- **한/영 키**는 `KC_RALT` 입니다. Windows 에서 한국어 키보드 종류가 **101키(종류 1)** 로 설정돼 있어야 오른쪽 Alt 가 한/영으로 동작합니다. 103/106키 설정이면 그냥 Alt 로 동작합니다. macOS 는 별도 설정(Karabiner-Elements 등)이 필요합니다.
+- **`Fn1`**(Caps Lock 자리 · 우측 Fn.1): 숫자행이 F1~F12, 좌상단이 `` ` ``, 왼쪽 `QWER`/`ASDF` 가 Home/↑/End/PgUp · ←/↓/→/PgDn 입니다.
+- **`Fn2`**(좌하단 Fn.2): 우측이 숫자패드로 바뀝니다. `Fn2`+`Win` 은 **왼쪽 Alt ↔ Win 교환**(`WINMAC`)이며 EEPROM 에 저장돼 전원을 껐다 켜도 유지됩니다. 켜져 있는지 표시는 없습니다 — 메모장에서 Alt+Tab 이 되는 쪽이 Alt 자리입니다.
+- 브라우저 키 테스터는 Alt 단독 입력을 제대로 받지 못합니다(Windows 가 메뉴바 포커스를 가져갑니다). 다른 키보드에서도 같으므로 고장이 아닙니다. 앱에서 확인하십시오.
 
 여기까지 했으면 조립해서 사용하시면 됩니다.
