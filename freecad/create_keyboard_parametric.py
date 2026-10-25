@@ -26,8 +26,15 @@ PCB = pcb_source.load()
 
 PARAMS = {
     "PlateThickness": 4.0,
-    "OuterMargin": 11.5,
-    "CornerRadius": 5.0,
+    # The outline hugs the PCB (ADR 261025-182809): PcbSeatClearance of air, then a
+    # PcbRingThickness ring around the board's own height. Below the board the wall
+    # is BodyWallThickness from the outside, so it runs under the PCB's edge and its
+    # top is a ledge the board sits on. Corner radius follows the PCB's.
+    "PcbRingThickness": 1.2,
+    # Except at the front: the palm-rest magnets' 10mm bores reach z -1.05, above
+    # the PCB underside, so a 1.2 ring there would be bored through and the magnet
+    # would sit against the board's edge. The front keeps a plain full wall.
+    "PcbRingThicknessFront": 3.0,
     "BodyWallThickness": 3.0,
     "BodyHeight": 13.2,
     "RestSideMargin": 6.0,
@@ -101,7 +108,7 @@ PARAMS = {
     # board this replaces was 1.0mm short of clearing the switch pins.
     "PcbThickness": 1.6,
     "PlateToPcb": 5.0,
-    "PcbSeatClearance": 0.3,
+    "PcbSeatClearance": 0.5,
     "PlateCollarDiameter": 6.0,
     # --- rear-wall ports --------------------------------------------------------
     # PortAxisZ is the one number the whole port stack hangs off: -6.45 puts the
@@ -147,18 +154,22 @@ PARAMS = {
     "CradleGrooveDepth": 0.2,
     # --- where the ports and cradles sit ----------------------------------------
     # All measured from the *inboard* cavity wall's inner face -- the side that
-    # faces the other half -- so shrinking OuterMargin later moves the whole port
-    # group with the wall instead of stranding it. ADR 260824-224604: these are the
+    # faces the other half -- so a smaller outline moves the whole port group with
+    # the wall instead of stranding it. When the outline moved to the PCB (ADR
+    # 261025-182809) that wall face moved 3.22mm in under the board, and these were
+    # reduced by the same amount to keep the ports where they were on the PCB --
+    # except ModuleInboardOffsetWired: that module used to fill the old gap beside
+    # the board, so it has to follow the wall in. ADR 260824-224604: these are the
     # case's own choice now, not something read off a board that will never be made.
     # SplitPortInboardOffset is shared by both halves (the PCB's own jack positions
     # were not mirror-symmetric; that asymmetry is dropped).
     # The host-side module is rear-flush and only the right half has one. The other
     # half's module is wired, not plugged, so it hugs the inboard wall beside the
     # 16-pin header and needs a rear offset as well as an inboard one.
-    "SplitPortInboardOffset": 17.83,
-    "ModuleInboardOffset": 35.88,
+    "SplitPortInboardOffset": 14.61,
+    "ModuleInboardOffset": 32.66,
     "ModuleInboardOffsetWired": 9.30,
-    "ModuleRearOffset": 18.0,
+    "ModuleRearOffset": 14.78,
     "DisplayGap": 25.0,
 }
 
@@ -307,20 +318,21 @@ def compute_layout(dxf_filename, side):
     key_loops = loops[1:]
     # Outer footprint is derived from the original cutouts so the stab-height
     # tweak below cannot move the plate/body outline.
-    xs = [p[0] for loop in key_loops for p in loop]
-    ys = [p[1] for loop in key_loops for p in loop]
-    margin = PARAMS["OuterMargin"]
     wall = PARAMS["BodyWallThickness"]
-    x_min, x_max = min(xs) - margin, max(xs) + margin
     ox, oy, worst = pcb_offset(side, key_loops)
     board = PCB.main(side)
     outline = board.outline
     print("  %s PCB offset (%.2f, %.2f), worst key deviation %.3fmm" % (side, ox, oy, worst))
+    # The outline is the PCB grown by the seat clearance and the ring around it.
+    grow = PARAMS["PcbSeatClearance"] + PARAMS["PcbRingThickness"]
+    x_min, x_max = outline.x_min + ox - grow, outline.x_max + ox + grow
+    grow_front = PARAMS["PcbSeatClearance"] + PARAMS["PcbRingThicknessFront"]
     return {
         "x_min": x_min,
-        "y_min": min(ys) - margin,
+        "y_min": outline.y_min + oy - grow_front,
         "x_max": x_max,
-        "y_max": max(ys) + margin,
+        "y_max": outline.y_max + oy + grow,
+        "corner_radius": outline.radius + grow,
         "key_loops": resize_keyholes(shrink_stab_slots(key_loops)),
         # The right half's inboard edge is its x minimum, the left half's its
         # maximum -- they meet in the middle of the desk.
@@ -511,7 +523,7 @@ def build_palm_rest(document, side, layout):
     rear_h = PARAMS["PalmRestRearHeight"]
     front_h = PARAMS["PalmRestFrontHeight"]
     flat = PARAMS["PalmRestFlatDepth"]
-    radius = PARAMS["CornerRadius"]
+    radius = layout["corner_radius"]
     # Both flanks lean inwards by PalmRestTaperAngleDeg, so the rear edge keeps the
     # plate width while the front edge (nearest the user) narrows.
     inset = PARAMS["PalmRestDepth"] * math.tan(math.radians(PARAMS["PalmRestTaperAngleDeg"]))
@@ -520,7 +532,7 @@ def build_palm_rest(document, side, layout):
 
     base = body.newObject("Sketcher::SketchObject", side + "_Palm_Base")
     base.Placement = App.Placement(App.Vector(0, 0, z_base), App.Rotation())
-    # Front corners keep the CornerRadius rounding; the two rear corners stay sharp
+    # Front corners keep the case corner rounding; the two rear corners stay sharp
     # so the rest butts squarely against the case.
     add_rounded_polygon(base, [
         (x0 + inset, y_front),
@@ -634,7 +646,7 @@ def build_plate(document, side, layout, color):
     x0, y0 = layout["x_min"], layout["y_min"]
     x1, y1 = layout["x_max"], layout["y_max"]
     thickness = PARAMS["PlateThickness"]
-    radius = PARAMS["CornerRadius"]
+    radius = layout["corner_radius"]
     stack = stack_z()
 
     body = document.addObject("PartDesign::Body", side + "_Switch_Plate")
@@ -667,7 +679,7 @@ def build_plate(document, side, layout, color):
     # holes, not an inset from the case corner: one screw has to pass through
     # plate, PCB and boss, so the three cannot each pick their own position.
     # (The old corner inset happened to land within 0.5mm of them, but only
-    # because both were "just outside the key field" -- OuterMargin moved and
+    # because both were "just outside the key field" -- the outer margin moved and
     # that coincidence went with it.)
     screw_xy = layout["screw_xy"]
     # Clamp collars on the underside. The plate bottom sits at z=0 and the PCB top
@@ -871,7 +883,7 @@ def build_body(document, side, layout, color, host_usb=False):
     x1, y1 = layout["x_max"], layout["y_max"]
     height = PARAMS["BodyHeight"]
     wall = PARAMS["BodyWallThickness"]
-    radius = PARAMS["CornerRadius"]
+    radius = layout["corner_radius"]
     cavity_h = height - wall
     z_base = -height
     r_inner = max(radius - wall, 0.5)
@@ -898,6 +910,20 @@ def build_body(document, side, layout, color, host_usb=False):
     cav.Profile = cav_sk
     cav.Length = cavity_h
     cav.setExpression("Length", u"Parameters.BodyHeight - Parameters.BodyWallThickness")
+    document.recompute()
+
+    # 2b. Ring pocket: around the PCB's own height the wall is only the ring, so the
+    # cavity steps out to the board plus PcbSeatClearance down to the PCB underside.
+    # What is left below is the full wall reaching under the board's edge -- its top
+    # is the ledge the PCB sits on, level with the boss tops.
+    px0, py0, px1, py1, prad = layout["pcb_rect"]
+    gap = PARAMS["PcbSeatClearance"]
+    ring_sk = body.newObject("Sketcher::SketchObject", side + "_Body_Pcb_Ring")
+    ring_sk.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation())
+    add_rounded_rect(ring_sk, px0 - gap, py0 - gap, px1 + gap, py1 + gap, prad + gap)
+    ring = body.newObject("PartDesign::Pocket", side + "_Body_Pcb_Ring_Pocket")
+    ring.Profile = ring_sk
+    ring.Length = -stack["pcb_bottom"]
     document.recompute()
 
     # 3. Insert bosses: pillars rising from the cavity floor.
@@ -951,7 +977,9 @@ def build_body(document, side, layout, color, host_usb=False):
     # inside of the wall, leaving 2.3mm behind each magnet. Clearing the switch pins
     # is not what bounds the pad: the PCB outline reaches further forward than the
     # front switch row, and at MagnetBossThickness 3.0 the block ran 0.32mm into it.
-    # 1.5 puts its inner face 1.18mm clear of the PCB's front edge.
+    # Since the outline hugs the PCB (ADR 261025-182809) the block reaches 1.0mm
+    # under the board's front edge, so it stops at the PCB underside and doubles as
+    # the front ledge -- the front wall itself is plain, without a step.
     magnet_x = magnet_centres_x(layout)
     hole_r = (PARAMS["MagnetDiameter"] + PARAMS["MagnetHoleClearance"]) / 2
     pad_half = hole_r + 3.0
@@ -966,8 +994,7 @@ def build_body(document, side, layout, color, host_usb=False):
         ])
     back_pad = body.newObject("PartDesign::Pad", side + "_Magnet_Backing_Pad")
     back_pad.Profile = back_sk
-    back_pad.Length = cavity_h
-    back_pad.setExpression("Length", u"Parameters.BodyHeight - Parameters.BodyWallThickness")
+    back_pad.Length = stack["pcb_bottom"] - stack["floor_z"]
     document.recompute()
 
     # The front face is vertical here; it acquires the tilt when the case sits on its

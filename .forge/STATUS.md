@@ -1,6 +1,6 @@
-# STATUS — 모듈 크래들 레일 자리를 바닥 0.2mm 홈으로 바꾸기
-slug: cradle-rail-glue-relief
+# STATUS — 케이스 외곽을 PCB에 밀착시키고 벽을 계단 벽으로 바꾸기
+slug: case-hug-pcb-stepped-wall
 status: executed
-executed: 2026-10-19
-verified: yes (verify_port_mounts 모듈 홈 바닥 −10.4 좌우 PASS, verify_no_support 4파트 PASS, selftest PASS)
+executed: 2026-10-25
+verified: yes (틈 0.5 재생성 후 verify_pcb_fit 전 항목 PASS · verify_no_support 4파트 PASS · verify_magnet_pockets 22 PASS · port_mounts 1·2·3·8 PASS · selftest 0 · PCB∩바디 0)
 retro: pending

@@ -28,7 +28,7 @@ boss grew into it.
     board sits in.
 
 Nothing is located by a hard-coded XY: each cradle is found by its seat faces (the
-only upward-facing planes at that Z), so the script survives an OuterMargin change.
+only upward-facing planes at that Z), so the script survives an outline change.
 
 Two contract notes for the modeller. First, a cradle whose rear face lands within
 5mm of the outer face is treated as bearing on the port seat, and then that face

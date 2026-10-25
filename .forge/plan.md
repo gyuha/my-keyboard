@@ -1,43 +1,41 @@
-<!-- forge-slug: cradle-rail-glue-relief -->
-<!-- task: 19 -->
+<!-- forge-slug: case-hug-pcb-stepped-wall -->
+<!-- task: 20 -->
 <!-- tdd: off -->
-<!-- retro-hint: optional -->
-# 모듈 크래들 레일 윗면을 0.2mm 낮춰 납땜 덩어리와 글루 자리를 만든다
+# 케이스 외곽을 PCB에 밀착시키고 벽을 PCB 밑으로 들어가는 계단 벽으로 바꾸기
 
 ## 목표 / 비목표
+- 목표: 케이스 외곽을 키 필드 + `OuterMargin`이 아니라 **PCB 외곽(epro `pcb_rect`)**에서 유도해 케이스를 최대한 작게 만든다. 단면은 [[계단 벽]]이다. PCB 높이 구간(z −2.6~0)은 PCB + 사방 0.3mm 틈 바깥에 1.2mm 링, 그 아래는 새 외곽에서 3.0mm 벽이 PCB 밑으로 1.5mm 들어가고 그 윗면 z −2.6이 PCB 둘레를 받친다. 외곽 모서리 반경 = PCB 반경 + 0.3 + 1.2(= 4.5, 동심원). 반쪽마다 한 변당 약 3.7mm(앞 4.5mm) 줄어든다.
+- 비목표:
+  - `split keyboard.3mf` 슬라이서 프로젝트 갱신(사용자가 Bambu Studio에서 다시 불러온다).
+  - `verify_port_mounts.py` 항목 4~7(기준선부터 FAIL, 선행 실패)을 고치는 일.
+  - Z 스택(PlateThickness, PCB 높이, BodyHeight, 포트 축) 변경.
+  - 펌웨어·배열 파이프라인.
 
-- **목표:** 좌·우 반쪽의 RP2040-Zero [[크래들]] **레일 두 줄**의 윗면을 0.2mm 낮춘다. 모듈 바닥에 손배선 납땜 덩어리가 생겨 레일 위에 잘 앉지 않으므로, 레일과 모듈 사이에 0.2mm 틈을 만들어 덩어리를 받고 글루건으로 모듈을 고정한다.
-- **모듈 높이는 유지한다(사용자 결정).** 모듈 바닥면·포트 축(`PortAxisZ -6.45`)·스위치 핀 여유 0.30mm는 그대로이고, 바닥 칩 여유(레일 1.2 − 칩 1.0 = 0.2mm)도 그대로다. 바뀌는 것은 레일 윗면 z(−9.0 → −9.2)뿐이다.
-- **비목표:**
-  - **USB-C 브레이크아웃 쪽 받침(0.6mm 패드) 변경** — 표시된 곳이 아니고 사용자가 모듈 레일만 지정했다.
-  - **`PortAxisZ`·`BodyHeight`·모듈 위치 변경** — 모듈 높이를 유지하기로 했으므로 건드리지 않는다.
-  - **`verify_port_mounts.py` 의 기존 실패 4건(항목 4~7) 수리** — 이번 작업 이전부터 실패하던 별건이다(아래 기준선 참고). 레일 높이 상수만 맞춘다.
-  - **`split keyboard.3mf` 갱신** — 사용자가 직접 한다(지난 작업들과 동일).
-
-## 원천
-
-- **용어집:** [[크래들]], [[포트-축]] — `.forge/CONTEXT.md`
-- **관련 ADR:** `.forge/adr/260824-224604-drop-aux-board-and-floor-mount-modules.md` — 크래들을 바닥에 두고 손배선하는 경위, 레일/칩 여유 설계의 원천
-- **설계 결정(그릴링 합의):**
-  - **범위:** 좌우 모듈 레일 모두. 레일은 `add_cradle(..., rail_width>0)` 한 곳에서 만들어지므로 파라미터 하나로 좌우에 동시에 적용된다.
-  - **방식:** 레일 시트 패드의 높이만 `CradleRailRelief = 0.2` 만큼 줄인다. `stack_z()` 의 `module_seat` 는 모듈 바닥면으로 남기고, 레일 윗면만 `module_seat - CradleRailRelief` 가 된다. 끝 스토퍼(보드 윗면까지)는 그대로.
-  - **안전 검사:** 기존 `rail_clear`(= 모듈 바닥면 − 바닥 − 칩 두께 > 0) 검사는 모듈 바닥면 기준이라 그대로 유효하다. 새 값 때문에 깨지는 검사는 없다.
-- **기준선 (2026-10-19 실측, `FreeCAD -c freecad/verify_port_mounts.py`):** `keyboard_parametric.FCStd` 에서 모듈 시트 z == −9.0 검사는 PASS(좌우 각 1그룹, 18.60 × 24.10). 같은 스크립트의 항목 4(브레이크아웃 시트 4그룹)·5·6·7 은 **이미 FAIL** — 이번 작업과 무관한 선행 실패다. `verify_port_mounts_selftest.py` 는 PASS.
-- **완료 기준 (Definition of Done).** 계획 작성 시점에 아래 ① 명령을 한 번 돌려 사전 상태를 기록했다. 헤드리스 FreeCAD 는 `/Applications/FreeCAD.app/Contents/MacOS/FreeCAD -c <스크립트>` 로 실행한다.
-
-  **전진 검사 — 지금은 실패한다(= 작업 전 상태):**
-  1. `freecad/verify_port_mounts.py` 의 모듈 시트 높이 항목이 `-9.2` 에서 PASS (좌 1·우 1 그룹, 18.60 × 24.10) → 현재는 `MODULE_SEAT_Z = -9.00` 이라 −9.2 를 기대하게 바꾸기 전엔 FAIL 이다. *(레일 윗면 −9.2 인지 ‘레일 값’을 직접 읽는 검사이며, 문자열 존재 확인이 아니다.)*
-  2. 헤드리스로 `Left_Keyboard_Body`·`Right_Keyboard_Body` 의 모듈 레일 윗면 z 를 읽어 둘 다 `-9.20 ± 0.05` → 현재 −9.00 이므로 FAIL.
-  3. 같은 측정에서 모듈 `ModuleSeat`(모듈 바닥면) 기준값이 `-9.00` 으로 **불변**임을 `stack_z()["module_seat"]` 로 확인.
-
-  **회귀 가드 — 지금도 통과한다. 통과 유지가 정상이다:**
-  4. `python3 freecad/verify_no_support.py` → 4파트 PASS, 순수 오버행 `0.0` *(현재 통과. 레일을 낮춰도 아래를 향하는 새 면이 생기지 않아야 한다)*
-  5. `/Applications/FreeCAD.app/Contents/MacOS/FreeCAD -c freecad/verify_port_mounts_selftest.py` → `self-test passed` *(현재 통과. 검사기 자체가 깨지지 않았다는 가드)*
-  6. 개구부 높이 검사(`verify_port_mounts.py` 의 `axis z == -6.45`, 좌 1·우 2 개구부)가 그대로 PASS *(현재 통과. 포트 축 불변 가드)*
+## 진실의 원천
+- 용어: `.forge/CONTEXT.md`의 계단 벽, 크래들, 포트 자리, 자석 포켓
+- 관련 ADR: `.forge/adr/261025-182809-case-outline-from-pcb-stepped-wall.md`(이번 결정), `.forge/adr/260824-224604-drop-aux-board-and-floor-mount-modules.md`(포트·모듈 오프셋이 벽 기준인 이유. 이번 작업에서 전제가 바뀜), `260824-001947`(epro가 수치 원천)
+- 그릴링 시점 실측(`compute_layout()` 계산):
+  - 캐비티 벽 ↔ PCB 틈: 좌 1.93, 우 1.92, 앞 2.68, 뒤 1.92(좌·우 반쪽 동일)
+  - PCB: 좌 146.21×103.35, 우 198.60×103.35, r 3.0
+  - 외곽: 좌 156.06×113.95, 우 208.45×113.95
+  - PCB 밑면 부품 중 가장자리에서 가장 가까운 것: 16핀 헤더(좌 안쪽 가장자리에서 6.35, 우 8.41), 다이오드 8.36 이상
+- 포트·모듈 위치 결정: `SplitPortInboardOffset`·`ModuleInboardOffset`·`ModuleInboardOffsetWired`는 안쪽 벽 이동량(≈3.42, 정확한 값은 old/new 레이아웃 차이로 계산)만큼, `ModuleRearOffset`는 뒤 벽 이동량(≈3.42)만큼 줄여서 **PCB 기준 위치를 유지**한다. 뒤 벽에 붙는(rear-flush) 오른쪽 호스트 모듈만 벽을 따라 앞으로 이동한다.
+- 완료 정의(DoD):
+  1. `freecadcmd freecad/verify_pcb_fit.py` → exit 0. 검사 항목: 좌·우 바디 각각 (a) PCB 높이 구간(z −1.8)에서 PCB 가장자리 +0.15는 빈 공간, +0.45는 재료(네 변 모두), (b) 바디 bbox = PCB + 2×1.5(X·Y), (c) z −2.8에서 PCB 가장자리 안쪽 1.4mm 지점은 재료, z −2.4의 같은 XY는 빈 공간(턱), (d) 분할 포트 개구부 x와 좌측 유선 모듈 포켓 x/y의 PCB 기준 위치가 재생성 전 값과 ±0.05 이내, (e) 오른쪽 호스트 모듈 포켓의 XY가 PCB 밑면 부품(헤더·다이오드) 외곽과 겹치지 않음.
+     - 사전 상태: 파일이 없어 실행 불가. 전방 검사이므로 지금 실패하는 게 맞다. (d)의 재생성 전 값은 fg-run이 S1 이전에 현재 FCStd에서 측정해 run.md에 기록한다.
+  2. `python3 freecad/verify_no_support.py` → 4파트 PASS, "All parts print without support."
+     - 사전 상태: PASS(바디 bridged 43.7/52.4). 회귀 방지 검사라 지금 통과하는 게 맞다.
+  3. `freecadcmd freecad/verify_magnet_pockets.py` → 모든 항목 PASS(바디 자석 뒷면 두께 2.3 유지 포함).
+     - 사전 상태: 전부 PASS. 회귀 방지 검사다.
+  4. `freecadcmd freecad/verify_port_mounts.py` → 항목 1·2·3·8 PASS(4~7은 기준선과 같이 FAIL이어도 된다). `freecadcmd freecad/verify_port_mounts_selftest.py` → exit 0.
+     - 사전 상태: 1·2·3·8 PASS / 4~7 FAIL, selftest exit 0. 회귀 방지 검사다.
+  5. README 치수표가 새 바디 STL bbox와 일치. 사이트 탐색 명령: `git grep -n "156\.06\|208\.45\|113\.95" -- . ':!.forge'` → 0줄. 그리고 `README.md` 표의 두 값 = `parametric_stl/{left,right}_keyboard_body.stl` bbox(±0.01).
+     - 사전 상태: README.md:195-196 두 줄이 걸린다. 전방 검사다.
+  6. `git grep -n '"OuterMargin"\|PARAMS\["OuterMargin"\]' -- freecad` → 0줄(이 변경으로 쓰이지 않게 된 파라미터 제거).
+     - 사전 상태: 2줄. 전방 검사다. 주석 속 언급(`:150`, `:670`, `verify_port_mounts.py:31`)은 내용이 틀려지면 고친다.
 
 ## 작업 조각
-
-- [ ] S1. `create_keyboard_parametric.py` 에 `PARAMS["CradleRailRelief"] = 0.2` 를 추가하고(`CradleRailWidth` 곁, 한두 줄 주석), `add_cradle` 의 시트 패드 길이를 `rail_width > 0` 일 때만 `seat_z - floor_z - CradleRailRelief` 로 만든다. — 완료 기준: 스크립트를 읽어 `rail_width == 0`(브레이크아웃 패드) 경로가 변하지 않았고, 레일 경로에서만 릴리프가 빠진다.
-- [ ] S2. `verify_port_mounts.py` 의 `MODULE_SEAT_Z` 를 `-9.20` 으로 고치고 주석을 맞춘다(셀프테스트가 이 상수를 참조하므로 함께 따라간다). — 완료 기준: DoD 1·5 (depends: S1)
-- [ ] S3. GUI 모드로 `keyboard_parametric.FCStd` 를 재생성하고(헤드리스로 돌리면 파트 색상이 사라진다 — 메모리 기록: MCP + `QTimer.singleShot` 예약, 실측 약 40초), 좌·우 `*_keyboard_body.stl` 만 다시 내보낸다. — 완료 기준: DoD 2·3·4·6 (depends: S1)
-- [ ] S4. README 의 조립 스택 한 줄(`z = -9.0 모듈 크래들 좌면 …`)에 "레일 윗면은 −9.2, 모듈 바닥과 0.2mm 틈에 납땜 덩어리를 받고 글루로 고정" 취지를 보정한다. — 완료 기준: `grep -n "9.2" README.md` 가 해당 줄을 찾는다 (depends: S3)
+- [ ] S1. `create_keyboard_parametric.py`를 수정한다. ① `compute_layout()` 외곽을 `pcb_rect` ± (`PcbSeatClearance` + 새 `PcbRingThickness` 1.2)로 바꾸고 `OuterMargin`을 제거한다. ② 외곽 모서리 반경을 PCB 반경 + 0.3 + 1.2로 유도한다(플레이트·팜레스트·바디 공통). ③ 바디 캐비티를 계단으로 만든다: 기존 캐비티(외곽 − 3.0)에 더해 바디 윗면에서 PCB 밑면(z −2.6)까지 PCB + 0.3 사각(r = PCB r + 0.3) 포켓. ④ 포트·모듈 오프셋 4개를 이동량만큼 보정한다. ⑤ 주석·`print`를 정리한다. — 완료 기준: freecadcmd로 레이아웃 계산 시 좌·우 외곽 = PCB + 3.0(X·Y), 스크립트 import 에러 없음.
+- [ ] S2. `freecad/verify_pcb_fit.py` 신설(기존 `verify_*.py` 관례: 헤드리스, PASS/FAIL 줄, 실패 시 exit 1). DoD 1의 (a)~(e)를 검사한다. — 완료 기준: 재생성 전 FCStd에 대해 (a)·(b)·(c)가 FAIL로 나와 검사가 실제로 동작함을 보인다. (depends: S1)
+- [ ] S3. FreeCAD **GUI 모드**에서 FCStd를 재생성한다(freecadcmd로 돌리면 색상이 사라진다. MCP가 꺼져 있으면 GUI 직접 실행 + QTimer 예약 + 플래그 파일). STL 8개(좌·우 바디·플레이트·팜레스트·웨지)를 내보낸다. — 완료 기준: DoD 1~4 통과, FCStd 파트 색상 유지. (depends: S2)
+- [ ] S4. README 치수표(`README.md:195-196`)를 새 bbox로 갱신하고, 스택 설명 중 벽·외곽 관련 문구가 있으면 계단 벽에 맞게 고친다. — 완료 기준: DoD 5 통과. (depends: S3)
